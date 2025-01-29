@@ -173,7 +173,7 @@ const CreatePrescription = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {inputs.length == 0 ?
+                                        {inputs.length === 0 ?
                                             <tr className="text-center"><td colSpan={6}>Liste des médicaments</td></tr>
                                         :
                                             inputs.map((input, index) => ( 
@@ -209,7 +209,7 @@ const CreatePrescription = () => {
                             </div>
                             <div className="row mt-2">
                                 <div className="col-12 d-flex justify-content-end">
-                                    <button onClick={handleSubmit} disabled={inputs.length == 0 || saving} className="btn btn-primary">
+                                    <button onClick={handleSubmit} disabled={inputs.length === 0 || saving} className="btn btn-primary">
                                         Sauvegarder
                                     </button>
                                 </div>

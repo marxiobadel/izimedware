@@ -78,7 +78,7 @@ const Prescription = () => {
                 </Dropdown>
             ),
         }
-    ], [prescriptions]);
+    ], []);
 
     const [loading, setLoading] = useState(true);
     
