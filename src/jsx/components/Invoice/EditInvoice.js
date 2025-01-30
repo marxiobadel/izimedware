@@ -6,12 +6,12 @@ import PageTitle from '../../layouts/PageTitle';
 import Select from 'react-select';
 import { Table } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
-import { notifyError, notifySuccess } from '../../constant/theme';
+import { notifyError, notifyInfo, notifySuccess } from '../../constant/theme';
 import AddButton from './Part/AddButton';
 
 const EditInvoice = () => {
-    const { id } = useParams();
-
+    const {id} = useParams(); 
+    
     const datas = useMemo(() => [
         {label: "Médicament", value: "medicine"},
         {label: "Acte médical", value: "medicalProcedure"}
@@ -79,6 +79,8 @@ const EditInvoice = () => {
         const input = inputMedicines.find(m => m.id === medicine_id);
         if (!input) {
             setInputMedicines([...inputMedicines, { id, name, quantity: 1, amount: price }]); 
+        } else {
+            notifyInfo('Médicament déjà ajouté.');
         }
     };
 
@@ -88,6 +90,8 @@ const EditInvoice = () => {
         const input = inputVProducts.find(vProduct => vProduct.id === vProduct_id);
         if (!input) {
             setInputVProducts([...inputVProducts, { reference, id, name, quantity: 1, amount }]); 
+        } else {
+            notifyInfo('Acte médical déjà ajouté.');
         }
     };
 
@@ -125,8 +129,8 @@ const EditInvoice = () => {
         )
             .then(function({data}) {
                 setSelectedPrescription(null);
-                setPrescriptions([...data.data]);
-                console.log(data.data);
+                setVProducts([...data.vProductsData]);
+                setPrescriptions([...data.prescriptionsData]);
             })
             .catch(function(error) {
                 console.log(error);
@@ -143,7 +147,7 @@ const EditInvoice = () => {
 
         const patient_id = selectedPatient ? selectedPatient.id : null;
 
-        axiosInstance.post('invoices', 
+        axiosInstance.put(`invoices/${id}`, 
             { medicines: inputMedicines, vProducts: inputVProducts, patient_id }, 
             { headers: { "Content-Type": "application/json" }}
         )
@@ -157,12 +161,11 @@ const EditInvoice = () => {
                         notifyError(data.errors.quantity.join('\n\r'));
                     } else if (data.errors.amount) {
                         notifyError(data.errors.amount.join('\n\r'));
+                    } else if (data.errors.mperror) {
+                        notifyError(data.errors.mperror.join('\n\r'));
                     }
                 } else {
-                    setInputMedicines([]);
-                    setInputVProducts([]);
-
-                    notifySuccess(`Facture créée avec succès.`);
+                    notifySuccess(`Facture modifiée avec succès.`);
                 }
             })
             .catch(function(error) {
@@ -173,7 +176,33 @@ const EditInvoice = () => {
             }); 
     };
 
-    useDocumentTitle('Ajouter une facture');
+    const handleInvoiceMedecines = (medicines) => {
+        medicines.forEach(medicine => {
+            const {id, name, pivotQuantity, pivotAmount } = medicine;
+
+            const newItem = {id, name, quantity: pivotQuantity, amount: pivotAmount};
+            
+            setInputMedicines(prevState => {
+                const exists = prevState.some((item) => item.id === id);
+                return exists ? prevState : [...prevState, newItem];
+            }); 
+        });
+    };
+
+    const handleInvoiceVProducts = (vProducts) => {
+        vProducts.forEach(vProduct => {
+            const {id, name, pivotQuantity, pivotAmount, reference } = vProduct;
+
+            const newItem = {reference, id, name, quantity: pivotQuantity, amount: pivotAmount};
+            
+            setInputVProducts(prevState => {
+                const exists = prevState.some((item) => item.id === id);
+                return exists ? prevState : [...prevState, newItem];
+            }); 
+        });
+    };
+
+    useDocumentTitle('Modifier une facture');
 
     const [loading, setLoading] = useState(true);
 
@@ -185,7 +214,11 @@ const EditInvoice = () => {
                     setVProducts([...data.vProducts]);
                     setPatients([...data.patients]);
                     setDefaultCurrency(data.defaultCurrency);
-                    console.log(data);
+
+                    handlePatientChange(data.data.patient);
+
+                    handleInvoiceMedecines(data.data.medicines);
+                    handleInvoiceVProducts(data.data.vProducts);
                 })
                 .catch(function (error) {
                     console.log(error);
@@ -276,9 +309,9 @@ const EditInvoice = () => {
                                 <div className="col-12 col-sm-6 col-lg-5 mb-3 mb-lg-4">
                                     <label className="form-label">Prescription</label>
                                     <Select options={prescriptions} className="custom-react-select"
-                                        placeholder={getting ? 'Chargement...' : (prescriptions.length == 0 ? 'Aucune prescription' : 'Choisir une prescription')}
+                                        placeholder={getting ? 'Chargement...' : (prescriptions.length === 0 ? 'Aucune prescription' : 'Choisir une prescription')}
                                         isSearchable
-                                        isDisabled={getting || prescriptions.length == 0}
+                                        isDisabled={getting || prescriptions.length === 0}
                                         value={selectedPrescription}
                                         onChange={handlePrescriptionChange}
                                         getOptionValue={p => p.id}
@@ -297,7 +330,7 @@ const EditInvoice = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {inputMedicines.length == 0 ?
+                                        {inputMedicines.length === 0 ?
                                             (<tr className="text-center"><td colSpan={4}>Liste des médicaments</td></tr>)
                                             :  
                                             <>
@@ -345,7 +378,7 @@ const EditInvoice = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {inputVProducts.length == 0 ?
+                                        {inputVProducts.length === 0 ?
                                             (<tr className="text-center"><td colSpan={4}>Liste des actes médicaux</td></tr>)
                                             :  
                                             <>

@@ -16,6 +16,7 @@ const ShowInvoice = () => {
     };
 
     const [saving, setSaving] = useState(false);
+    const [cancelling, setCancelling] = useState(false);
 
     const handleSubmit = () => {
         setSaving(true);
@@ -32,6 +33,23 @@ const ShowInvoice = () => {
             })
             .finally(function() {
                 setSaving(false);
+            }); 
+    }
+
+    const handleCancel = () => {
+        setCancelling(true);
+
+        axiosInstance.get(`invoices/${id}/cancelled`, 
+            { headers: { "Content-Type": "application/json" }}
+        )
+            .then(function({data}) {
+                setInvoice({...data.data});
+            })
+            .catch(function(error) {
+                console.log(error);
+            })
+            .finally(function() {
+                setCancelling(false);
             }); 
     }
 
@@ -206,7 +224,7 @@ const ShowInvoice = () => {
                                     </table>
                                 </div>
                             </div>
-                            {invoice && invoice.status !== 'paid' &&
+                            {invoice && invoice.status === 'pending' &&
                             <>
                                 <div className="row mt-4">
                                     <div className="col-6 col-sm-4 col-md-3">
@@ -279,16 +297,24 @@ const ShowInvoice = () => {
                                     </div>
                                 </div>
                             </>}
-                            {invoice && invoice.status === 'paid' &&
                             <div className="row mt-2">
                                 <div className="col-12 d-flex justify-content-end">
-                                    <button onClick={handlePrint} 
-                                        disabled={saving} className="btn btn-primary">
-                                        imprimer
-                                    </button>
+                                    {invoice && invoice.status !== 'pending' &&
+                                        <>
+                                            <button onClick={handlePrint} 
+                                                disabled={saving} className="btn btn-primary">
+                                                Imprimer
+                                            </button>
+                                            {invoice.status !== 'cancelled' &&
+                                                <button onClick={handleCancel} 
+                                                    disabled={cancelling} className="ms-1 btn btn-danger">
+                                                    Annuler
+                                                </button> 
+                                            }
+                                        </>
+                                    }
                                 </div>
                             </div>
-                            }
                         </div>
                     </div>
                 </div>

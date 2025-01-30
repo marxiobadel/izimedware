@@ -6,7 +6,7 @@ import PageTitle from '../../layouts/PageTitle';
 import Select from 'react-select';
 import { Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { notifyError, notifySuccess } from '../../constant/theme';
+import { notifyError, notifyInfo, notifySuccess } from '../../constant/theme';
 import AddButton from './Part/AddButton';
 
 const CreateInvoice = () => {
@@ -77,6 +77,8 @@ const CreateInvoice = () => {
         const input = inputMedicines.find(m => m.id === medicine_id);
         if (!input) {
             setInputMedicines([...inputMedicines, { id, name, quantity: 1, amount: price }]); 
+        } else {
+            notifyInfo('Médicament déjà ajouté.');
         }
     };
 
@@ -86,6 +88,8 @@ const CreateInvoice = () => {
         const input = inputVProducts.find(vProduct => vProduct.id === vProduct_id);
         if (!input) {
             setInputVProducts([...inputVProducts, { reference, id, name, quantity: 1, amount }]); 
+        } else {
+            notifyInfo('Acte médical déjà ajouté.');
         }
     };
 
@@ -123,7 +127,8 @@ const CreateInvoice = () => {
         )
             .then(function({data}) {
                 setSelectedPrescription(null);
-                setPrescriptions([...data.data]);
+                setVProducts([...data.vProductsData]);
+                setPrescriptions([...data.prescriptionsData]);
             })
             .catch(function(error) {
                 console.log(error);
@@ -154,6 +159,8 @@ const CreateInvoice = () => {
                         notifyError(data.errors.quantity.join('\n\r'));
                     } else if (data.errors.amount) {
                         notifyError(data.errors.amount.join('\n\r'));
+                    } else if (data.errors.mperror) {
+                        notifyError(data.errors.mperror.join('\n\r'));
                     }
                 } else {
                     setInputMedicines([]);
@@ -221,31 +228,41 @@ const CreateInvoice = () => {
                                         <li className="text-center">...</li>
                                     :
                                         (selectedData.value === 'medicine' ?
-                                            medicines.map(medicine => (
-                                                <li key={medicine.id}>
-                                                    <div className="timeline-panel">
-                                                        <div className="media-body">
-                                                            <h5 className="mb-0">{medicine.name}</h5>
-                                                            <small className="text-muted">{medicine.price_with_currency}</small>
+                                            (medicines.length === 0 ?
+                                                <li className="text-center">Aucun médicament de disponible</li>
+                                                :
+                                                medicines.map(medicine => (
+                                                    <li key={medicine.id}>
+                                                        <div className="timeline-panel">
+                                                            <div className="media-body">
+                                                                <h5 className="mb-0">{medicine.name}</h5>
+                                                                <small className="text-muted">{medicine.price_with_currency}</small>
+                                                            </div>
+                                                            <AddButton add={() => handleAddInputMedicine(medicine.id)}/>
                                                         </div>
-                                                        <AddButton add={() => handleAddInputMedicine(medicine.id)}/>
-                                                    </div>
-                                                </li>
-                                            ))
+                                                    </li>
+                                                ))
+                                            )
                                             :
-                                            vProducts.map(vProduct => (
-                                                <li key={vProduct.id}>
-                                                    <div className="timeline-panel">
-                                                        <div className="media-body">
-                                                            <h5 className="mb-0">{vProduct.name}</h5>
-                                                            <small className="text-muted">
-                                                                {vProduct.reference} - {vProduct.amount_with_currency}
-                                                            </small>
-                                                        </div>
-                                                        <AddButton add={() => handleAddInputVProduct(vProduct.id)}/>
-                                                    </div>
+                                            (vProducts.length === 0 ?
+                                                <li className="text-center">
+                                                    {selectedPatient ? 'Aucun acte médical pour le patient sélectionné.' : 'Aucun acte médical de disponible.'}
                                                 </li>
-                                            ))
+                                                :
+                                                vProducts.map(vProduct => (
+                                                    <li key={vProduct.id}>
+                                                        <div className="timeline-panel">
+                                                            <div className="media-body">
+                                                                <h5 className="mb-0">{vProduct.name}</h5>
+                                                                <small className="text-muted">
+                                                                    {vProduct.reference} - {vProduct.amount_with_currency}
+                                                                </small>
+                                                            </div>
+                                                            <AddButton add={() => handleAddInputVProduct(vProduct.id)}/>
+                                                        </div>
+                                                    </li>
+                                                ))
+                                            )
                                         )
                                     }
                                 </ul>

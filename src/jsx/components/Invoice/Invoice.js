@@ -27,10 +27,12 @@ const Invoice = () => {
         {
             Header : 'Patient',
             Footer : 'Patient',
-            accessor: 'patient',
+            accessor: 'patient.shortname',
             Filter: ColumnFilter,
-            Cell: ({ value }) => (
-                <Link to={`/patient-details/${value.slug}`}>{value.shortname}</Link>
+            Cell: ({ value, row }) => (
+                <div className="text-left">
+                    <Link to={`/patient-details/${row.original.patient.slug}`}>{value}</Link>
+                </div>
             ),
         },
         {
@@ -67,7 +69,9 @@ const Invoice = () => {
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-end" align="end">
                         <Dropdown.Item as={Link} to={'/invoices/'+ row.original.id}>Détail</Dropdown.Item>
-                        <Dropdown.Item as={Link} to={'/invoices/'+ row.original.id +'/edit'}>Modifier</Dropdown.Item>
+                        {row.original.status === 'pending' &&
+                            <Dropdown.Item as={Link} to={'/invoices/'+ row.original.id +'/edit'}>Modifier</Dropdown.Item>
+                        }
                         <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
@@ -133,7 +137,6 @@ const Invoice = () => {
             axiosInstance.get('invoices')
                 .then(function({data}) {
                     setInvoices([...data.invoices]);
-                    console.log(data.invoices);
                 })
                 .catch(function(error) {
                     console.log(error);
