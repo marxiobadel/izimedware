@@ -1,6 +1,6 @@
 {
-  "short_name": "Welly",
-  "name": "Welly - React Redux Hospital Admin Dashboard Template",
+  "short_name": "IziMedWare",
+  "name": "Application de gestion hospitalière",
   "icons": [
     {
       "src": "favicon.ico",
