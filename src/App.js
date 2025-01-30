@@ -1,22 +1,18 @@
 import { lazy, Suspense, useEffect } from 'react';
 
-/// Components
 import Index from "./jsx";
 import { connect, useDispatch } from 'react-redux';
 import { Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
-// action
+
 import { checkAutoLogin } from './services/AuthService';
-// import { isLogin } from './services/AuthService';
+
 import { isAuthenticated } from './store/selectors/AuthSelectors';
-/// Style
+
 import "./vendor/bootstrap-select/dist/css/bootstrap-select.min.css";
 import '../node_modules/filepond/dist/filepond.min.css';
 import '../node_modules/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 import "./css/style.css";
-// import Error404 from './jsx/pages/Error404';
 
-
-const SignUp = lazy(() => import('./jsx/pages/Registration'));
 const Login = lazy(() => {
     return new Promise(resolve => {
         setTimeout(() => resolve(import('./jsx/pages/Login')), 500);
@@ -50,7 +46,6 @@ function App(props) {
     let routeblog = (
         <Routes>
             <Route path='/login' element={<Login title="Connexion" />} />
-            <Route path='/page-register' element={<SignUp />} />
         </Routes>
     );
     if (props.isAuthenticated) {

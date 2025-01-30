@@ -6,6 +6,7 @@ import { errorStyle, GENDER, notifySuccess } from '../../../constant/theme';
 import fr from "date-fns/locale/fr";
 import { format } from 'date-fns';
 import axiosInstance from "../../../../services/AxiosInstance";
+import { createPortal } from "react-dom";
 
 const DoctorModal = ({ show, onHide, onSave, doctor, roles, skills}) => {
     registerLocale("fr", fr);
@@ -138,7 +139,7 @@ const DoctorModal = ({ show, onHide, onSave, doctor, roles, skills}) => {
             });  
     };
 
-    return (
+    return createPortal(
         <Modal className="modal fade" backdrop={true} dialogClassName="modal-lg" show={show} onHide={onHide} centered>
             <div className="modal-content">
                 <div className="modal-header">
@@ -284,7 +285,7 @@ const DoctorModal = ({ show, onHide, onSave, doctor, roles, skills}) => {
                     </button>
                 </div>
             </div>
-        </Modal>
+        </Modal>, document.body
     )
 }
 

@@ -272,9 +272,9 @@ const CreateInvoice = () => {
                                 <div className="col-12 col-sm-6 col-lg-5 mb-3 mb-lg-4">
                                     <label className="form-label">Prescription</label>
                                     <Select options={prescriptions} className="custom-react-select"
-                                        placeholder={getting ? 'Chargement...' : (prescriptions.length == 0 ? 'Aucune prescription' : 'Choisir une prescription')}
+                                        placeholder={getting ? 'Chargement...' : (prescriptions.length === 0 ? 'Aucune prescription' : 'Choisir une prescription')}
                                         isSearchable
-                                        isDisabled={getting || prescriptions.length == 0}
+                                        isDisabled={getting || prescriptions.length === 0}
                                         value={selectedPrescription}
                                         onChange={handlePrescriptionChange}
                                         getOptionValue={p => p.id}
@@ -293,7 +293,7 @@ const CreateInvoice = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {inputMedicines.length == 0 ?
+                                        {inputMedicines.length === 0 ?
                                             (<tr className="text-center"><td colSpan={4}>Liste des médicaments</td></tr>)
                                             :  
                                             <>
@@ -341,7 +341,7 @@ const CreateInvoice = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {inputVProducts.length == 0 ?
+                                        {inputVProducts.length === 0 ?
                                             (<tr className="text-center"><td colSpan={4}>Liste des actes médicaux</td></tr>)
                                             :  
                                             <>
