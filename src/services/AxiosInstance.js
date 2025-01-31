@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { store } from '../store/store';
 
-const env = 'local'; // 'welly', 'prod', 'local'
+const env = 'prod'; // 'welly', 'prod', 'local'
 
 let baseURL = '';
 
@@ -10,7 +10,7 @@ switch (env) {
         baseURL = 'http://localhost:8000/api/'
         break;
     case 'prod':
-        baseURL = 'https://izimedware.com/api/'
+        baseURL = 'https://medware.izipresta.com/api/'
         break;
     default:
         baseURL = '`https://react-course-b798e-default-rtdb.firebaseio.com/'

@@ -12,7 +12,7 @@ export function login(email, password) {
         returnSecureToken: true,
     };
 
-    return axios.post(`http://localhost:8000/api/login`, postData, { withCredentials: true });
+    return axios.post(`https://medware.izipresta.com/api/login`, postData, { withCredentials: true });
 }
 
 export function formatError(errorResponse) {
