@@ -8,8 +8,9 @@ import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, notifySuccess } from '../../constant/theme';
 import DoctorModal from './modal/DoctorModal';
+import { connect } from 'react-redux';
 
-const Doctor = () => {
+const Doctor = ({currentUser}) => {
     const [doctors, setDoctors] = useState([]);
     const [roles, setRoles] = useState([]);
     const [skills, setSkills] = useState([]);
@@ -27,7 +28,12 @@ const Doctor = () => {
             disableSortBy: true,
             disableFilters: true,
             Cell: ({ row }) => ( 
-                <img src={row.original.avatar_url} alt={row.original.firstname} width="43" height="43" style={{objectFit: 'cover'}}/>
+                <div className="image-container">
+                    <img src={row.original.avatar_url} alt={row.original.firstname} className="img-thumbnail preview-image" />
+                    <div className="zoomed-image">
+                        <img src={row.original.avatar_url} alt={row.original.firstname} />
+                    </div>
+                </div>
             ),
         },
         {
@@ -57,10 +63,7 @@ const Doctor = () => {
         {
             Header : 'Sexe',
             Footer : 'Sexe',
-            accessor: 'gender',
-            Cell: ({ value }) => { 
-                return value === 'male' ? 'masculin' : (value === 'female' ? 'féminin' : 'autre');
-            },
+            accessor: 'gender_label',
             Filter: ColumnFilter,
         },
         {
@@ -81,7 +84,9 @@ const Doctor = () => {
                     <Dropdown.Menu className="dropdown-menu-end" align="end">
                         <Dropdown.Item as={Link} to={`/doctor-details/${row.original.slug}`}>Détails</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleEdit(row.original)}>Modifier</Dropdown.Item>
-                        <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
+                        {currentUser.id !== row.original.id &&
+                            <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
+                        }
                     </Dropdown.Menu>
                 </Dropdown>
             ),
@@ -314,4 +319,10 @@ const Doctor = () => {
     );
 };
 
-export default Doctor;
+const mapStateToProps = (state) => {
+    return {
+        currentUser: state.auth.auth.currentUser
+    };
+};
+ 
+export default connect(mapStateToProps)(Doctor);

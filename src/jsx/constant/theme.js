@@ -69,6 +69,26 @@ export const handleSort = (column) => {
     }
 };
 
+export const isPatient = (roles) => {
+    return roles.some(role => role.name === 'patient');
+};
+
+export const isNurse = (roles) => {
+    return roles.some(role => role.name === 'nurse');
+};
+
+export const isMedecin = (roles) => {
+    return roles.some(role => role.name === 'medecin');
+};
+
+export const isCassier = (roles) => {
+    return roles.some(role => role.name === 'caissier');
+};
+
+export const isSuperAdmin = (roles) => {
+    return roles.some(role => role.name === 'superadmin');
+};
+
 export const IMAGES = {
     // User : require('../../images/user.jpg'),
     Avatar : require('../../images/avatar/1.jpg'),       

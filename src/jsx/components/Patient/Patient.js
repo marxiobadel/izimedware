@@ -25,7 +25,12 @@ const Patient = () => {
             disableSortBy: true,
             disableFilters: true,
             Cell: ({ row }) => ( 
-                <img src={row.original.avatar_url} alt={row.original.firstname} width="43" height="43" style={{objectFit: 'cover'}}/>
+                <div className="image-container">
+                    <img src={row.original.avatar_url} alt={row.original.firstname} className="img-thumbnail preview-image" />
+                    <div className="zoomed-image">
+                        <img src={row.original.avatar_url} alt={row.original.firstname} />
+                    </div>
+                </div>
             ),
         },
         {
@@ -55,10 +60,7 @@ const Patient = () => {
         {
             Header : 'Sexe',
             Footer : 'Sexe',
-            accessor: 'gender',
-            Cell: ({ value }) => { 
-                return value === 'male' ? 'masculin' : (value === 'female' ? 'féminin' : 'autre');
-            },
+            accessor: 'gender_label',
             Filter: ColumnFilter,
         },
         {

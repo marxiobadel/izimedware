@@ -2,15 +2,14 @@
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import Collapse from 'react-bootstrap/Collapse';
 
-
 /// Link
 import { Link } from "react-router-dom";
 
-import { MenuList } from './Menu';
+import { getFilteringMenuList } from './Menu';
 import { useScrollPosition } from "@n8tb1t/use-scroll-position";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { APPNAME, DEVNAME } from "../../constant/theme";
-
+import { connect } from "react-redux";
 
 const reducer = (previousState, updatedState) => ({
     ...previousState,
@@ -22,7 +21,7 @@ const initialState = {
     activeSubmenu: "",
 }
 
-const SideBar = () => {
+const SideBar = ({currentUser}) => {
     const date = new Date();
     const {
         iconHover,
@@ -68,7 +67,7 @@ const SideBar = () => {
     path = path[path.length - 1];
 
     useEffect(() => {
-        MenuList.forEach((data) => {
+        getFilteringMenuList(currentUser.roles).forEach((data) => {
             data.content?.forEach((item) => {
                 if (path === item.to) {
                     setState({ active: data.title })
@@ -98,7 +97,7 @@ const SideBar = () => {
         >
             <div className="deznav-scroll">
                 <ul className="metismenu" id="menu">
-                    {MenuList.map((data, index) => {
+                    {getFilteringMenuList(currentUser.roles).map((data, index) => {
                         let menuClass = data.classsChange;
                         if (menuClass === "menu-title") {
                             return (
@@ -196,4 +195,10 @@ const SideBar = () => {
     );
 };
 
-export default SideBar;
+const mapStateToProps = (state) => {
+    return {
+        currentUser: state.auth.auth.currentUser
+    };
+};
+ 
+export default connect(mapStateToProps)(SideBar);

@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Badge, Col, Dropdown, Row } from 'react-bootstrap';
-import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, handleSort, isCassier, isSuperAdmin, notifySuccess } from '../../constant/theme';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import Swal from 'sweetalert2';
 import axiosInstance from '../../../services/AxiosInstance';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDocumentTitle } from '../../hooks/useTitle';
 import { ToastContainer } from 'react-toastify';
+import { connect } from 'react-redux';
 
-const Invoice = () => {
+const Invoice = ({currentUser}) => {
     const [invoices, setInvoices] = useState([]);
 
     const columns = useMemo(() => [
@@ -68,11 +69,15 @@ const Invoice = () => {
                         </svg>
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-end" align="end">
-                        <Dropdown.Item as={Link} to={'/invoices/'+ row.original.id}>Détail</Dropdown.Item>
-                        {row.original.status === 'pending' &&
+                        {(isCassier(currentUser.roles) || isSuperAdmin(currentUser.roles)) && 
+                            <Dropdown.Item as={Link} to={'/invoices/'+ row.original.id}>Détail</Dropdown.Item>
+                        }
+                        {isSuperAdmin(currentUser.roles) && row.original.status === 'pending' &&
                             <Dropdown.Item as={Link} to={'/invoices/'+ row.original.id +'/edit'}>Modifier</Dropdown.Item>
                         }
-                        <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
+                        {isSuperAdmin(currentUser.roles) &&
+                            <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
+                        }
                     </Dropdown.Menu>
                 </Dropdown>
             ),
@@ -80,6 +85,8 @@ const Invoice = () => {
     ], [invoices]);
 
     const [loading, setLoading] = useState(true);
+
+    const navigate = useNavigate();
     
     const tableInstance = useTable({
         columns,
@@ -134,6 +141,10 @@ const Invoice = () => {
 
     useEffect(() => {
         (() => {
+            if (!isCassier(currentUser.roles) && !isSuperAdmin(currentUser.roles)) {
+                navigate('/page-error-403');
+            }
+
             axiosInstance.get('invoices')
                 .then(function({data}) {
                     setInvoices([...data.invoices]);
@@ -153,9 +164,10 @@ const Invoice = () => {
                     <h2 className="text-black font-w600">Facturation</h2>
                     <p className="mb-0">Liste des factures</p>
                 </div>
+                {isSuperAdmin(currentUser.roles) &&
                 <div>
                     <Link to={"/invoices/create"} className="btn btn-primary me-3">+ Nouvelle facture</Link>
-                </div>
+                </div>}
             </div>
             <ToastContainer />
             <Row>
@@ -257,4 +269,10 @@ const Invoice = () => {
     );
 }
 
-export default Invoice;
+const mapStateToProps = (state) => {
+    return {
+        currentUser: state.auth.auth.currentUser
+    };
+};
+ 
+export default connect(mapStateToProps)(Invoice);

@@ -1,23 +1,27 @@
-// import { SVGICON } from "../../constant/theme";
+import { isCassier, isMedecin, isPatient, isSuperAdmin } from "../../constant/theme";
 
 export const MenuList = [
     {   
+        id: 'dashboard',
         title:'Tableau de bord',
         iconStyle: <i className="flaticon-381-networking" />,
         to: 'dashboard',
+        content: []
     },
     {
+        id: 'patients',
         title: 'Patients',	
         classsChange: 'mm-collapse',		
         iconStyle: <i className="flaticon-381-networking" />,
         content: [
             {
                 title: 'Liste',
-                to: 'patients',                
+                to: 'patients',                 
             },
         ],
     },     
     {
+        id: 'doctors',
         title:'Personnel médical',
         classsChange: 'mm-collapse',
         iconStyle: <i className="flaticon-381-notepad" />,
@@ -33,6 +37,7 @@ export const MenuList = [
         ]
     },
     {
+        id: 'consultations',
         title:'Consultations',
         classsChange: 'mm-collapse',
         iconStyle: <i className="flaticon-381-notepad" />,
@@ -44,6 +49,7 @@ export const MenuList = [
         ]
     },
     {
+        id: 'prescriptions',
         title:'Prescriptions',
         classsChange: 'mm-collapse',
         iconStyle: <i className="flaticon-381-notepad" />,
@@ -55,6 +61,7 @@ export const MenuList = [
         ]
     },
     {
+        id: "medical_procedures",
         title:'Actes médicaux',
         classsChange: 'mm-collapse',
         iconStyle: <i className="flaticon-381-notepad" />,
@@ -66,6 +73,7 @@ export const MenuList = [
         ]
     },
     {
+        id: 'medicines',
         title:'Médicaments',
         classsChange: 'mm-collapse',
         iconStyle: <i className="flaticon-381-notepad" />,
@@ -89,6 +97,7 @@ export const MenuList = [
         ]
     },
     {
+        id: 'invoices',
         title:'Facturation',
         classsChange: 'mm-collapse',
         iconStyle: <i className="flaticon-381-notepad" />,
@@ -100,6 +109,7 @@ export const MenuList = [
         ]
     },
     {
+        id: 'departments',
         title:'Départements',
         classsChange: 'mm-collapse',
         iconStyle: <i className="flaticon-381-notepad" />,
@@ -111,6 +121,7 @@ export const MenuList = [
         ]
     },
     {
+        id: 'config',
         title:'Paramètres',
         classsChange: 'mm-collapse',
         iconStyle:<i className="flaticon-381-network" />,
@@ -125,4 +136,37 @@ export const MenuList = [
             },
         ]
     } 
-]
+];
+
+export const getFilteringMenuList = (roles) => {
+    if (isMedecin(roles)) {
+        return MenuList.filter(menu => menu.id !== 'doctors' && menu.id !== 'invoices' 
+                            && menu.id !== 'medical_procedures' && menu.id !== 'departments'
+                            && menu.id !== 'medicines')
+                        .map(menu => ({
+                            ...menu, 
+                            content: menu.content.some(subMenu => subMenu.to === 'edit-profile') ? 
+                                    menu.content.filter(subMenu => subMenu.to === 'edit-profile') : menu.content
+                        }));
+    }
+
+    if (isCassier(roles)) {
+        return MenuList.filter(menu => menu.id === 'dashboard' || menu.id === 'invoices' || menu.id === 'config')
+                    .map(menu => ({
+                        ...menu, 
+                        content: menu.content.some(subMenu => subMenu.to === 'edit-profile') ? 
+                                menu.content.filter(subMenu => subMenu.to === 'edit-profile') : menu.content
+                    }));
+    }
+
+    if (isSuperAdmin(roles)) {
+        return MenuList;
+    }
+
+    return MenuList.filter(menu => menu.id === 'dashboard' || menu.id === 'config')
+                    .map(menu => ({
+                        ...menu, 
+                        content: menu.content.some(subMenu => subMenu.to === 'edit-profile') ? 
+                                menu.content.filter(subMenu => subMenu.to === 'edit-profile') : menu.content
+                    }));
+}
