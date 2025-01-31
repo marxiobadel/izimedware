@@ -124,7 +124,7 @@ const EditInvoice = () => {
     const showPatientPrescriptions = (option) => {
         setGetting(true);
 
-        axiosInstance.get(`invoices/${option.slug}/prescriptions`,  
+        axiosInstance.get(`invoices/patient/${option.slug}/prescriptions/edit`,  
             { headers: { "Content-Type": "application/json" }}
         )
             .then(function({data}) {

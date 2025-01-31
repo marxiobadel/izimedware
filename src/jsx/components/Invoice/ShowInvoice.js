@@ -3,54 +3,58 @@ import PageTitle from "../../layouts/PageTitle";
 import { ToastContainer } from "react-toastify";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../../../services/AxiosInstance";
+import PaymentModal from "./modal/PaymentModal";
+import { notifySuccess } from "../../constant/theme";
+import Swal from "sweetalert2";
 
 const ShowInvoice = () => {
     const { id } = useParams();
 
     const [invoice, setInvoice] = useState(null);
 
-    const [paymentMethod, setPaymentMethod] = useState('cash');
+    const [patients, setPatients] = useState([]);
 
-    const handlePaymentMethodChange = (event) => {
-        setPaymentMethod(event.target.value);
-    };
+    const [openModal, setOpenModal] = useState(false);
 
     const [saving, setSaving] = useState(false);
     const [cancelling, setCancelling] = useState(false);
 
-    const handleSubmit = () => {
-        setSaving(true);
+    const handleSave = (invoice) => {
+        setInvoice({ ...invoice });
 
-        axiosInstance.post(`invoices/${id}/payment`, 
-            { payment_method: paymentMethod }, 
-            { headers: { "Content-Type": "application/json" }}
-        )
-            .then(function({data}) {
-                setInvoice({...data.data});
-            })
-            .catch(function(error) {
-                console.log(error);
-            })
-            .finally(function() {
-                setSaving(false);
-            }); 
+        notifySuccess("Le paiement s'est effectué avec succès.");
+
+        setOpenModal(false);
     }
 
     const handleCancel = () => {
-        setCancelling(true);
+        Swal.fire({
+            title:'Etes-vous sûr ?',
+            text: "Après annulation, vous ne pourrez pas revenir en arrière !",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dd6b55',
+            cancelButtonColor: '#aaa',
+            confirmButtonText: 'Ok, annulée !',
+            cancelButtonText: 'Fermer'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                setCancelling(true);
 
-        axiosInstance.get(`invoices/${id}/cancelled`, 
-            { headers: { "Content-Type": "application/json" }}
-        )
-            .then(function({data}) {
-                setInvoice({...data.data});
-            })
-            .catch(function(error) {
-                console.log(error);
-            })
-            .finally(function() {
-                setCancelling(false);
-            }); 
+                axiosInstance.get(`invoices/${id}/cancelled`, 
+                    { headers: { "Content-Type": "application/json" }}
+                )
+                    .then(function({data}) {
+                        setInvoice({...data.data});
+                    })
+                    .catch(function(error) {
+                        console.log(error);
+                    })
+                    .finally(function() {
+                        setCancelling(false);
+                    }); 
+                }
+        })
     }
 
     const handlePrint = () => {
@@ -80,6 +84,7 @@ const ShowInvoice = () => {
             axiosInstance.get(`invoices/${id}`)
                 .then(function ({ data }) {
                     setInvoice(data.data);
+                    setPatients(data.patients);
                 })
                 .catch(function (error) {
                     console.log(error);
@@ -225,78 +230,14 @@ const ShowInvoice = () => {
                                 </div>
                             </div>
                             {invoice && invoice.status === 'pending' &&
-                            <>
-                                <div className="row mt-4">
-                                    <div className="col-6 col-sm-4 col-md-3">
-                                        <div className="form-check">
-                                            <input
-                                                className="form-check-input"
-                                                type="radio"
-                                                name="payment"
-                                                value="cash"
-                                                checked={paymentMethod === 'cash'}
-                                                onChange={handlePaymentMethodChange}
-                                            />
-                                            <label className="form-check-label" style={{paddingTop: '4px'}}>
-                                                Cash
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div className="col-6 col-sm-4 col-md-3">
-                                        <div className="form-check">
-                                            <input
-                                                className="form-check-input"
-                                                type="radio"
-                                                name="payment"
-                                                value="card"
-                                                checked={paymentMethod === 'card'}
-                                                onChange={handlePaymentMethodChange}
-                                            />
-                                            <label className="form-check-label" style={{paddingTop: '4px'}}>
-                                                Carte (Visa, MasterCard...)
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div className="col-6 col-sm-4 col-md-3">
-                                        <div className="form-check">
-                                            <input
-                                                className="form-check-input"
-                                                type="radio"
-                                                name="payment"
-                                                value="insurance"
-                                                checked={paymentMethod === 'insurance'}
-                                                onChange={handlePaymentMethodChange}
-                                            />
-                                            <label className="form-check-label" style={{paddingTop: '4px'}}>
-                                                Assurance
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div className="col-6 col-sm-4 col-md-3">
-                                        <div className="form-check">
-                                            <input
-                                                className="form-check-input"
-                                                type="radio"
-                                                name="payment"
-                                                value="cheque"
-                                                checked={paymentMethod === 'cheque'}
-                                                onChange={handlePaymentMethodChange}
-                                            />
-                                            <label className="form-check-label" style={{paddingTop: '4px'}}>
-                                                Chèque
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
                                 <div className="row mt-2">
                                     <div className="col-12 d-flex justify-content-end">
-                                        <button onClick={handleSubmit} 
-                                            disabled={saving} className="btn btn-primary">
+                                        <button onClick={() => setOpenModal(true)} className="btn btn-primary">
                                             Payer
                                         </button>
                                     </div>
                                 </div>
-                            </>}
+                            }
                             <div className="row mt-2">
                                 <div className="col-12 d-flex justify-content-end">
                                     {invoice && invoice.status !== 'pending' &&
@@ -319,6 +260,14 @@ const ShowInvoice = () => {
                     </div>
                 </div>
             </div>
+            <PaymentModal 
+                id={id}
+                show={openModal}
+                onHide={() => setOpenModal(false)}
+                onSave={handleSave}
+                invoice={invoice}
+                patients={patients}
+            />
         </>
     )
 }

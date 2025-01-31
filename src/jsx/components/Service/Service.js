@@ -32,6 +32,12 @@ const Service = () => {
             Filter: ColumnFilter,
         },
         {
+            Header : 'Modifiée le',
+            Footer : 'Modifiée le',
+            accessor: 'updated_at',
+            Filter: ColumnFilter,
+        },
+        {
             Header: 'Actions',
             Footer: 'Actions',
             accessor: 'actions',

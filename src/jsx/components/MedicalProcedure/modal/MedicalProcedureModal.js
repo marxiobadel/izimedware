@@ -2,9 +2,17 @@ import { useEffect, useState } from "react";
 import { Modal } from "react-bootstrap";
 import { errorStyle, notifySuccess } from '../../../constant/theme';
 import axiosInstance from "../../../../services/AxiosInstance";
+import { createPortal } from "react-dom";
+import Select from 'react-select';
 
-const MedicalProcedureModal = ({ show, onHide, onSave, medicalProcedure, defaultCurrency }) => {
+const MedicalProcedureModal = ({ show, onHide, onSave, medicalProcedure, defaultCurrency, services }) => {
     const [inputs, setInputs] = useState({ name: '', amount: '', description: '' });
+
+    const [service, setService] = useState(null);
+
+    const handleService = (option) => {
+        setService(option);
+    }
 
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
@@ -17,6 +25,7 @@ const MedicalProcedureModal = ({ show, onHide, onSave, medicalProcedure, default
         handleOnChange('', 'name');
         handleOnChange('', 'amount');
         handleOnChange('', 'description');
+        handleService(null);
     }
     
     useEffect(() => {
@@ -24,9 +33,12 @@ const MedicalProcedureModal = ({ show, onHide, onSave, medicalProcedure, default
             handleOnChange(medicalProcedure.name, 'name');
             handleOnChange(medicalProcedure.amount, 'amount');
             handleOnChange(medicalProcedure.description ?? '', 'description');
+            handleService(services.find(service => service.id === medicalProcedure.service_id));
         } else {
             resetForm();
         }
+
+        console.log(medicalProcedure);
 
         setErrors({});
     }, [medicalProcedure]);
@@ -36,30 +48,30 @@ const MedicalProcedureModal = ({ show, onHide, onSave, medicalProcedure, default
 
         setSaving(true);
 
-        const method = medicalProcedure ? 'PUT' : 'POST';
+        const service_id = service ? service.id : null;
+
         const url = medicalProcedure ? 'medical_procedures/'+ medicalProcedure.id : 'medical_procedures';
-        const type = medicalProcedure ? 'edit' : 'add';
-        const message = medicalProcedure ? 'modifié' : 'ajouté';
 
         axiosInstance.request({
-            method,
+            method: medicalProcedure ? 'PUT' : 'POST',
             url,
-            data: inputs,
+            data: {...inputs, service_id},
             headers: {
-                "Content-Type": 'Application/json'
+                "Content-Type": 'application/json'
             }
         })
             .then(function(response) {
                 const data = response.data;
                
                 if (Object.entries(data.data).length === 0 && data.errors) {
+                    console.log(data.errors)
                     setErrors({...data.errors});
                 } else {
-                    onSave(data.data, type);
+                    onSave(data.data, medicalProcedure ? 'edit' : 'add');
 
                     resetForm();
 
-                    notifySuccess(`Acte médical ${message} avec succès`);
+                    notifySuccess(`Acte médical ${medicalProcedure ? 'modifié' : 'ajouté'} avec succès`);
                 }
             })
             .catch(function(error) {
@@ -70,7 +82,7 @@ const MedicalProcedureModal = ({ show, onHide, onSave, medicalProcedure, default
             });  
     };
 
-    return (
+    return createPortal(
         <Modal className="modal fade" backdrop={true} show={show} onHide={onHide} centered>
             <div className="modal-content">
                 <div className="modal-header">
@@ -90,7 +102,7 @@ const MedicalProcedureModal = ({ show, onHide, onSave, medicalProcedure, default
                                     <small style={errorStyle}>{errors.name.join('\n\r')}</small>
                                 </div>}
                             </div>
-                            <div className="col-sm-12 mb-3">
+                            <div className="col-sm-6 mb-3">
                                 <label className="form-label">Coût<span className="text-danger">*</span></label>
                                 <div className="input-group">
                                     <input type="number" 
@@ -101,6 +113,20 @@ const MedicalProcedureModal = ({ show, onHide, onSave, medicalProcedure, default
                                 </div>
                                 {errors.amount && <div className="text-danger">
                                     <small style={errorStyle}>{errors.amount.join('\n\r')}</small>
+                                </div>}
+                            </div>
+                            <div className="col-sm-6 mb-3">
+                                <label className="form-label">Départements<span className="text-danger">*</span></label>
+                                <Select options={services} className="custom-react-select" 
+                                    placeholder='Choisir un département'
+                                    isSearchable
+                                    value={service}
+                                    onChange={handleService} 
+                                    getOptionValue={s => s.id}
+                                    getOptionLabel={s => s.name}
+                                />
+                                {errors.service_id && <div className="text-danger">
+                                    <small style={errorStyle}>{errors.service_id.join('\n\r')}</small>
                                 </div>}
                             </div>
                             <div className="col-sm-12">
@@ -124,7 +150,7 @@ const MedicalProcedureModal = ({ show, onHide, onSave, medicalProcedure, default
                     </button>
                 </div>
             </div>
-        </Modal>
+        </Modal>, document.body
     )
 }
 

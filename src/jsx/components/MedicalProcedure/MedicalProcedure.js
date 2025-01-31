@@ -11,6 +11,7 @@ import MedicalProcedureModal from './modal/MedicalProcedureModal';
 
 const MedicalProcedure = () => {
     const [medicalProcedures, setMedicalProcedures] = useState([]);
+    const [services, setServices] = useState([]);
     const [defaultCurrency, setDefaultCurrency] = useState(null);
 
     const columns = useMemo(() => [
@@ -30,6 +31,12 @@ const MedicalProcedure = () => {
             Header : 'Prix',
             Footer : 'Prix',
             accessor: 'amount_with_currency',
+            Filter: ColumnFilter,
+        },
+        {
+            Header : 'Département',
+            Footer : 'Département',
+            accessor: 'service.name',
             Filter: ColumnFilter,
         },
         {
@@ -146,6 +153,7 @@ const MedicalProcedure = () => {
             axiosInstance.get('medical_procedures')
                 .then(function({data}) {
                     setMedicalProcedures([...data.medicalProcedures]);
+                    setServices([...data.services]);
                     setDefaultCurrency(data.defaultCurrency);
                 })
                 .catch(function(error) {
@@ -269,6 +277,7 @@ const MedicalProcedure = () => {
                 onSave={handleAddOrEditMedicalProcedure}
                 medicalProcedure={editingMedicalProcedure}
                 defaultCurrency={defaultCurrency}
+                services={services}
             />
         </>
     );
