@@ -11,6 +11,7 @@ import { notifyError, notifyInfo, notifySuccess } from '../../constant/theme';
 const CreatePrescription = () => {
     const [medicines, setMedicines] = useState([]);
     const [doctors, setDoctors] = useState([]);
+    const [services, setServices] = useState([]);
 
     const [inputs, setInputs] = useState([]);
 
@@ -19,6 +20,7 @@ const CreatePrescription = () => {
     const [reference, setReference] = useState('');
     const [selectedMedicine, setSelectedMedicine] = useState(null);
     const [selectedDoctor, setSelectedDoctor] = useState(null);
+    const [selectedService, setSelectedService] = useState(null);
 
     const isPatient = () => { 
         /** If the ref field is the ID of patient */
@@ -64,8 +66,10 @@ const CreatePrescription = () => {
         setSaving(true);
 
         const doctor_id = selectedDoctor ? selectedDoctor.id : null;
+        const service_id = selectedService ? selectedService.id : null;
 
-        axiosInstance.post('prescriptions', {medicines: inputs, reference, doctor_id}, {
+        axiosInstance.post('prescriptions', 
+            {medicines: inputs, reference, doctor_id, service_id}, {
             headers: { "Content-Type": "application/json" }
         })
             .then(function(response) {
@@ -82,6 +86,8 @@ const CreatePrescription = () => {
                         notifyError(data.errors.quantity.join('\n\r'));
                     } else if (data.errors.duration) {
                         notifyError(data.errors.duration.join('\n\r'));
+                    } else if (data.errors.service_id) {
+                        notifyError(data.errors.service_id.join('\n\r'));
                     }
                 } else {
                     setInputs([]);
@@ -107,6 +113,7 @@ const CreatePrescription = () => {
                 .then(function ({ data }) {
                     setMedicines([...data.medicines]);
                     setDoctors([...data.doctors]);
+                    setServices([...data.services]);
                 })
                 .catch(function (error) {
                     console.log(error);
@@ -208,7 +215,19 @@ const CreatePrescription = () => {
                                 </Table>
                             </div>
                             <div className="row mt-2">
-                                <div className="col-12 d-flex justify-content-end">
+                                <div className="col-12 col-sm-4 col-md-3 mb-3 mb-md-0">
+                                    <label className="form-label">Département<span className="text-danger">*</span></label>
+                                    <Select options={services} className="custom-react-select"
+                                        isDisabled={loading}
+                                        placeholder={loading ? 'Chargement...' : 'Choisir un département'}
+                                        isSearchable
+                                        value={selectedService}
+                                        onChange={setSelectedService}
+                                        getOptionValue={s => s.id}
+                                        getOptionLabel={s => s.name}
+                                    />
+                                </div>
+                                <div className="col-12 col-md-12 d-flex justify-content-end">
                                     <button onClick={handleSubmit} disabled={inputs.length === 0 || saving} className="btn btn-primary">
                                         Sauvegarder
                                     </button>

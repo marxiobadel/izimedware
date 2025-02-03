@@ -5,14 +5,20 @@ import {
     Logout,
 } from '../store/actions/AuthActions';
 
-export function login(email, password) {
+export function login(email, password, local = false) {
+    let baseURL = 'https://medware.izipresta.com';
+
     const postData = {
         email,
         password,
         returnSecureToken: true,
     };
 
-    return axios.post(`https://medware.izipresta.com/api/login`, postData, { withCredentials: true });
+    if (local) {
+        baseURL = 'http://localhost:8000';
+    } 
+
+    return axios.post(`${baseURL}/api/login`, postData, { withCredentials: true });
 }
 
 export function formatError(errorResponse) {

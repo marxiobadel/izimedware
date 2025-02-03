@@ -13,7 +13,7 @@ switch (env) {
         baseURL = 'https://medware.izipresta.com/api/'
         break;
     default:
-        baseURL = '`https://react-course-b798e-default-rtdb.firebaseio.com/'
+        baseURL = 'https://react-course-b798e-default-rtdb.firebaseio.com/'
         break;
 }
 

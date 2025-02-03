@@ -21,28 +21,14 @@ const Prescription = () => {
         {
             Header : 'Patient',
             Footer : 'Patient',
-            accessor: 'patient',
+            accessor: 'patient_name',
             Filter: ColumnFilter,
-            Cell: ({ value, row }) => {
-                if (value) {
-                    return value.shortname
-                } else {
-                    return row.original.consultation.patient_name
-                }
-            },
         },
         {
             Header : 'Responsable',
             Footer : 'Responsable',
-            accessor: 'doctor',
+            accessor: 'doctor_name',
             Filter: ColumnFilter,
-            Cell: ({ value, row }) => {
-                if (value) {
-                    return value.shortname
-                } else {
-                    return row.original.consultation.doctor_name
-                }
-            },
         },
         {
             Header : 'Créée le',
