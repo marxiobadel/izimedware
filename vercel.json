@@ -9,5 +9,11 @@
                 }
             ]
         }
+    ],
+    "rewrites": [
+        {
+            "source": "/(.*)/static/css/(.*).css",
+            "destination": "/static/css/$2.css"
+        }
     ]
 }
