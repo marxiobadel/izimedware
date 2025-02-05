@@ -1,4 +1,4 @@
-import { isCassier, isMedecin, isPatient, isSuperAdmin } from "../../constant/theme";
+import { isCassier, isMedecin, isSuperAdmin } from "../../constant/theme";
 
 export const MenuList = [
     {   
@@ -45,6 +45,34 @@ export const MenuList = [
             {
                 title:'Liste',
                 to: 'consultations',
+            },
+        ]
+    },
+    {
+        id: 'examens',
+        title:'Examens',
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="flaticon-381-notepad" />,
+        content : [
+            {
+                title:'Liste',
+                to: 'examinations',
+            },
+            {
+                title:'Type',
+                to: 'types/exam',
+            },
+        ]
+    },
+    {
+        id: 'admissions',
+        title:'Hospitalisations',
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="flaticon-381-notepad" />,
+        content : [
+            {
+                title:'Liste',
+                to: 'admissions',
             },
         ]
     },
@@ -106,6 +134,34 @@ export const MenuList = [
                 title:'Liste',
                 to: 'invoices',
             }
+        ]
+    },
+    {
+        id: 'Chambres',
+        title:'Chambres',
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="flaticon-381-notepad" />,
+        content : [
+            {
+                title:'Liste',
+                to: 'rooms',
+            },
+            {
+                title:'Type',
+                to: 'types/room',
+            },
+        ]
+    },
+    {
+        id: 'Lits',
+        title:'Lits',
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="flaticon-381-notepad" />,
+        content : [
+            {
+                title:'Liste',
+                to: 'beds',
+            },
         ]
     },
     {

@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axiosInstance from '../../../services/AxiosInstance';
-import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
 import { Col, Dropdown, Row } from 'react-bootstrap';
-import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
-import { useDocumentTitle } from '../../hooks/useTitle';
-import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
+import { useDocumentTitle } from '../../hooks/useTitle';
+import axiosInstance from '../../../services/AxiosInstance';
+import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
-import ConsultationModal from './modal/ConsultationModal';
+import Swal from 'sweetalert2';
+import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
+import ExamenModal from './modal/ExamenModal';
 
-const Consultation = () => {
-    const [consultations, setConsultations] = useState([]);
-    const [patients, setPatients] = useState([]);
-    const [doctors, setDoctors] = useState([]);
+const Examen = () => {
+    const [examens, setExamens] = useState([]);
     const [medicalProcedures, setMedicalProcedures] = useState([]);
+    const [doctors, setDoctors] = useState([]);
+    const [types, setTypes] = useState([]);
 
     const columns = useMemo(() => [
         {
@@ -29,6 +29,12 @@ const Consultation = () => {
             Filter: ColumnFilter,
         },
         {
+            Header : 'Type',
+            Footer : 'Type',
+            accessor: 'type.name',
+            Filter: ColumnFilter,
+        },
+       {
             Header : 'Patient',
             Footer : 'Patient',
             accessor: 'patient_name',
@@ -56,32 +62,33 @@ const Consultation = () => {
                         </svg>
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-end" align="end">
+                        <Dropdown.Item as={Link} to={`/examinations/${row.original.id}`}>Détail</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleEdit(row.original)}>Modifier</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
             ),
         }
-    ], [consultations]);
+    ], [examens]);
 
-    const [editingConsultation, setEditingConsultation] = useState(null);
+    const [editingExamen, setEditingExamen] = useState(null);
 
     const [openModal, setOpenModal] = useState(false);
-    
+   
     const [loading, setLoading] = useState(true);
 
-    const tableInstance = useTable({
-        columns,
-        data: consultations,	
-        initialState: {pageIndex: 0}
-    }, useFilters, useGlobalFilter, useSortBy, usePagination);
+	const tableInstance = useTable({
+		columns,
+		data: examens,	
+		initialState: {pageIndex: 0}
+	}, useFilters, useGlobalFilter, useSortBy, usePagination);
 
-    const handleEdit = (consultation) => {
-        setEditingConsultation(consultation);
+    const handleEdit = (examen) => {
+        setEditingExamen(examen);
         setOpenModal(true);
     };
 
-    const handleDelete = (consultation) => {
+    const handleDelete = (examen) => {
         Swal.fire({
             title:'Etes-vous sûr ?',
             text: "Après suppression, vous ne pourrez pas récupérer la donnée supprimée !",
@@ -93,9 +100,9 @@ const Consultation = () => {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosInstance.delete(`consultations/${consultation.id}`)
+                axiosInstance.delete(`examens/${examen.id}`)
                     .then(({data}) => {
-                        setConsultations((prevConsutations) => prevConsutations.filter((c) => c.id !== consultation.id));
+                        setExamens((prevExamens) => prevExamens.filter((e) => e.id !== examen.id));
 
                         notifySuccess(data.message);
                     })
@@ -107,17 +114,17 @@ const Consultation = () => {
     };
 
     const handleAdd = () => {
-        setEditingConsultation(null);
+        setEditingExamen(null);
         setOpenModal(true); 
     }
 
-    const handleAddOrEditConsultation = (consultation, medical_procedure_id, type) => {
+    const handleAddOrEditExamen = (examen, medical_procedure_id, type) => {
         if (type === 'edit') {
-            setConsultations((prevConsutations) =>
-                prevConsutations.map((c) => (c.id === consultation.id ? {...c, ...{...consultation, medical_procedure_id}} : c))
+            setExamens((prevExamens) =>
+                prevExamens.map((e) => (e.id === examen.id ? {...e, ...{...examen, medical_procedure_id}} : e))
             );
         } else {
-            setConsultations((prevConsutations) => [consultation, ...prevConsutations]);
+            setExamens((prevExamens) => [examen, ...prevExamens]);
         }
 
         setOpenModal(false);
@@ -141,16 +148,16 @@ const Consultation = () => {
 
     const {pageIndex} = state;
 
-    useDocumentTitle('Consultations');
+    useDocumentTitle('Examens médicaux');
 
     useEffect(() => {
         (() => {
-            axiosInstance.get('consultations')
+            axiosInstance.get('examens')
                 .then(function({data}) {
-                    setConsultations([...data.consultations]);
-                    setDoctors([...data.doctors]);
-                    setPatients([...data.patients]);
+                    setExamens([...data.examens]);
                     setMedicalProcedures([...data.medicalProcedures]);
+                    setDoctors([...data.doctors]);
+                    setTypes([...data.types]);
                 })
                 .catch(function(error) {
                     console.log(error);
@@ -164,11 +171,11 @@ const Consultation = () => {
         <>
             <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
                 <div className="me-auto">
-                    <h2 className="text-black font-w600">Consultations</h2>
-                    <p className="mb-0">Liste des consultations</p>
+                    <h2 className="text-black font-w600">Examens</h2>
+                    <p className="mb-0">Liste des examens médicaux</p>
                 </div>
                 <div>
-                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouvelle consultation</Link>
+                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouveau examen</Link>
                 </div>
             </div>
             <ToastContainer />
@@ -267,17 +274,17 @@ const Consultation = () => {
 					</div>
                 </Col>
             </Row>
-            <ConsultationModal 
+            <ExamenModal 
                 show={openModal}
                 onHide={() => setOpenModal(false)}
-                onSave={handleAddOrEditConsultation}
-                consultation={editingConsultation}
-                doctors={doctors}
-                patients={patients}
+                onSave={handleAddOrEditExamen}
+                examen={editingExamen}
                 medicalProcedures={medicalProcedures}
+                doctors={doctors}
+                types={types}
             />
         </>
     );
-}
+};
 
-export default Consultation;
+export default Examen;

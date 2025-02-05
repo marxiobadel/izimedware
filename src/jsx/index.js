@@ -108,6 +108,12 @@ import EditInvoice from "./components/Invoice/EditInvoice";
 import Service from "./components/Service/Service";
 import ShowInvoice from "./components/Invoice/ShowInvoice";
 import EditPrescription from "./components/prescription/EditPrescription";
+import Type from "./components/Morph/Type";
+import Examen from "./components/Examen/Examen";
+import ShowExamen from "./components/Examen/ShowExamen";
+import Room from "./components/Room/Room";
+import Bed from "./components/Bed/Bed";
+import Admission from "./components/Admission/Admission";
 
 const Markup = () => {
     const allroutes = [
@@ -135,6 +141,12 @@ const Markup = () => {
         { url: "prescriptions", component: <Prescription /> },
         { url: "prescriptions/create", component: <CreatePrescription /> },
         { url: "prescriptions/:id/edit", component: <EditPrescription /> },
+        { url: "examinations", component: <Examen /> },
+        { url: "examinations/:id", component: <ShowExamen /> },
+        { url: "admissions", component: <Admission /> },
+        { url: "rooms", component: <Room /> },
+        { url: "beds", component: <Bed /> },
+        { url: "types/:status", component: <Type /> },
 
         //Apps
         { url: "app-profile", component: <AppProfile /> },

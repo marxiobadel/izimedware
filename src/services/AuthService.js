@@ -5,7 +5,7 @@ import {
     Logout,
 } from '../store/actions/AuthActions';
 
-export function login(email, password, local = false) {
+export function login(email, password, local = true) {
     let baseURL = 'https://medware.izipresta.com';
 
     const postData = {

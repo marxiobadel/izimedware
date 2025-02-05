@@ -1,19 +1,24 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axiosInstance from '../../../services/AxiosInstance';
-import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
 import { Col, Dropdown, Row } from 'react-bootstrap';
-import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
-import { useDocumentTitle } from '../../hooks/useTitle';
-import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
+import { useDocumentTitle } from '../../hooks/useTitle';
+import axiosInstance from '../../../services/AxiosInstance';
+import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
-import ConsultationModal from './modal/ConsultationModal';
+import Swal from 'sweetalert2';
+import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
+import axios from 'axios';
+import AdmissionModal from './modal/AdmissionModal';
 
-const Consultation = () => {
-    const [consultations, setConsultations] = useState([]);
+const Admission = () => {
+    const [admissions, setAdmissions] = useState([]);
     const [patients, setPatients] = useState([]);
-    const [doctors, setDoctors] = useState([]);
-    const [medicalProcedures, setMedicalProcedures] = useState([]);
+    const [rooms, setRooms] = useState([]);
+    const [beds, setBeds] = useState([]);
+
+    const handleRoomChange = (beds) => {
+        setBeds([...beds]);
+    }
 
     const columns = useMemo(() => [
         {
@@ -23,21 +28,36 @@ const Consultation = () => {
             Filter: ColumnFilter,
         },
         {
-            Header : 'Date',
-            Footer : 'Date',
-            accessor: 'date',
+            Header : "Date d'admission",
+            Footer : "Date d'admission",
+            accessor: 'format_entry_date',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Patient',
-            Footer : 'Patient',
+            Header : "Date de sortie",
+            Footer : "Date de sortie",
+            accessor: 'format_release_date',
+            Filter: ColumnFilter,
+        },
+        {
+            Header : "Patient",
+            Footer : "Patient",
             accessor: 'patient_name',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Responsable',
-            Footer : 'Responsable',
-            accessor: 'doctor_name',
+            Header : "Chambre",
+            Footer : "Chambre",
+            accessor: 'room_number',
+            Filter: ColumnFilter,
+            Cell: ({ value }) => (
+                <span className={value === 'aucune' ? 'text-warning' : ''}>{value}</span>
+            ),
+        },
+        {
+            Header : "Lit",
+            Footer : "Lit",
+            accessor: 'bed_number',
             Filter: ColumnFilter,
         },
         {
@@ -62,26 +82,26 @@ const Consultation = () => {
                 </Dropdown>
             ),
         }
-    ], [consultations]);
+    ], [admissions]);
 
-    const [editingConsultation, setEditingConsultation] = useState(null);
+    const [editingAdmission, setEditingAdmission] = useState(null);
 
     const [openModal, setOpenModal] = useState(false);
-    
+   
     const [loading, setLoading] = useState(true);
 
-    const tableInstance = useTable({
-        columns,
-        data: consultations,	
-        initialState: {pageIndex: 0}
-    }, useFilters, useGlobalFilter, useSortBy, usePagination);
+	const tableInstance = useTable({
+		columns,
+		data: admissions,	
+		initialState: {pageIndex: 0}
+	}, useFilters, useGlobalFilter, useSortBy, usePagination);
 
-    const handleEdit = (consultation) => {
-        setEditingConsultation(consultation);
+    const handleEdit = (admission) => {
+        setEditingAdmission(admission);
         setOpenModal(true);
     };
 
-    const handleDelete = (consultation) => {
+    const handleDelete = (admission) => {
         Swal.fire({
             title:'Etes-vous sûr ?',
             text: "Après suppression, vous ne pourrez pas récupérer la donnée supprimée !",
@@ -93,9 +113,9 @@ const Consultation = () => {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosInstance.delete(`consultations/${consultation.id}`)
+                axiosInstance.delete(`admissions/${admission.id}`)
                     .then(({data}) => {
-                        setConsultations((prevConsutations) => prevConsutations.filter((c) => c.id !== consultation.id));
+                        setAdmissions((prevAdmissions) => prevAdmissions.filter((a) => a.id !== admission.id));
 
                         notifySuccess(data.message);
                     })
@@ -107,17 +127,17 @@ const Consultation = () => {
     };
 
     const handleAdd = () => {
-        setEditingConsultation(null);
+        setEditingAdmission(null);
         setOpenModal(true); 
     }
 
-    const handleAddOrEditConsultation = (consultation, medical_procedure_id, type) => {
+    const handleAddOrEditAdmission = (admission, type) => {
         if (type === 'edit') {
-            setConsultations((prevConsutations) =>
-                prevConsutations.map((c) => (c.id === consultation.id ? {...c, ...{...consultation, medical_procedure_id}} : c))
+            setAdmissions((prevAdmissions) =>
+                prevAdmissions.map((a) => (a.id === admission.id ? {...a, ...admission} : a))
             );
         } else {
-            setConsultations((prevConsutations) => [consultation, ...prevConsutations]);
+            setAdmissions((prevAdmissions) => [admission, ...prevAdmissions]);
         }
 
         setOpenModal(false);
@@ -141,34 +161,44 @@ const Consultation = () => {
 
     const {pageIndex} = state;
 
-    useDocumentTitle('Consultations');
+    useDocumentTitle('Hospitalisation');
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('consultations')
+            axiosInstance.get('admissions', {signal: controller.signal})
                 .then(function({data}) {
-                    setConsultations([...data.consultations]);
-                    setDoctors([...data.doctors]);
+                    setAdmissions([...data.admissions]);
                     setPatients([...data.patients]);
-                    setMedicalProcedures([...data.medicalProcedures]);
+                    setRooms([...data.rooms]);
+                    setBeds([...data.beds]);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (
         <>
             <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
                 <div className="me-auto">
-                    <h2 className="text-black font-w600">Consultations</h2>
-                    <p className="mb-0">Liste des consultations</p>
+                    <h2 className="text-black font-w600">Hospitalisations</h2>
+                    <p className="mb-0">Liste des hospitalisations</p>
                 </div>
                 <div>
-                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouvelle consultation</Link>
+                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouvelle admission</Link>
                 </div>
             </div>
             <ToastContainer />
@@ -267,17 +297,18 @@ const Consultation = () => {
 					</div>
                 </Col>
             </Row>
-            <ConsultationModal 
+            <AdmissionModal
                 show={openModal}
                 onHide={() => setOpenModal(false)}
-                onSave={handleAddOrEditConsultation}
-                consultation={editingConsultation}
-                doctors={doctors}
+                onSave={handleAddOrEditAdmission}
+                admission={editingAdmission}
+                onRoomChange={handleRoomChange}
                 patients={patients}
-                medicalProcedures={medicalProcedures}
+                rooms={rooms}
+                beds={beds}
             />
         </>
     );
-}
+};
 
-export default Consultation;
+export default Admission;

@@ -1,43 +1,80 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axiosInstance from '../../../services/AxiosInstance';
-import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
-import { Col, Dropdown, Row } from 'react-bootstrap';
-import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
+import { Badge, Col, Dropdown, Row } from 'react-bootstrap';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../../hooks/useTitle';
-import Swal from 'sweetalert2';
-import { Link } from 'react-router-dom';
+import axiosInstance from '../../../services/AxiosInstance';
+import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
-import ConsultationModal from './modal/ConsultationModal';
+import Swal from 'sweetalert2';
+import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
+import TypeModal from './modal/TypeModal';
 
-const Consultation = () => {
-    const [consultations, setConsultations] = useState([]);
-    const [patients, setPatients] = useState([]);
-    const [doctors, setDoctors] = useState([]);
-    const [medicalProcedures, setMedicalProcedures] = useState([]);
+const Type = () => {
+    const {status} = useParams();
+
+    let title = null;
+    let parentTitle = null;
+    let parentValue = null;
+
+    const navigate = useNavigate();
+
+    switch (status) {
+        case 'exam':
+            title = "Types d'examens médicaux";
+            parentTitle = "Examens";
+            parentValue = "examens_count";
+            break;
+        case 'room':
+            title = "Types de chambre";
+            parentTitle = "Chambres";
+            parentValue = "rooms_count";
+            break;
+        case 'leave':
+            title = "Types de congé";
+            parentTitle = "Congés";
+            parentValue = "leaves_count";
+            break;
+        default:
+            navigate('/page-error-404');
+            break;
+    }
+
+    const [types, setTypes] = useState([]);
 
     const columns = useMemo(() => [
         {
-            Header : 'ID',
-            Footer : 'ID',
-            accessor: 'reference',
+            Header: 'ID',
+            Footer: 'ID',
+            accessor: 'id',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Date',
-            Footer : 'Date',
-            accessor: 'date',
+            Header: 'Nom',
+            Footer: 'Nom',
+            accessor: 'name',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Patient',
-            Footer : 'Patient',
-            accessor: 'patient_name',
+            Header: parentTitle,
+            Footer: parentTitle,
+            accessor: parentValue,
+            Filter: ColumnFilter,
+            Cell: ({ value }) => (
+                <div className="bootstrap-badge text-center">
+					<Badge bg="" className='badge-rounded badge-outline-primary'>{value}</Badge>
+				</div>
+            ),
+        },
+        {
+            Header: 'Ajouté le',
+            Footer: 'Ajouté le',
+            accessor: 'created_at',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Responsable',
-            Footer : 'Responsable',
-            accessor: 'doctor_name',
+            Header: 'Modifié le',
+            Footer: 'Modifié le',
+            accessor: 'updated_at',
             Filter: ColumnFilter,
         },
         {
@@ -62,26 +99,26 @@ const Consultation = () => {
                 </Dropdown>
             ),
         }
-    ], [consultations]);
+    ], [parentTitle, parentValue]);
 
-    const [editingConsultation, setEditingConsultation] = useState(null);
+    const [editingType, setEditingType] = useState(null);
 
     const [openModal, setOpenModal] = useState(false);
-    
+   
     const [loading, setLoading] = useState(true);
 
-    const tableInstance = useTable({
-        columns,
-        data: consultations,	
-        initialState: {pageIndex: 0}
-    }, useFilters, useGlobalFilter, useSortBy, usePagination);
+	const tableInstance = useTable({
+		columns,
+		data: types,	
+		initialState: {pageIndex: 0}
+	}, useFilters, useGlobalFilter, useSortBy, usePagination);
 
-    const handleEdit = (consultation) => {
-        setEditingConsultation(consultation);
+    const handleEdit = (type) => {
+        setEditingType(type);
         setOpenModal(true);
     };
 
-    const handleDelete = (consultation) => {
+    const handleDelete = (type) => {
         Swal.fire({
             title:'Etes-vous sûr ?',
             text: "Après suppression, vous ne pourrez pas récupérer la donnée supprimée !",
@@ -93,9 +130,9 @@ const Consultation = () => {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosInstance.delete(`consultations/${consultation.id}`)
+                axiosInstance.delete(`types/${type.id}`)
                     .then(({data}) => {
-                        setConsultations((prevConsutations) => prevConsutations.filter((c) => c.id !== consultation.id));
+                        setTypes((prevTypes) => prevTypes.filter((t) => t.id !== type.id));
 
                         notifySuccess(data.message);
                     })
@@ -107,17 +144,17 @@ const Consultation = () => {
     };
 
     const handleAdd = () => {
-        setEditingConsultation(null);
+        setEditingType(null);
         setOpenModal(true); 
     }
 
-    const handleAddOrEditConsultation = (consultation, medical_procedure_id, type) => {
-        if (type === 'edit') {
-            setConsultations((prevConsutations) =>
-                prevConsutations.map((c) => (c.id === consultation.id ? {...c, ...{...consultation, medical_procedure_id}} : c))
+    const handleAddOrEditType = (type, which) => {
+        if (which === 'edit') {
+            setTypes((prevTypes) =>
+                prevTypes.map((t) => (t.id === type.id ? {...t, ...type} : t))
             );
         } else {
-            setConsultations((prevConsutations) => [consultation, ...prevConsutations]);
+            setTypes((prevTypes) => [type, ...prevTypes]);
         }
 
         setOpenModal(false);
@@ -141,16 +178,13 @@ const Consultation = () => {
 
     const {pageIndex} = state;
 
-    useDocumentTitle('Consultations');
+    useDocumentTitle(title);
 
     useEffect(() => {
         (() => {
-            axiosInstance.get('consultations')
+            axiosInstance.get(`types?status=${status}`)
                 .then(function({data}) {
-                    setConsultations([...data.consultations]);
-                    setDoctors([...data.doctors]);
-                    setPatients([...data.patients]);
-                    setMedicalProcedures([...data.medicalProcedures]);
+                    setTypes([...data.types]);
                 })
                 .catch(function(error) {
                     console.log(error);
@@ -158,17 +192,17 @@ const Consultation = () => {
                     setLoading(false);
                 });     
         })();
-    }, []);
+    }, [status]);
 
     return (
         <>
             <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
                 <div className="me-auto">
-                    <h2 className="text-black font-w600">Consultations</h2>
-                    <p className="mb-0">Liste des consultations</p>
+                    <h2 className="text-black font-w600">Types</h2>
+                    <p className="mb-0">{title}</p>
                 </div>
                 <div>
-                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouvelle consultation</Link>
+                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouveau type</Link>
                 </div>
             </div>
             <ToastContainer />
@@ -267,17 +301,15 @@ const Consultation = () => {
 					</div>
                 </Col>
             </Row>
-            <ConsultationModal 
+            <TypeModal 
                 show={openModal}
                 onHide={() => setOpenModal(false)}
-                onSave={handleAddOrEditConsultation}
-                consultation={editingConsultation}
-                doctors={doctors}
-                patients={patients}
-                medicalProcedures={medicalProcedures}
+                onSave={handleAddOrEditType}
+                type={editingType}
+                status={status}
             />
         </>
     );
-}
+};
 
-export default Consultation;
+export default Type;

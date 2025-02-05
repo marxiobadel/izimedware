@@ -1,43 +1,59 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axiosInstance from '../../../services/AxiosInstance';
-import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
-import { Col, Dropdown, Row } from 'react-bootstrap';
-import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
-import { useDocumentTitle } from '../../hooks/useTitle';
-import Swal from 'sweetalert2';
+import { Badge, Col, Dropdown, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { useDocumentTitle } from '../../hooks/useTitle';
+import axiosInstance from '../../../services/AxiosInstance';
+import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
-import ConsultationModal from './modal/ConsultationModal';
+import Swal from 'sweetalert2';
+import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
+import RoomModal from './modal/RoomModal';
+import axios from 'axios';
 
-const Consultation = () => {
-    const [consultations, setConsultations] = useState([]);
-    const [patients, setPatients] = useState([]);
-    const [doctors, setDoctors] = useState([]);
-    const [medicalProcedures, setMedicalProcedures] = useState([]);
+const Room = () => {
+    const [rooms, setRooms] = useState([]);
+    const [types, setTypes] = useState([]);
 
     const columns = useMemo(() => [
         {
             Header : 'ID',
             Footer : 'ID',
-            accessor: 'reference',
+            accessor: 'id',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Date',
-            Footer : 'Date',
-            accessor: 'date',
+            Header : 'Numéro',
+            Footer : 'Numéro',
+            accessor: 'number',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Patient',
-            Footer : 'Patient',
-            accessor: 'patient_name',
+            Header : 'Type',
+            Footer : 'Type',
+            accessor: 'type.name',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Responsable',
-            Footer : 'Responsable',
-            accessor: 'doctor_name',
+            Header : 'Capacité Max',
+            Footer : 'Capacité Max',
+            accessor: 'capacity',
+            Filter: ColumnFilter,
+        },
+        {
+            Header : 'Statut',
+            Footer : 'Statut',
+            accessor: 'status_label',
+            Filter: ColumnFilter,
+            Cell: ({ value, row }) => (
+                <div className="bootstrap-badge text-center">
+					<Badge bg="" className={`badge-rounded badge-outline-${row.original.status_color}`}>{value}</Badge>
+				</div>
+            ),
+        },
+        {
+            Header : 'Ajoutée le',
+            Footer : 'Ajoutée le',
+            accessor: 'created_at',
             Filter: ColumnFilter,
         },
         {
@@ -62,26 +78,26 @@ const Consultation = () => {
                 </Dropdown>
             ),
         }
-    ], [consultations]);
+    ], [rooms]);
 
-    const [editingConsultation, setEditingConsultation] = useState(null);
+    const [editingRoom, setEditingRoom] = useState(null);
 
     const [openModal, setOpenModal] = useState(false);
-    
+   
     const [loading, setLoading] = useState(true);
 
-    const tableInstance = useTable({
-        columns,
-        data: consultations,	
-        initialState: {pageIndex: 0}
-    }, useFilters, useGlobalFilter, useSortBy, usePagination);
+	const tableInstance = useTable({
+		columns,
+		data: rooms,	
+		initialState: {pageIndex: 0}
+	}, useFilters, useGlobalFilter, useSortBy, usePagination);
 
-    const handleEdit = (consultation) => {
-        setEditingConsultation(consultation);
+    const handleEdit = (room) => {
+        setEditingRoom(room);
         setOpenModal(true);
     };
 
-    const handleDelete = (consultation) => {
+    const handleDelete = (room) => {
         Swal.fire({
             title:'Etes-vous sûr ?',
             text: "Après suppression, vous ne pourrez pas récupérer la donnée supprimée !",
@@ -93,9 +109,9 @@ const Consultation = () => {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosInstance.delete(`consultations/${consultation.id}`)
+                axiosInstance.delete(`rooms/${room.id}`)
                     .then(({data}) => {
-                        setConsultations((prevConsutations) => prevConsutations.filter((c) => c.id !== consultation.id));
+                        setRooms((prevRooms) => prevRooms.filter((r) => r.id !== room.id));
 
                         notifySuccess(data.message);
                     })
@@ -107,17 +123,17 @@ const Consultation = () => {
     };
 
     const handleAdd = () => {
-        setEditingConsultation(null);
+        setEditingRoom(null);
         setOpenModal(true); 
     }
 
-    const handleAddOrEditConsultation = (consultation, medical_procedure_id, type) => {
+    const handleAddOrEditRoom = (room, type) => {
         if (type === 'edit') {
-            setConsultations((prevConsutations) =>
-                prevConsutations.map((c) => (c.id === consultation.id ? {...c, ...{...consultation, medical_procedure_id}} : c))
+            setRooms((prevRooms) =>
+                prevRooms.map((r) => (r.id === room.id ? {...r, ...room} : r))
             );
         } else {
-            setConsultations((prevConsutations) => [consultation, ...prevConsutations]);
+            setRooms((prevRooms) => [room, ...prevRooms]);
         }
 
         setOpenModal(false);
@@ -141,34 +157,42 @@ const Consultation = () => {
 
     const {pageIndex} = state;
 
-    useDocumentTitle('Consultations');
+    useDocumentTitle('Chambres');
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('consultations')
+            axiosInstance.get('rooms', {signal: controller.signal})
                 .then(function({data}) {
-                    setConsultations([...data.consultations]);
-                    setDoctors([...data.doctors]);
-                    setPatients([...data.patients]);
-                    setMedicalProcedures([...data.medicalProcedures]);
+                    setRooms([...data.rooms]);
+                    setTypes([...data.types]);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (
         <>
             <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
                 <div className="me-auto">
-                    <h2 className="text-black font-w600">Consultations</h2>
-                    <p className="mb-0">Liste des consultations</p>
+                    <h2 className="text-black font-w600">Chambres</h2>
+                    <p className="mb-0">Liste des chambres</p>
                 </div>
                 <div>
-                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouvelle consultation</Link>
+                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouvelle chambre</Link>
                 </div>
             </div>
             <ToastContainer />
@@ -267,17 +291,15 @@ const Consultation = () => {
 					</div>
                 </Col>
             </Row>
-            <ConsultationModal 
+            <RoomModal
                 show={openModal}
                 onHide={() => setOpenModal(false)}
-                onSave={handleAddOrEditConsultation}
-                consultation={editingConsultation}
-                doctors={doctors}
-                patients={patients}
-                medicalProcedures={medicalProcedures}
+                onSave={handleAddOrEditRoom}
+                room={editingRoom}
+                types={types}
             />
         </>
     );
-}
+};
 
-export default Consultation;
+export default Room;
