@@ -1,83 +1,49 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Badge, Col, Dropdown, Row } from 'react-bootstrap';
-import { Link, useParams } from 'react-router-dom';
+import { Col, Dropdown, Row } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../../hooks/useTitle';
 import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
-import TypeModal from './modal/TypeModal';
-import axios from 'axios';
+import SoinModal from './modal/SoinModal';
 
-const Type = () => {
-    let {status} = useParams();
-
-    let title = "Types d'examens médicaux";
-    let parentTitle = "Examens";
-    let parentValue = 'examens_count';
-
-    const allTypes = ["exam", "room", "leave", "soin"];
-   
-    switch (status) {
-        case 'exam':
-            title = "Types d'examens médicaux";
-            parentTitle = "Examens";
-            parentValue = "examens_count";
-            break;
-        case 'room':
-            title = "Types de chambres";
-            parentTitle = "Chambres";
-            parentValue = "rooms_count";
-            break;
-        case 'leave':
-            title = "Types de congés";
-            parentTitle = "Congés";
-            parentValue = "leaves_count";
-            break;
-        case 'soin':
-            title = "Types de soins";
-            parentTitle = "Soins";
-            parentValue = "soins_count";
-            break;
-    }
-
+const Soin = () => {
+    const [soins, setSoins] = useState([]);
+    const [medicalProcedures, setMedicalProcedures] = useState([]);
+    const [doctors, setDoctors] = useState([]);
     const [types, setTypes] = useState([]);
 
     const columns = useMemo(() => [
         {
-            Header: 'ID',
-            Footer: 'ID',
-            accessor: 'id',
+            Header : 'ID',
+            Footer : 'ID',
+            accessor: 'reference',
             Filter: ColumnFilter,
         },
         {
-            Header: 'Nom',
-            Footer: 'Nom',
-            accessor: 'name',
+            Header : 'Date',
+            Footer : 'Date',
+            accessor: 'format_date_time',
             Filter: ColumnFilter,
         },
         {
-            Header: parentTitle,
-            Footer: parentTitle,
-            accessor: parentValue,
+            Header : 'Type',
+            Footer : 'Type',
+            accessor: 'type.name',
             Filter: ColumnFilter,
-            Cell: ({ value }) => (
-                <div className="bootstrap-badge text-center">
-					<Badge bg="" className='badge-rounded badge-outline-primary'>{value}</Badge>
-				</div>
-            ),
         },
-        {
-            Header: 'Ajouté le',
-            Footer: 'Ajouté le',
-            accessor: 'created_at',
+       {
+            Header : 'Patient',
+            Footer : 'Patient',
+            accessor: 'patient_name',
             Filter: ColumnFilter,
         },
         {
-            Header: 'Modifié le',
-            Footer: 'Modifié le',
-            accessor: 'updated_at',
+            Header : 'Responsable',
+            Footer : 'Responsable',
+            accessor: 'doctor_name',
             Filter: ColumnFilter,
         },
         {
@@ -102,9 +68,9 @@ const Type = () => {
                 </Dropdown>
             ),
         }
-    ], [parentTitle, parentValue]);
+    ], [soins]);
 
-    const [editingType, setEditingType] = useState(null);
+    const [editingSoin, setEditingSoin] = useState(null);
 
     const [openModal, setOpenModal] = useState(false);
    
@@ -112,16 +78,16 @@ const Type = () => {
 
 	const tableInstance = useTable({
 		columns,
-		data: types,	
+		data: soins,	
 		initialState: {pageIndex: 0}
 	}, useFilters, useGlobalFilter, useSortBy, usePagination);
 
-    const handleEdit = (type) => {
-        setEditingType(type);
+    const handleEdit = (soin) => {
+        setEditingSoin(soin);
         setOpenModal(true);
     };
 
-    const handleDelete = (type) => {
+    const handleDelete = (soin) => {
         Swal.fire({
             title:'Etes-vous sûr ?',
             text: "Après suppression, vous ne pourrez pas récupérer la donnée supprimée !",
@@ -133,9 +99,9 @@ const Type = () => {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosInstance.delete(`types/${type.id}`)
+                axiosInstance.delete(`soins/${soin.id}`)
                     .then(({data}) => {
-                        setTypes((prevTypes) => prevTypes.filter((t) => t.id !== type.id));
+                        setSoins((prevSoins) => prevSoins.filter((s) => s.id !== soin.id));
 
                         notifySuccess(data.message);
                     })
@@ -147,17 +113,17 @@ const Type = () => {
     };
 
     const handleAdd = () => {
-        setEditingType(null);
+        setEditingSoin(null);
         setOpenModal(true); 
     }
 
-    const handleAddOrEditType = (type, which) => {
-        if (which === 'edit') {
-            setTypes((prevTypes) =>
-                prevTypes.map((t) => (t.id === type.id ? {...t, ...type} : t))
+    const handleAddOrEditSoin = (soin, medical_procedure_id, type) => {
+        if (type === 'edit') {
+            setSoins((prevSoins) =>
+                prevSoins.map((s) => (s.id === soin.id ? {...s, ...{...soin, medical_procedure_id}} : s))
             );
         } else {
-            setTypes((prevTypes) => [type, ...prevTypes]);
+            setSoins((prevSoins) => [soin, ...prevSoins]);
         }
 
         setOpenModal(false);
@@ -181,45 +147,34 @@ const Type = () => {
 
     const {pageIndex} = state;
 
-    useDocumentTitle(title);
+    useDocumentTitle('Soins médicaux');
 
     useEffect(() => {
-        if (!allTypes.some(uri => uri === status)) {
-            status = 'exam';
-        }
-
-        const controller = new AbortController();
-
         (() => {
-            axiosInstance.get(`types?status=${status}`, {signal: controller.signal})
+            axiosInstance.get('soins')
                 .then(function({data}) {
+                    setSoins([...data.soins]);
+                    setMedicalProcedures([...data.medicalProcedures]);
+                    setDoctors([...data.doctors]);
                     setTypes([...data.types]);
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
-                        console.log('requête annulée.');
-                    } else {
-                        console.log(error);
-                    }
+                    console.log(error);
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
-
-        return () => {
-            controller.abort();
-        }
-    }, [status]);
+    }, []);
 
     return (
         <>
             <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
                 <div className="me-auto">
-                    <h2 className="text-black font-w600">Types</h2>
-                    <p className="mb-0">{title}</p>
+                    <h2 className="text-black font-w600">Soins</h2>
+                    <p className="mb-0">Liste des soins médicaux</p>
                 </div>
                 <div>
-                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouveau type</Link>
+                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouveau soin</Link>
                 </div>
             </div>
             <ToastContainer />
@@ -318,15 +273,17 @@ const Type = () => {
 					</div>
                 </Col>
             </Row>
-            <TypeModal 
+            <SoinModal 
                 show={openModal}
                 onHide={() => setOpenModal(false)}
-                onSave={handleAddOrEditType}
-                type={editingType}
-                status={status}
+                onSave={handleAddOrEditSoin}
+                soin={editingSoin}
+                medicalProcedures={medicalProcedures}
+                doctors={doctors}
+                types={types}
             />
         </>
     );
 };
 
-export default Type;
+export default Soin;

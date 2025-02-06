@@ -1,36 +1,46 @@
 import { useState } from "react";
 import { Modal } from "react-bootstrap";
-import { errorStyle, notifySuccess } from '../../../constant/theme';
+import { errorStyle } from '../../../constant/theme';
 import axiosInstance from "../../../../services/AxiosInstance";
 import { createPortal } from "react-dom";
+import { FilePond, registerPlugin } from "react-filepond";
+import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
+
+registerPlugin(FilePondPluginFileValidateType);
 
 const ResultModal = ({show, onHide, onSave, examen}) => {
     const [inputs, setInputs] = useState({
         content: '',
+        file: null,
     });
+
+    const [files, setFiles] = useState([]);
 
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
+
+    const handleOnChange = (value, input) => {
+        setInputs(prevState => ({...prevState, [input]: value}));
+    }
+
+    const resetForm = () => {
+        handleOnChange('', 'content');
+        setFiles([]);
+    }
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
         setSaving(true);
 
-        const handleOnChange = (value, input) => {
-            setInputs(prevState => ({...prevState, [input]: value}));
-        }
-
-        const resetForm = () => {
-            handleOnChange('', 'content');
-        }
+        const file = files.length > 0 ? files[0].file : null
 
         axiosInstance.request({
             method: 'POST',
-            url: 'examens/'+ (examen ? examen.id : 0) +'/result',
-            data: inputs,
+            url: 'examens/'+ (examen ? examen.id : 0) +'/results',
+            data: {...inputs, file},
             headers: {
-                "Content-Type": 'application/json'
+                "Content-Type": 'multipart/form-data'
             }
         })
             .then(function(response) {
@@ -42,8 +52,6 @@ const ResultModal = ({show, onHide, onSave, examen}) => {
                     onSave(data.data);
 
                     resetForm();
-
-                    notifySuccess(`Examen médical ajouté avec succès`);
                 }
             })
             .catch(function(error) {
@@ -65,9 +73,9 @@ const ResultModal = ({show, onHide, onSave, examen}) => {
                     <form>
                         <div className="row">
                             <div className="col-sm-12 mb-3">
-                                <label className="form-label">Contenu</label>
+                                <label className="form-label">Contenu<span className="text-danger">*</span></label>
                                 <textarea
-                                    rows={5}
+                                    rows={3}
                                     value={inputs.content} 
                                     onChange={event => handleOnChange(event.target.value, 'content')} 
                                     className="form-control"
@@ -75,6 +83,22 @@ const ResultModal = ({show, onHide, onSave, examen}) => {
                                 {errors.content && <div className="text-danger">
                                     <small style={errorStyle}>{errors.content.join('\n\r')}</small>
                                 </div>}
+                            </div>
+                            <div className="col-sm-12 mb-3">                                        
+                                <label className="form-label">Fichier</label>
+                                <FilePond
+                                    files={files}
+                                    onupdatefiles={setFiles}
+                                    allowMultiple={false}
+                                    acceptedFilesTypes={["image/*", "application/pdf"]}
+                                    labelIdle="Glisser-déposer un fichier"
+                                    allowImagePreview={false}
+                                    credits={false}
+                                />
+                                {errors.file && <div className="text-danger">
+                                    <small style={errorStyle}>{errors.file.join('\n\r')}</small>
+                                </div>}
+                              
                             </div>
                         </div>
                     </form>

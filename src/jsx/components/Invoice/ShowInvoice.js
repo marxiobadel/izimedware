@@ -98,7 +98,7 @@ const ShowInvoice = () => {
             <ToastContainer />
             <div className="row">
                 <div className="col-lg-12">
-                    <div className="card  mt-3">
+                    <div className="card mt-3">
                         <div className="card-header">
                             {" "}
                             {invoice ? invoice.reference : '---'} <strong>{invoice ? invoice.created_at : '---'}</strong>{" "}

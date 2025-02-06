@@ -101,6 +101,22 @@ export const MenuList = [
         ]
     },
     {
+        id: "soins",
+        title:'Soins médicaux',
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="flaticon-381-notepad" />,
+        content : [
+            {
+                title:'Liste',
+                to: 'soins',
+            },
+            {
+                title:'Type',
+                to: 'types/soin',
+            },
+        ]
+    },
+    {
         id: 'medicines',
         title:'Médicaments',
         classsChange: 'mm-collapse',
