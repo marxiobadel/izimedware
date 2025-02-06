@@ -6,6 +6,7 @@ import axiosInstance from "../../../services/AxiosInstance";
 import PaymentModal from "./modal/PaymentModal";
 import { notifySuccess } from "../../constant/theme";
 import Swal from "sweetalert2";
+import axios from "axios";
 
 const ShowInvoice = () => {
     const { id } = useParams();
@@ -80,16 +81,26 @@ const ShowInvoice = () => {
     }
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get(`invoices/${id}`)
+            axiosInstance.get(`invoices/${id}`, {signal: controller.signal})
                 .then(function ({ data }) {
                     setInvoice(data.data);
                     setPatients(data.patients);
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 });
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (

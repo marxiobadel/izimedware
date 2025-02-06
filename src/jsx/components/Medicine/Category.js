@@ -6,8 +6,9 @@ import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
-import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
 import CategoryModal from './modal/CategoryModal';
+import axios from 'axios';
 
 const Category = () => {
     const [categories, setCategories] = useState([]);
@@ -137,7 +138,11 @@ const Category = () => {
                         notifySuccess(data.message);
                     })
                     .catch(error => {
-                        console.log(error)
+                        if (error.response && error.response.data) {
+                            notifyError('Désolé ! Cette donnée ne peut être supprimée.');
+                        } else {
+                            console.log(error);
+                        }
                     })
             }
         })
@@ -181,17 +186,27 @@ const Category = () => {
     useDocumentTitle('Catégories');
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('categories')
+            axiosInstance.get('categories', {signal: controller.signal})
                 .then(function({data}) {
                     setCategories([...data.categories]);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (

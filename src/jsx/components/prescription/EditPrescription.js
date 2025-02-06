@@ -7,6 +7,7 @@ import Select from 'react-select';
 import { Table } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import { notifyError, notifyInfo, notifySuccess } from '../../constant/theme';
+import axios from 'axios';
 
 const EditPrescription = () => {
     const {id} = useParams();
@@ -120,8 +121,10 @@ const EditPrescription = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get(`prescriptions/${id}/edit`)
+            axiosInstance.get(`prescriptions/${id}/edit`, {signal: controller.signal})
                 .then(function ({ data }) {
                     setMedicines([...data.medicines]);
                     setDoctors([...data.doctors]);
@@ -139,11 +142,19 @@ const EditPrescription = () => {
                     handlePrescriptionMedecines(data.data.medicines);
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function () {
                     setLoading(false);
                 });
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (

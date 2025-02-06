@@ -8,6 +8,7 @@ import { Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { notifyError, notifyInfo, notifySuccess } from '../../constant/theme';
 import AddButton from './Part/AddButton';
+import axios from 'axios';
 
 const CreateInvoice = () => {
     const datas = useMemo(() => [
@@ -182,8 +183,10 @@ const CreateInvoice = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('invoices/create')
+            axiosInstance.get('invoices/create', {signal: controller.signal})
                 .then(function ({ data }) {
                     setMedicines([...data.medicines]);
                     setVProducts([...data.vProducts]);
@@ -191,11 +194,19 @@ const CreateInvoice = () => {
                     setDefaultCurrency(data.defaultCurrency);
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function () {
                     setLoading(false);
                 });
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (

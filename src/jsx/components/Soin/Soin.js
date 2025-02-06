@@ -6,8 +6,9 @@ import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
-import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
 import SoinModal from './modal/SoinModal';
+import axios from 'axios';
 
 const Soin = () => {
     const [soins, setSoins] = useState([]);
@@ -106,7 +107,11 @@ const Soin = () => {
                         notifySuccess(data.message);
                     })
                     .catch(error => {
-                        console.log(error)
+                        if (error.response && error.response.data) {
+                            notifyError('Désolé ! Cette donnée ne peut être supprimée.');
+                        } else {
+                            console.log(error);
+                        }
                     })
             }
         })
@@ -150,8 +155,10 @@ const Soin = () => {
     useDocumentTitle('Soins médicaux');
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('soins')
+            axiosInstance.get('soins', {signal: controller.signal})
                 .then(function({data}) {
                     setSoins([...data.soins]);
                     setMedicalProcedures([...data.medicalProcedures]);
@@ -159,11 +166,19 @@ const Soin = () => {
                     setTypes([...data.types]);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (

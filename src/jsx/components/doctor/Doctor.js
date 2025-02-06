@@ -6,9 +6,10 @@ import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
-import { ColumnFilter, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, notifyError, notifySuccess } from '../../constant/theme';
 import DoctorModal from './modal/DoctorModal';
 import { connect } from 'react-redux';
+import axios from 'axios';
 
 const Doctor = ({currentUser}) => {
     const [doctors, setDoctors] = useState([]);
@@ -53,6 +54,11 @@ const Doctor = ({currentUser}) => {
             Footer : 'Téléphone',
             accessor: 'phone',
             Filter: ColumnFilter,
+            Cell: ({ value }) => ( 
+                <div className={value !== 'aucun' ? '' : 'text-warning'}>
+                    {value}
+                </div>
+            ),
         },
         {
             Header : 'Naissance',
@@ -129,7 +135,11 @@ const Doctor = ({currentUser}) => {
                         notifySuccess(data.message);
                     })
                     .catch(error => {
-                        console.log(error)
+                        if (error.response && error.response.data) {
+                            notifyError('Désolé ! Cette donnée ne peut être supprimée.');
+                        } else {
+                            console.log(error);
+                        }
                     })
             }
         })
@@ -173,19 +183,29 @@ const Doctor = ({currentUser}) => {
     useDocumentTitle('Personnel médical');
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('doctors')
+            axiosInstance.get('doctors', {signal: controller.signal})
                 .then(function({data}) {
                     setDoctors([...data.doctors]);
                     setRoles([...data.roles]);  
                     setSkills([...data.skills]); 
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     const handleSort = (column) => {

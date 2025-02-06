@@ -6,8 +6,9 @@ import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
-import { ColumnFilter, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
 import StockModal from './modal/StockModal';
+import axios from 'axios';
 
 const Stock = () => {
     const [stocks, setStocks] = useState([]);
@@ -129,31 +130,29 @@ const Stock = () => {
     useDocumentTitle('Stocks');
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('stocks')
+            axiosInstance.get('stocks', {signal: controller.signal})
                 .then(function({data}) {
                     setStocks([...data.stocks]);
                     setMedicines([...data.medicines]);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
-    }, []);
 
-    const handleSort = (column) => {
-        if (column.canSort) {
-            if (column.isSortedDesc) {
-                column.toggleSortBy(); 
-            } else if (column.isSorted) {
-                column.toggleSortBy(true); 
-            } else {
-                column.toggleSortBy(false); 
-            }
+        return () => {
+            controller.abort();
         }
-    };
+    }, []);
 
     return (
         <>

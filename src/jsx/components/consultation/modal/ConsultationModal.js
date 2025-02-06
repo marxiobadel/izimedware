@@ -15,14 +15,13 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
         reason: '',
         patient_id: null,
         doctor_id: null,
-        date: null,
+        date: new Date(),
         observation: '',
     });
 
     const [doctor, setDoctor] = useState(null);
     const [patient, setPatient] = useState(null);
     const [medicalProcedure, setMedicalProcedure] = useState(null);
-    const [curdate, setCurdate] = useState(new Date());
 
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
@@ -49,7 +48,7 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
         handleDoctorChange(currentUser ?? null);
         handlePatientChange(null);
         handleMedicalProcedureChange(null);
-        setCurdate(new Date());
+        handleOnChange(new Date(), 'date');
     }
     
     useEffect(() => {
@@ -59,7 +58,7 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
             handleDoctorChange(doctors.find(d => parseInt(d.id) === parseInt(consultation.doctor_id)));
             handlePatientChange(patients.find(p => parseInt(p.id) === parseInt(consultation.patient_id)));
             handleMedicalProcedureChange(medicalProcedures.find(mp => parseInt(mp.id) === parseInt(consultation.medical_procedure_id)));
-            setCurdate(consultation.curdate ? new Date(consultation.curdate) : new Date());
+            handleOnChange(new Date(consultation.date), 'date');
         } else {
             resetForm();
         }
@@ -72,7 +71,7 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
 
         setSaving(true);
 
-        const date = format(curdate, 'yyyy-MM-dd');
+        const date = format(inputs.date, 'yyyy-MM-dd');
         const patient_id = patient ? patient.id : null;
         const doctor_id = doctor ? doctor.id : null;
         const medical_procedure_id = medicalProcedure ? medicalProcedure.id : null;
@@ -126,8 +125,8 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
                                     locale="fr"
                                     dateFormat="dd/MM/yyyy"
                                     className="form-control"
-                                    selected={curdate} 
-                                    onChange={setCurdate} 
+                                    selected={inputs.date} 
+                                    onChange={date => handleOnChange(date, 'date')} 
                                 />
                                 {errors.date && <div className="text-danger">
                                     <small style={errorStyle}>{errors.date.join('\n\r')}</small>

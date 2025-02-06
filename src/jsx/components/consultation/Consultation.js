@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import ConsultationModal from './modal/ConsultationModal';
+import axios from 'axios';
 
 const Consultation = () => {
     const [consultations, setConsultations] = useState([]);
@@ -25,7 +26,7 @@ const Consultation = () => {
         {
             Header : 'Date',
             Footer : 'Date',
-            accessor: 'date',
+            accessor: 'format_date',
             Filter: ColumnFilter,
         },
         {
@@ -95,7 +96,7 @@ const Consultation = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`consultations/${consultation.id}`)
                     .then(({data}) => {
-                        setConsultations((prevConsutations) => prevConsutations.filter((c) => c.id !== consultation.id));
+                        setConsultations((prevState) => prevState.filter((c) => c.id !== consultation.id));
 
                         notifySuccess(data.message);
                     })
@@ -113,11 +114,11 @@ const Consultation = () => {
 
     const handleAddOrEditConsultation = (consultation, medical_procedure_id, type) => {
         if (type === 'edit') {
-            setConsultations((prevConsutations) =>
-                prevConsutations.map((c) => (c.id === consultation.id ? {...c, ...{...consultation, medical_procedure_id}} : c))
+            setConsultations((prevState) =>
+                prevState.map((c) => (c.id === consultation.id ? {...c, ...{...consultation, medical_procedure_id}} : c))
             );
         } else {
-            setConsultations((prevConsutations) => [consultation, ...prevConsutations]);
+            setConsultations((prevState) => [consultation, ...prevState]);
         }
 
         setOpenModal(false);
@@ -144,8 +145,10 @@ const Consultation = () => {
     useDocumentTitle('Consultations');
 
     useEffect(() => {
-        (() => {
-            axiosInstance.get('consultations')
+        const controller = new AbortController();
+
+        (() => { 
+            axiosInstance.get('consultations', {signal: controller.signal})
                 .then(function({data}) {
                     setConsultations([...data.consultations]);
                     setDoctors([...data.doctors]);
@@ -153,11 +156,19 @@ const Consultation = () => {
                     setMedicalProcedures([...data.medicalProcedures]);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (

@@ -6,8 +6,9 @@ import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
-import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
 import MedicalProcedureModal from './modal/MedicalProcedureModal';
+import axios from 'axios';
 
 const MedicalProcedure = () => {
     const [medicalProcedures, setMedicalProcedures] = useState([]);
@@ -100,12 +101,16 @@ const MedicalProcedure = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`medical_procedures/${medicalProcedure.id}`)
                     .then(({data}) => {
-                        setMedicalProcedures((prevMedicalProcedures) => prevMedicalProcedures.filter((mp) => mp.id !== medicalProcedure.id));
+                        setMedicalProcedures((prevState) => prevState.filter((mp) => mp.id !== medicalProcedure.id));
 
                         notifySuccess(data.message);
                     })
                     .catch(error => {
-                        console.log(error)
+                        if (error.response && error.response.data) {
+                            notifyError('Désolé ! Cette donnée ne peut être supprimée.');
+                        } else {
+                            console.log(error);
+                        }
                     })
             }
         })
@@ -118,11 +123,11 @@ const MedicalProcedure = () => {
 
     const handleAddOrEditMedicalProcedure = (medicalProcedure, type) => {
         if (type === 'edit') {
-            setMedicalProcedures((prevMedicalProcedures) =>
-                prevMedicalProcedures.map((mp) => (mp.id === medicalProcedure.id ? {...mp, ...medicalProcedure} : mp))
+            setMedicalProcedures((prevState) =>
+                prevState.map((mp) => (mp.id === medicalProcedure.id ? {...mp, ...medicalProcedure} : mp))
             );
         } else {
-            setMedicalProcedures((prevMedicalProcedures) => [medicalProcedure, ...prevMedicalProcedures]);
+            setMedicalProcedures((prevState) => [medicalProcedure, ...prevState]);
         }
 
         setOpenModal(false);
@@ -149,19 +154,29 @@ const MedicalProcedure = () => {
     useDocumentTitle('Actes médicaux');
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('medical_procedures')
+            axiosInstance.get('medical_procedures', {signal: controller.signal})
                 .then(function({data}) {
                     setMedicalProcedures([...data.medicalProcedures]);
                     setServices([...data.services]);
                     setDefaultCurrency(data.defaultCurrency);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Badge, Col, Dropdown, Row } from 'react-bootstrap';
-import { ColumnFilter, handleSort, isCassier, isSuperAdmin, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, handleSort, isCassier, isSuperAdmin, notifyError, notifySuccess } from '../../constant/theme';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import Swal from 'sweetalert2';
 import axiosInstance from '../../../services/AxiosInstance';
@@ -8,6 +8,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDocumentTitle } from '../../hooks/useTitle';
 import { ToastContainer } from 'react-toastify';
 import { connect } from 'react-redux';
+import axios from 'axios';
 
 const Invoice = ({currentUser}) => {
     const [invoices, setInvoices] = useState([]);
@@ -113,7 +114,11 @@ const Invoice = ({currentUser}) => {
                         notifySuccess(data.message);
                     })
                     .catch(error => {
-                        console.log(error)
+                        if (error.response && error.response.data) {
+                            notifyError('Désolé ! Cette donnée ne peut être supprimée.');
+                        } else {
+                            console.log(error);
+                        }
                     })
             }
         })
@@ -140,21 +145,31 @@ const Invoice = ({currentUser}) => {
     useDocumentTitle('Factures');
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
             if (!isCassier(currentUser.roles) && !isSuperAdmin(currentUser.roles)) {
                 navigate('/page-error-403');
             }
 
-            axiosInstance.get('invoices')
+            axiosInstance.get('invoices', {signal: controller.signal})
                 .then(function({data}) {
                     setInvoices([...data.invoices]);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (

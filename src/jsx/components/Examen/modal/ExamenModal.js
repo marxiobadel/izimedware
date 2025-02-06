@@ -16,13 +16,12 @@ const ExamenModal = ({currentUser, show, onHide, onSave, examen, doctors, types,
         type_id: null,
         reference: '',
         doctor_id: null,
-        date: null,
+        date: new Date(),
     });
 
     const [doctor, setDoctor] = useState(null);
     const [type, setType] = useState(null);
     const [medicalProcedure, setMedicalProcedure] = useState(null);
-    const [curdate, setCurdate] = useState(new Date());
 
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
@@ -45,19 +44,19 @@ const ExamenModal = ({currentUser, show, onHide, onSave, examen, doctors, types,
 
     const resetForm = () => {
         handleOnChange('', 'reference');
+        handleOnChange(new Date(), 'date');
         handleTypeChange(null);
         handleDoctorChange(currentUser ?? null);
         handleMedicalProcedureChange(null);
-        setCurdate(new Date());
     }
     
     useEffect(() => {
         if (examen) {
             handleOnChange(examen.consultation_or_patient_ref, 'reference');
+            handleOnChange(new Date(examen.date), 'date');
             handleDoctorChange(doctors.find(d => d.id === examen.doctor_id));
             handleTypeChange(types.find(t => t.id === examen.type.id));
             handleMedicalProcedureChange(medicalProcedures.find(mp => mp.id === examen.medical_procedure_id));
-            setCurdate(examen.curdate ? new Date(examen.curdate) : new Date());
         } else {
             resetForm();
         }
@@ -70,7 +69,7 @@ const ExamenModal = ({currentUser, show, onHide, onSave, examen, doctors, types,
 
         setSaving(true);
 
-        const date = format(curdate, 'yyyy-MM-dd');
+        const date = format(inputs.date, 'yyyy-MM-dd');
         const doctor_id = doctor ? doctor.id : null;
         const type_id = type ? type.id : null;
         const medical_procedure_id = medicalProcedure ? medicalProcedure.id : null;
@@ -120,8 +119,8 @@ const ExamenModal = ({currentUser, show, onHide, onSave, examen, doctors, types,
                                     locale="fr"
                                     dateFormat="dd/MM/yyyy"
                                     className="form-control"
-                                    selected={curdate} 
-                                    onChange={setCurdate} 
+                                    selected={inputs.date} 
+                                    onChange={date => handleOnChange(date, 'date')} 
                                 />
                                 {errors.date && <div className="text-danger">
                                     <small style={errorStyle}>{errors.date.join('\n\r')}</small>

@@ -4,10 +4,11 @@ import { useDocumentTitle } from '../../hooks/useTitle';
 import { Col, Dropdown, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { ColumnFilter, IMAGES, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, IMAGES, notifyError, notifySuccess } from '../../constant/theme';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import MedicineModal from './modal/MedicineModal';
 import { ToastContainer } from 'react-toastify';
+import axios from 'axios';
 
 const Medicine = () => {
     const [medicines, setMedicines] = useState([]);
@@ -121,7 +122,11 @@ const Medicine = () => {
                         notifySuccess(data.message);
                     })
                     .catch(error => {
-                        console.log(error)
+                        if (error.response && error.response.data) {
+                            notifyError('Désolé ! Cette donnée ne peut être supprimée.');
+                        } else {
+                            console.log(error);
+                        }
                     })
             }
         })
@@ -165,8 +170,10 @@ const Medicine = () => {
     useDocumentTitle('Médicaments');
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('medicines')
+            axiosInstance.get('medicines', {signal: controller.signal})
                 .then(function({data}) {
                     setMedicines([...data.medicines]);
                     setFormes([...data.formes]);
@@ -174,11 +181,19 @@ const Medicine = () => {
                     setUnities([...data.unities]);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     const handleSort = (column) => {

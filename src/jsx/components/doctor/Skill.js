@@ -8,6 +8,7 @@ import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, notifySuccess } from '../../constant/theme';
 import SkillModal from './modal/SkillModal';
+import axios from 'axios';
 
 const Skill = () => {
     const [skills, setSkills] = useState([]);
@@ -149,21 +150,30 @@ const Skill = () => {
 
     const {pageIndex} = state;
 
-    useDocumentTitle('Compétence');
+    useDocumentTitle('Compétences');
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('skills')
+            axiosInstance.get('skills', {signal: controller.signal})
                 .then(function({data}) {
                     setSkills([...data.skills]);
-                    console.log(data);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     const handleSort = (column) => {

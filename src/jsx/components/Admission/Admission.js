@@ -6,7 +6,7 @@ import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
-import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
 import axios from 'axios';
 import AdmissionModal from './modal/AdmissionModal';
 
@@ -120,7 +120,11 @@ const Admission = () => {
                         notifySuccess(data.message);
                     })
                     .catch(error => {
-                        console.log(error)
+                        if (error.response && error.response.data) {
+                            notifyError('Désolé ! Cette donnée ne peut être supprimée.');
+                        } else {
+                            console.log(error);
+                        }
                     })
             }
         })

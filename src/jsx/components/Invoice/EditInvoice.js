@@ -8,6 +8,7 @@ import { Table } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import { notifyError, notifyInfo, notifySuccess } from '../../constant/theme';
 import AddButton from './Part/AddButton';
+import axios from 'axios';
 
 const EditInvoice = () => {
     const {id} = useParams(); 
@@ -207,8 +208,10 @@ const EditInvoice = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get(`invoices/${id}/edit`)
+            axiosInstance.get(`invoices/${id}/edit`, {signal: controller.signal})
                 .then(function ({ data }) {
                     setMedicines([...data.medicines]);
                     setVProducts([...data.vProducts]);
@@ -221,11 +224,19 @@ const EditInvoice = () => {
                     handleInvoiceVProducts(data.data.vProducts);
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function () {
                     setLoading(false);
                 });
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (

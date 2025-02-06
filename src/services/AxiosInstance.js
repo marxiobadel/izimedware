@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { store } from '../store/store';
 
-const env = 'local'; // 'welly', 'prod', 'local'
+const env = 'prod'; // 'welly', 'prod', 'local'
 
 let baseURL = '';
 

@@ -69,10 +69,10 @@ const MedicineModal = ({ show, onHide, onSave, medicine, formes, categories, uni
                         type: 'local'
                     }
                 }]);*/
-            }
-            setCategory(categories.find(c => parseInt(c.id) === parseInt(medicine.category_id)));
-            setForme(formes.find(f => parseInt(f.id) === parseInt(medicine.forme_id)));
-            setUnity(unities.find(u => parseInt(u.id) === parseInt(medicine.unity_id)));
+            } 
+            setCategory(categories.find(c => c.id === medicine.category_id));
+            setForme(formes.find(f => f.id === medicine.forme_id));
+            setUnity(unities.find(u => u.id === medicine.unity_id));
         } else {
             resetForm();
         }

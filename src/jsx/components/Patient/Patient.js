@@ -7,7 +7,8 @@ import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 
 import PatientModal from './modal/PatientModal';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
-import { ColumnFilter, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
+import axios from 'axios';
 
 const Patient = () => {
     const [patients, setPatients] = useState([]);
@@ -124,7 +125,11 @@ const Patient = () => {
                         notifySuccess(data.message);
                     })
                     .catch(error => {
-                        console.log(error)
+                        if (error.response && error.response.data) {
+                            notifyError('Désolé ! Cette donnée ne peut être supprimée.');
+                        } else {
+                            console.log(error);
+                        }
                     })
             }
         })
@@ -168,30 +173,28 @@ const Patient = () => {
     useDocumentTitle('Patients');
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('patients')
+            axiosInstance.get('patients', {signal: controller.signal})
                 .then(function({data}) {
                     setPatients([...data.patients]);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
-    }, []);
 
-    const handleSort = (column) => {
-        if (column.canSort) {
-            if (column.isSortedDesc) {
-                column.toggleSortBy(); 
-            } else if (column.isSorted) {
-                column.toggleSortBy(true); 
-            } else {
-                column.toggleSortBy(false); 
-            }
+        return () => {
+            controller.abort();
         }
-    };
+    }, []);
 
     return (
         <>

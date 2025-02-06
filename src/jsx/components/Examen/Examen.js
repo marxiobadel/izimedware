@@ -6,8 +6,9 @@ import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
-import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
 import ExamenModal from './modal/ExamenModal';
+import axios from 'axios';
 
 const Examen = () => {
     const [examens, setExamens] = useState([]);
@@ -25,7 +26,7 @@ const Examen = () => {
         {
             Header : 'Date',
             Footer : 'Date',
-            accessor: 'date',
+            accessor: 'format_date',
             Filter: ColumnFilter,
         },
         {
@@ -107,7 +108,11 @@ const Examen = () => {
                         notifySuccess(data.message);
                     })
                     .catch(error => {
-                        console.log(error)
+                        if (error.response && error.response.data) {
+                            notifyError('Désolé ! Cette donnée ne peut être supprimée.');
+                        } else {
+                            console.log(error);
+                        }
                     })
             }
         })
@@ -151,8 +156,10 @@ const Examen = () => {
     useDocumentTitle('Examens médicaux');
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('examens')
+            axiosInstance.get('examens', {signal: controller.signal})
                 .then(function({data}) {
                     setExamens([...data.examens]);
                     setMedicalProcedures([...data.medicalProcedures]);
@@ -160,11 +167,19 @@ const Examen = () => {
                     setTypes([...data.types]);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (

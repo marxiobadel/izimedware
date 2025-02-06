@@ -8,6 +8,7 @@ import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, notifySuccess } from '../../constant/theme';
 import FormeModal from './modal/FormeModal';
+import axios from 'axios';
 
 const Forme = () => {
     const [formes, setFormes] = useState([]);
@@ -181,17 +182,27 @@ const Forme = () => {
     useDocumentTitle('Formes');
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('formes')
+            axiosInstance.get('formes', {signal: controller.signal})
                 .then(function({data}) {
                     setFormes([...data.formes]);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     const handleSort = (column) => {
