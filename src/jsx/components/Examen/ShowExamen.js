@@ -69,7 +69,7 @@ const ShowExamen = () => {
                                     <strong>Type</strong><span class="mb-0">{examen ? examen.type.name : '---'}</span>
                                 </li>
                                 <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>Date</strong><span class="mb-0">{examen ? examen.date : '---'}</span>
+                                    <strong>Date</strong><span class="mb-0">{examen ? examen.format_date : '---'}</span>
                                 </li>
                                 <li className="list-group-item d-flex px-0 justify-content-between">
                                     <strong>Patient</strong><span class="mb-0">{examen ? examen.patient.reference : '---'}</span>

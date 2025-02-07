@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {Link} from 'react-router-dom';
 import {Tab, Nav, Dropdown} from 'react-bootstrap';
 import DatePicker from "react-datepicker";
+import parse from 'html-react-parser';
 
 //element
 import { IMAGES, SVGICON } from '../../constant/theme';
@@ -11,36 +12,8 @@ import VisitorsChart from './Element/VisitorsChart';
 import RevenuChart from './Element/RevenuChart';
 import CardWidget from './Element/CardWidget';
 import { useDocumentTitle } from '../../hooks/useTitle';
-
-
-//Import Components
-const cardBlog = [
-	{svg: SVGICON.calander, number:'76', subtitle:'Appointment', progress:'50%' },
-	{svg: SVGICON.heart, number:'124,551', subtitle:'Total Patient', progress:'80%' },
-	{svg: SVGICON.stetho, number:'442', subtitle:'Total Doctor', progress:'38%' },
-	{svg: SVGICON.money, number:'$5,034', subtitle:'Hospital Earning', progress:'70%' },
-];
-
-const doctorList = [
-	{ image: IMAGES.User11, title:'Dr. Samantha Queque',  review:'315', subtitle:'Cardiologists'},
-	{ image: IMAGES.User12, title:'Dr. Samuel Jr.',  review:'221', subtitle:'Audiologists'},
-	{ image: IMAGES.User13, title:'Dr. Jennifer Ruby',  review:'181', subtitle:'Dentists'},
-	{ image: IMAGES.User14, title:'Dr. Abdul Aziz Lazis',  review:'315', subtitle:'Gynecologists'},
-	{ image: IMAGES.User15, title:'Dr. Alex Siauw',  review:'176', subtitle:'Pediatricians'},
-	// { image: IMAGES.User11, title:'Dr. Abdul Aziz Lazis',  review:'315', subtitle:'Psychiatrists'},
-];
-
-const activityTable = [
-	{ image: IMAGES.User16, title:'Roby Romeo' , year:'41' ,subtitle:'Allergies & Asthma', status:'Recovered'},
-	{ image: IMAGES.User17, title:'Angela Nurhayati' , year:'38' ,subtitle:'Sleep Problem', status:'New Patient'},
-	{ image: IMAGES.User18, title:'James Robinson' , year:'35' ,subtitle:'Dental Care', status:'In Treatment'},
-	{ image: IMAGES.User19, title:'Thomas Jaja' , year:'40' ,subtitle:'Diabetes', status:'New Patient'},
-	{ image: IMAGES.User20, title:'Cindy Brownle' , year:'39' ,subtitle:'Covid-19 Suspect', status:'In Treatment'},
-	{ image: IMAGES.User21, title:'Oconner Jr.' , year:'33' ,subtitle:'Dental Care', status:'Recovered'},
-	{ image:IMAGES.User15, title:'Angela Nurhayati' , year:'37' ,subtitle:'Sleep Problem', status:'New Patient'},
-	{ image:IMAGES.User16, title:'James Robinson' , year:'39' ,subtitle:'Dental Care', status:'In Treatment'},
-	{ image:IMAGES.User17, title:'Thomas Jaja' , year:'45' ,subtitle:'Diabetes', status:'New Patient'},
-];
+import axiosInstance from '../../../services/AxiosInstance';
+import axios from 'axios';
 
 const appointmentBlog = [
 	{day:'Wednesday', date:'October 18'},
@@ -53,16 +26,50 @@ const Home = ({title}) => {
 	const [startDate, setStartDate] = useState(new Date());
 	const [selectYear, setSelectYear] = useState(2023);
 
+	const [cardBlog, setCardBlog] = useState([
+		{id: 'appointment', svg: SVGICON.calander, number:'---', subtitle:'Rendez-vous', progress:'50%' },
+		{id: 'total_patient', svg: SVGICON.heart, number:'---', subtitle:'Total Patient', progress:'80%' },
+		{id: 'total_doctor', svg: SVGICON.stetho, number:'---', subtitle:'Total Doctor', progress:'38%' },
+		{id: 'earning', svg: SVGICON.money, number:'---', subtitle:'Gains hôpital', progress:'70%' },
+	]);
+
 	useDocumentTitle(title);
+
+	useEffect(() => {
+        const controller = new AbortController();
+
+        (() => {
+            axiosInstance.get('dashboard', {signal: controller.signal})
+                .then(function({data}) {
+                    setCardBlog(prevState => 
+						prevState.map(blog => blog.id === 'total_patient' ? {...blog, number: data.patients_count} : blog));
+					setCardBlog(prevState => 
+						prevState.map(blog => blog.id === 'total_doctor' ? {...blog, number: data.doctors_count} : blog));
+					setCardBlog(prevState => 
+						prevState.map(blog => blog.id === 'earning' ? {...blog, number: parse(data.earning)} : blog));
+					console.log(data);
+                })
+                .catch(function(error) {
+                    if (axios.isCancel(error)) {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
+                });     
+        })();
+
+        return () => {
+            controller.abort();
+        }
+    }, []);
 
 	return(
 		<>
 			<div className="form-head d-flex align-items-center mb-sm-4 mb-3">
 				<div className="me-auto">
-					<h2 className="text-black font-w600">Dashboard</h2>
-					<p className="mb-0">Hospital Admin Dashboard Template</p>
+					<h2 className="text-black font-w600">Tableau de bord</h2>
+					<p className="mb-0">Hospital Admin Dashboard</p>
 				</div>
-				<Link to={"#"} className="btn btn-outline-primary"><i className="las la-cog scale5 me-3"></i>Customize Layout</Link>
 			</div>
 			<div className="row">
 				{cardBlog.map((item, index)=>(
@@ -190,59 +197,6 @@ const Home = ({title}) => {
 									</div>
 								</div>
 							</div>
-							
-						</div>
-						<div className="col-xl-12">
-							<div className="card rated-doctors">
-								<div className="card-header border-0 pb-0">
-									<h3 className="fs-20 text-black mb-0 me-auto">Top Rated Doctors</h3>
-									<Link to={"#"} className="btn-link text-primary">More {`>>`}</Link>
-								</div>
-								<div className="card-body">
-									{doctorList.map((item, ind)=>(
-										<div className="d-sm-flex pb-sm-4 pb-3 border-bottom mb-sm-4 mb-3 align-items-center" key={ind}>
-											<div className="d-flex align-items-center me-auto ps-2">
-												<span className="num me-sm-4 me-3">#{`${ind+1}`}</span>
-												<img src={item.image} className="img-1 me-sm-4 me-3" alt="" />
-												<div>
-													<h4 className="mb-sm-2 mb-1"><Link to={"/doctor"} className="text-black">{item.title}</Link></h4>
-													<span className="fs-14 text-primary font-w600">{item.subtitle}</span>
-												</div>
-											</div>
-											<div className="text-sm-end mt-sm-0 mt-3 star-review">
-												<ul>
-													<li><i className="fa fa-star" /></li>
-													<li><i className="fa fa-star" /></li>
-													<li><i className="fa fa-star" /></li>
-													<li><i className="fa fa-star" /></li>
-													<li><i className="fa fa-star" /></li>
-												</ul>
-												<span className="fs-14 text-black">{item.review} reviews</span>
-											</div>
-										</div>
-									))}
-									<div className="d-sm-flex pb-0 align-items-center" >
-										<div className="d-flex align-items-center me-auto ps-2">
-											<span className="num me-sm-4 me-3">#6</span>
-											<img src={IMAGES.User11} className="img-1 me-sm-4 me-3" alt="" />
-											<div>
-												<h4 className="mb-sm-2 mb-1"><Link to={"/doctor"} className="text-black">Dr. Abdul Aziz Lazis</Link></h4>
-												<span className="fs-14 text-primary font-w600">Psychiatrists</span>
-											</div>
-										</div>
-										<div className="text-sm-end mt-sm-0 mt-3 star-review">
-											<ul>
-												<li><i className="fa fa-star" /></li>
-												<li><i className="fa fa-star" /></li>
-												<li><i className="fa fa-star" /></li>
-												<li><i className="fa fa-star" /></li>
-												<li><i className="fa fa-star" /></li>
-											</ul>
-											<span className="fs-14 text-black">315 reviews</span>
-										</div>
-									</div>
-								</div>
-							</div>
 						</div>
 					</div>
 				</div>
@@ -321,61 +275,6 @@ const Home = ({title}) => {
 									</div>
 								</div>
 							</div>
-						</div>
-						<div className="col-xl-12">
-							<div className="card patient-activity">
-								<div className="card-header border-0 pb-0">
-									<h3 className="fs-20 text-black mb-0">Recent Patient Activity</h3>
-									<div className="dropdown ms-auto c-pointer">
-										<Dropdown className="ms-auto c-pointer">
-											<Dropdown.Toggle className="btn-link i-false" as="div">
-												{SVGICON.dropsvg}
-											</Dropdown.Toggle>
-											<Dropdown.Menu className="dropdown-menu-end" align="end">
-												<Dropdown.Item className="text-black">Info</Dropdown.Item>
-												<Dropdown.Item className="text-black">Details</Dropdown.Item>
-											</Dropdown.Menu>
-										</Dropdown>										
-									</div>
-								</div>
-								<div className="card-body pb-0" >
-									<div className="table-responsive height720 dz-scroll" id="patient-activity">
-										<table className="table table-responsive-sm">
-											<tbody>
-												{activityTable.map((item, ind)=>(
-													<tr key={ind}>
-														<td>
-															<div className="d-flex">
-																<img src={item.image} alt="" className="img-2 me-3" />
-																<div>
-																	<h6 className="fs-16 mb-1"><Link to={"/patient"} className="text-black">{item.title}</Link></h6>
-																	<span className="fs-14">{item.year} Years Old</span>
-																</div>
-															</div>
-														</td>
-														<td>
-															<div>
-																<p className="fs-14 mb-1">Disease</p>
-																<span className="text-primary font-w600 mb-auto">{item.subtitle}</span>
-															</div>
-														</td>
-														<td>
-															<div>
-																<p className="fs-14 mb-1">Status</p>
-																<span className={`font-w600 mb-2 d-block text-nowrap ${item.change}`}>{item.status}</span>
-																<p className="mb-0 fs-12">{ind+1}/11/2023 12:34 AM</p>
-															</div>
-														</td>
-													</tr>
-												))}
-											</tbody>	
-										</table>
-									</div>
-								</div>	
-								<div className="card-footer text-center border-0">
-									<Link to={"/patient"} className="btn-link text-primary">See More {`>>`}</Link>
-								</div>
-							</div>		
 						</div>
 					</div>
 				</div>

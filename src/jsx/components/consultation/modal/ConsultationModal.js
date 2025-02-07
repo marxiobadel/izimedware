@@ -7,6 +7,7 @@ import fr from "date-fns/locale/fr";
 import { format } from 'date-fns';
 import axiosInstance from "../../../../services/AxiosInstance";
 import { connect } from "react-redux";
+import { createPortal } from "react-dom";
 
 const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doctors, patients, medicalProcedures}) => {
     registerLocale("fr", fr);
@@ -109,7 +110,7 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
             });  
     };
 
-    return (
+    return createPortal(
         <Modal className="modal fade" backdrop={true} dialogClassName="modal-lg" show={show} onHide={onHide} centered>
             <div className="modal-content">
                 <div className="modal-header">
@@ -208,7 +209,7 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
                     </button>
                 </div>
             </div>
-        </Modal>
+        </Modal>, document.body
     )
 }
 

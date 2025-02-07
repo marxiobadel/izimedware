@@ -32,7 +32,9 @@ const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patient
     const handleRoomChange = (option) => {
         setSelectedRoom(option);
 
-        const url = option ? `admissions/rooms/${option.id}` : `admissions/rooms`;
+        const startUri = admission ? `admissions/${admission.id}` : 'admissions';
+
+        const url = option ? `${startUri}/rooms/${option.id}/beds` : `${startUri}/beds`;
 
         setLoading(true);
        

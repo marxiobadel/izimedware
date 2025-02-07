@@ -97,8 +97,17 @@ const Admission = () => {
 	}, useFilters, useGlobalFilter, useSortBy, usePagination);
 
     const handleEdit = (admission) => {
-        setEditingAdmission(admission);
         setOpenModal(true);
+
+        axiosInstance.get(`admissions/${admission.id}/rooms`)
+            .then(function({data}) {
+                setRooms([...data.rooms]);
+
+                setEditingAdmission(admission);
+            })
+            .catch(function(error) {
+                console.log(error);
+            }); 
     };
 
     const handleDelete = (admission) => {
@@ -131,8 +140,17 @@ const Admission = () => {
     };
 
     const handleAdd = () => {
-        setEditingAdmission(null);
         setOpenModal(true); 
+
+        axiosInstance.get(`admissions/rooms`)
+            .then(function({data}) {
+                setRooms([...data.rooms]);
+
+                setEditingAdmission(null);
+            })
+            .catch(function(error) {
+                console.log(error);
+            }); 
     }
 
     const handleAddOrEditAdmission = (admission, type) => {
@@ -175,8 +193,6 @@ const Admission = () => {
                 .then(function({data}) {
                     setAdmissions([...data.admissions]);
                     setPatients([...data.patients]);
-                    setRooms([...data.rooms]);
-                    setBeds([...data.beds]);
                 })
                 .catch(function(error) {
                     if (axios.isCancel(error)) {
