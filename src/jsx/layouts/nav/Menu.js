@@ -33,7 +33,11 @@ export const MenuList = [
             {
                 title:'Compétences',
                 to: 'skills',
-            }
+            },
+            {
+                title:'Créneaux horaires',
+                to: 'slots',
+            },
         ]
     },
     {
@@ -190,6 +194,22 @@ export const MenuList = [
                 title:'Liste',
                 to: 'departments',
             }
+        ]
+    },
+    {
+        id: 'leaves',
+        title:'Congés',
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="flaticon-381-notepad" />,
+        content : [
+            {
+                title:'Liste',
+                to: 'leaves',
+            },
+            {
+                title:'Type',
+                to: 'types/leave',
+            },
         ]
     },
     {
