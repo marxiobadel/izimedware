@@ -3,24 +3,37 @@ import { Modal } from "react-bootstrap";
 import { errorStyle, notifySuccess } from '../../../constant/theme';
 import axiosInstance from "../../../../services/AxiosInstance";
 import { createPortal } from "react-dom";
+import Select from 'react-select';
 
-const ServiceModal = ({ show, onHide, onSave, service }) => {
+const ServiceModal = ({ show, onHide, onSave, service, doctors }) => {
     const [inputs, setInputs] = useState({ name: '', description: '' });
 
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
 
+    const [doctor, setDoctor] = useState(null);
+
     const handleOnChange = (value, input) => {
         setInputs(prevState => ({...prevState, [input]: value}));
+    }
+
+    const handleDoctorChange = (option) => {
+        setDoctor(option);
+    }
+
+    const resetForm = () => {
+        handleOnChange('', 'name');
+        handleOnChange('', 'description');
+        handleDoctorChange(null);
     }
     
     useEffect(() => {
         if (service) {
             handleOnChange(service.name, 'name');
             handleOnChange(service.description ?? '', 'description');
+            handleDoctorChange(doctors.find(d => d.id === service.doctor_id));
         } else {
-            handleOnChange('', 'name');
-            handleOnChange('', 'description');
+            resetForm();
         }
 
         setErrors({});
@@ -31,17 +44,14 @@ const ServiceModal = ({ show, onHide, onSave, service }) => {
 
         setSaving(true);
 
-        const method = service ? 'PUT' : 'POST';
-        const url = service ? 'services/'+ service.id : 'services';
-        const type = service ? 'edit' : 'add';
-        const message = service ? 'modifié' : 'ajouté';
+        const doctor_id = doctor ? doctor.id : null;
 
         axiosInstance.request({
-            method,
-            url,
-            data: inputs,
+            method: service ? 'PUT' : 'POST',
+            url: service ? 'services/'+ service.id : 'services',
+            data: {...inputs, doctor_id},
             headers: {
-                "Content-Type": 'Application/json'
+                "Content-Type": 'application/json'
             }
         })
             .then(function(response) {
@@ -50,12 +60,11 @@ const ServiceModal = ({ show, onHide, onSave, service }) => {
                 if (Object.entries(data.data).length === 0 && data.errors) {
                     setErrors({...data.errors});
                 } else {
-                    onSave(data.data, type);
+                    onSave(data.data, service ? 'edit' : 'add');
 
-                    handleOnChange('', 'name');
-                    handleOnChange('', 'description');
+                    resetForm();
 
-                    notifySuccess(`Département ${message} avec succès`);
+                    notifySuccess(`Département ${service ? 'modifié' : 'ajouté'} avec succès`);
                 }
             })
             .catch(function(error) {
@@ -84,6 +93,20 @@ const ServiceModal = ({ show, onHide, onSave, service }) => {
                                     className="form-control" />
                                 {errors.name && <div className="text-danger">
                                     <small style={errorStyle}>{errors.name.join('\n\r')}</small>
+                                </div>}
+                            </div>
+                            <div className="col-sm-12 mb-3">                                        
+                                <label className="form-label">Chef de département</label>
+                                <Select options={doctors} className="custom-react-select" 
+                                    placeholder='Choisir un membre'
+                                    isSearchable
+                                    value={doctor}
+                                    onChange={handleDoctorChange} 
+                                    getOptionValue={d => d.id}
+                                    getOptionLabel={d => d.fullname}
+                                />
+                                {errors.doctor_id && <div className="text-danger">
+                                    <small style={errorStyle}>{errors.doctor_id.join('\n\r')}</small>
                                 </div>}
                             </div>
                             <div className="col-sm-12">

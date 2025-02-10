@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import {Link} from 'react-router-dom';
 import {Tab, Nav, Dropdown} from 'react-bootstrap';
-import DatePicker from "react-datepicker";
 import parse from 'html-react-parser';
+import { registerLocale } from "react-datepicker";
+import fr from "date-fns/locale/fr";
 
-//element
 import { IMAGES, SVGICON } from '../../constant/theme';
 import PatientTab from './Element/PatientTab';
 import RecoveredChart from './Element/RecoveredChart';
@@ -13,22 +12,20 @@ import RevenuChart from './Element/RevenuChart';
 import CardWidget from './Element/CardWidget';
 import { useDocumentTitle } from '../../hooks/useTitle';
 import axiosInstance from '../../../services/AxiosInstance';
-
-const appointmentBlog = [
-	{day:'Wednesday', date:'October 18'},
-	{day:'Tuesday', date:'October 24'},
-	{day:'Saturday', date:'October 28'},
-	{day:'Monday', date:'October 30'},
-];
+import Appointment from './Element/Appointment';
+import { ToastContainer } from 'react-toastify';
 
 const Home = ({title}) => {	
-	const [startDate, setStartDate] = useState(new Date());
+	registerLocale("fr", fr);
+
+	const [doctors, setDoctors] = useState([]);
+
 	const [selectYear, setSelectYear] = useState(2023);
 
 	const [cardBlog, setCardBlog] = useState([
 		{id: 'appointment', svg: SVGICON.calander, number:'---', subtitle:'Rendez-vous', progress:'50%' },
 		{id: 'total_patient', svg: SVGICON.heart, number:'---', subtitle:'Total Patient', progress:'80%' },
-		{id: 'total_doctor', svg: SVGICON.stetho, number:'---', subtitle:'Total Doctor', progress:'38%' },
+		{id: 'total_doctor', svg: SVGICON.stetho, number:'---', subtitle:'Total Médecin', progress:'38%' },
 		{id: 'earning', svg: SVGICON.money, number:'---', subtitle:'Gains hôpital', progress:'70%' },
 	]);
 
@@ -40,13 +37,16 @@ const Home = ({title}) => {
         (() => {
             axiosInstance.get('dashboard', {signal: controller.signal})
                 .then(function({data}) {
+					setCardBlog(prevState => 
+						prevState.map(blog => blog.id === 'appointment' ? {...blog, number: data.appointments_count} : blog));
                     setCardBlog(prevState => 
 						prevState.map(blog => blog.id === 'total_patient' ? {...blog, number: data.patients_count} : blog));
 					setCardBlog(prevState => 
 						prevState.map(blog => blog.id === 'total_doctor' ? {...blog, number: data.doctors_count} : blog));
 					setCardBlog(prevState => 
 						prevState.map(blog => blog.id === 'earning' ? {...blog, number: parse(data.earning)} : blog));
-					console.log(data);
+
+					setDoctors(data.doctors);
                 })
                 .catch(function(error) {
                     if (error.name === 'CanceledError') {
@@ -70,6 +70,7 @@ const Home = ({title}) => {
 					<p className="mb-0">Hospital Admin Dashboard</p>
 				</div>
 			</div>
+			<ToastContainer />
 			<div className="row">
 				{cardBlog.map((item, index)=>(
 					<div className="col-xl-3 col-sm-6" key={index}>						
@@ -202,56 +203,7 @@ const Home = ({title}) => {
 				<div className="col-xl-6">
 					<div className="row">
 						<div className="col-xl-12">	
-							<div className="card appointment-schedule">
-								<div className="card-header pb-0 border-0">
-									<h3 className="fs-20 text-black mb-0">Appointment Schedule</h3>
-									<Dropdown className="ms-auto c-pointer">
-										<Dropdown.Toggle className="btn-link p-2 bg-light i-false" as="div">
-											<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-												<path d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z" stroke="#2E2E2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-												<path d="M12 6C12.5523 6 13 5.55228 13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6Z" stroke="#2E2E2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-												<path d="M12 20C12.5523 20 13 19.5523 13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20Z" stroke="#2E2E2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-											</svg>
-										</Dropdown.Toggle>
-										<Dropdown.Menu className="dropdown-menu-end" align="end">
-											<Dropdown.Item className="text-black">Info</Dropdown.Item>
-											<Dropdown.Item className="text-black">Details</Dropdown.Item>
-										</Dropdown.Menu>
-									</Dropdown>									
-								</div>
-								<div className="card-body">
-									<div className="row">
-										<div className="col-xl-6 col-xxl-12 col-md-6">
-											<div className="appointment-calender dz-calender style-1">												
-												<DatePicker selected={startDate} className="form-control" 
-													onChange={(date) => setStartDate(date)}
-													dateFormat="MM-dd-yyyy"
-													inline
-												/>
-											</div>
-										</div>
-										<div className="col-xl-6 col-xxl-12  col-md-6 height415 dz-scroll" id="appointment-schedule">
-											{appointmentBlog.map((item, index)=>(
-												<div className="d-flex pb-3 border-bottom mb-3 align-items-end" key={index}>
-													<div className="me-auto">
-														<p className="text-black font-w600 mb-2">{item.day}, {item.date}</p>
-														<ul>
-															<li><i className="las la-clock"></i>09:00 - 10:30 AM</li>
-															<li><i className="las la-user"></i>Dr. Samantha</li>
-														</ul>
-													</div>
-													<Link to={"#"} className="text-success me-3 mb-2">
-														<i className="las la-check-circle scale5" />
-													</Link>
-													<Link to={"#"} className="text-danger mb-2">
-														<i className="las la-times-circle scale5" />
-													</Link>
-												</div>
-											))}											
-										</div>
-									</div>
-								</div>
-							</div>
+							<Appointment doctors={doctors} locale={fr} />
 						</div>
 						<div className="col-xl-12">
 							<div className="card">
@@ -281,4 +233,5 @@ const Home = ({title}) => {
 		</>
 	)
 }
+
 export default Home;

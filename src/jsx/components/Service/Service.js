@@ -11,6 +11,7 @@ import ServiceModal from './modal/ServiceModal';
 
 const Service = () => {
     const [services, setServices] = useState([]);
+    const [doctors, setDoctors] = useState([]);
 
     const columns = useMemo(() => [
         {
@@ -24,6 +25,15 @@ const Service = () => {
             Footer : 'Nom',
             accessor: 'name',
             Filter: ColumnFilter,
+        },
+        {
+            Header : 'Chef de département',
+            Footer : 'Chef de département',
+            accessor: 'doctor_name',
+            Filter: ColumnFilter,
+            Cell: ({ value }) => (
+                <span className={value === 'aucun' ? 'text-warning' : ''}>{value}</span>
+            ),
         },
         {
             Header : 'Ajoutée le',
@@ -151,12 +161,15 @@ const Service = () => {
             axiosInstance.get('services', {signal: controller.signal})
                 .then(function({data}) {
                     setServices([...data.services]);
+                    setDoctors([...data.doctors]);
                 })
                 .catch(function(error) {
                     if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
-                        console.log(error);
+                        if (error.response && error.response.status === 401) {
+                            notifyError('Merci de vous reconnecter.')
+                        }
                     }
                 }).finally(function() {
                     setLoading(false);
@@ -280,6 +293,7 @@ const Service = () => {
                 onHide={() => setOpenModal(false)}
                 onSave={handleAddOrEditService}
                 service={editingService}
+                doctors={doctors}
             />
         </>
     );

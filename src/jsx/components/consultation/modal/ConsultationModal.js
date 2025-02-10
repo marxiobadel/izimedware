@@ -56,9 +56,9 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
         if (consultation) {
             handleOnChange(consultation.reason, 'reason');
             handleOnChange(consultation.observation ?? '', 'observation');
-            handleDoctorChange(doctors.find(d => parseInt(d.id) === parseInt(consultation.doctor_id)));
-            handlePatientChange(patients.find(p => parseInt(p.id) === parseInt(consultation.patient_id)));
-            handleMedicalProcedureChange(medicalProcedures.find(mp => parseInt(mp.id) === parseInt(consultation.medical_procedure_id)));
+            handleDoctorChange(doctors.find(d => d.id === consultation.doctor_id));
+            handlePatientChange(patients.find(p => p.id === consultation.patient_id));
+            handleMedicalProcedureChange(medicalProcedures.find(mp => mp.id === consultation.medical_procedure_id));
             handleOnChange(new Date(consultation.date), 'date');
         } else {
             resetForm();

@@ -18,7 +18,7 @@ export function login(email, password, local = false) {
         baseURL = 'http://localhost:8000';
     } 
 
-    return axios.post(`${baseURL}/api/login`, postData, { withCredentials: true });
+    return axios.post(`${baseURL}/api/login`, postData, {withCredentials: true});
 }
 
 export function formatError(errorResponse) {

@@ -741,3 +741,7 @@ button.react-calendar__tile.react-calendar__tile--active.react-calendar__tile--r
 .header-right img {
   object-fit: cover;
 }
+.react-datepicker__day--disabled {
+  color: #d0d0d0 !important;
+  opacity: 0.9;
+}
