@@ -8,7 +8,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDocumentTitle } from '../../hooks/useTitle';
 import { ToastContainer } from 'react-toastify';
 import { connect } from 'react-redux';
-import axios from 'axios';
 
 const Invoice = ({currentUser}) => {
     const [invoices, setInvoices] = useState([]);
@@ -157,7 +156,7 @@ const Invoice = ({currentUser}) => {
                     setInvoices([...data.invoices]);
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);

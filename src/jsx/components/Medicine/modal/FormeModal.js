@@ -23,38 +23,37 @@ const FormeModal = ({ show, onHide, onSave, forme}) => {
         setErrors({});
     }, [forme]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
 
         setSaving(true);
 
-        axiosInstance.request({
-            method: forme ? 'PUT' : 'POST',
-            url: forme ? 'formes/'+ forme.id : 'formes',
-            data: inputs,
-            headers: {
-                "Content-Type": 'Application/json'
-            }
-        })
-            .then(function(response) {
-                const data = response.data;
-               
-                if (Object.entries(data.data).length === 0 && data.errors) {
-                    setErrors({...data.errors});
-                } else {
-                    onSave(data.data, forme ? 'edit' : 'add');
+        try {
+            const url = forme ? 'formes/'+ forme.id : 'formes';
 
-                    handleOnChange('', 'name');
-
-                    notifySuccess(`${data.data.name} ${forme ? 'modifiée' : 'ajoutée'} avec succès`);
+            const { data } = await axiosInstance.request({
+                method: forme ? 'PUT' : 'POST',
+                url,
+                data: inputs,
+                headers: {
+                    "Content-Type": 'application/json'
                 }
-            })
-            .catch(function(error) {
-                console.log(error);
-            })
-            .finally(function() {
-                setSaving(false);
-            });  
+            });
+
+            if (Object.entries(data.data).length === 0 && data.errors) {
+                setErrors({...data.errors});
+            } else {
+                onSave(data.data, forme ? 'edit' : 'add');
+
+                handleOnChange('', 'name');
+
+                notifySuccess(`${data.data.name} ${forme ? 'modifiée' : 'ajoutée'} avec succès`);
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (

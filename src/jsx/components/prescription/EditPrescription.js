@@ -7,7 +7,6 @@ import Select from 'react-select';
 import { Table } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import { notifyError, notifyInfo, notifySuccess } from '../../constant/theme';
-import axios from 'axios';
 
 const EditPrescription = () => {
     const {id} = useParams();
@@ -130,7 +129,9 @@ const EditPrescription = () => {
                     setDoctors([...data.doctors]);
                     setServices([...data.services]);
 
-                    if (data.data.consultation) {
+                    if (data.data.admission) {
+                        handleReferenceChange(data.data.admission.reference);
+                    } else if (data.data.consultation) {
                         handleReferenceChange(data.data.consultation.reference);
                     } else if (data.data.patient) {
                         handleReferenceChange(data.data.patient.reference);
@@ -142,7 +143,7 @@ const EditPrescription = () => {
                     handlePrescriptionMedecines(data.data.medicines);
                 })
                 .catch(function (error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);
@@ -167,7 +168,7 @@ const EditPrescription = () => {
                         <div className="card-body">
                             <div className="row align-items-end">
                                 <div className="col-sm-4 col-md-3 mb-3 mb-lg-4">
-                                    <label className="form-label">ID (Patient ou Consultation)</label>
+                                    <label className="form-label">ID (Patient ou consultation ou hospitalisation)</label>
                                     <input type="text"
                                         value={reference}
                                         onChange={event => handleReferenceChange(event.target.value)}

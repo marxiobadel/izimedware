@@ -91,7 +91,7 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
                 if (Object.entries(data.data).length === 0 && data.errors) {
                     setErrors({...data.errors});
                 } else {
-                    onSave(data.data, data.medical_procedure_id, consultation ? 'edit' : 'add');
+                    onSave(data.data, consultation ? 'edit' : 'add');
 
                     resetForm();
 

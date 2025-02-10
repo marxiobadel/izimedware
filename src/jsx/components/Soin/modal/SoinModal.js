@@ -57,7 +57,7 @@ const SoinModal = ({currentUser, show, onHide, onSave, soin, doctors, types, med
     
     useEffect(() => {
         if (soin) {
-            handleOnChange(soin.consultation_or_patient_or_admission_ref, 'reference');
+            handleOnChange(soin.external_reference, 'reference');
             handleOnChange(soin.description ?? '', 'description');
             handleDoctorChange(doctors.find(d => d.id === soin.doctor_id));
             handleTypeChange(types.find(t => t.id === soin.type.id));
@@ -96,7 +96,7 @@ const SoinModal = ({currentUser, show, onHide, onSave, soin, doctors, types, med
                 if (Object.entries(data.data).length === 0 && data.errors) {
                     setErrors({...data.errors});
                 } else {
-                    onSave(data.data, data.medical_procedure_id, soin ? 'edit' : 'add');
+                    onSave(data.data, soin ? 'edit' : 'add');
 
                     resetForm();
 
@@ -187,7 +187,7 @@ const SoinModal = ({currentUser, show, onHide, onSave, soin, doctors, types, med
                                 </div>}
                             </div>
                             <div className="col-sm-6 mb-3">
-                                <label className="form-label">ID (consultation ou patient ou hospitalisation)<span className="text-danger">*</span></label>
+                                <label className="form-label">ID (patient ou consultation ou hospitalisation)<span className="text-danger">*</span></label>
                                 <input
                                     type="text"
                                     value={inputs.reference} 

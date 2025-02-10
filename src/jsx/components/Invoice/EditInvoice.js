@@ -8,7 +8,6 @@ import { Table } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import { notifyError, notifyInfo, notifySuccess } from '../../constant/theme';
 import AddButton from './Part/AddButton';
-import axios from 'axios';
 
 const EditInvoice = () => {
     const {id} = useParams(); 
@@ -224,7 +223,7 @@ const EditInvoice = () => {
                     handleInvoiceVProducts(data.data.vProducts);
                 })
                 .catch(function (error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);

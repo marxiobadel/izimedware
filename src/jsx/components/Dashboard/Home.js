@@ -13,7 +13,6 @@ import RevenuChart from './Element/RevenuChart';
 import CardWidget from './Element/CardWidget';
 import { useDocumentTitle } from '../../hooks/useTitle';
 import axiosInstance from '../../../services/AxiosInstance';
-import axios from 'axios';
 
 const appointmentBlog = [
 	{day:'Wednesday', date:'October 18'},
@@ -50,7 +49,7 @@ const Home = ({title}) => {
 					console.log(data);
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);

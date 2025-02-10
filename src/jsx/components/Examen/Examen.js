@@ -123,10 +123,10 @@ const Examen = () => {
         setOpenModal(true); 
     }
 
-    const handleAddOrEditExamen = (examen, medical_procedure_id, type) => {
+    const handleAddOrEditExamen = (examen, type) => {
         if (type === 'edit') {
             setExamens((prevExamens) =>
-                prevExamens.map((e) => (e.id === examen.id ? {...e, ...{...examen, medical_procedure_id}} : e))
+                prevExamens.map((e) => (e.id === examen.id ? {...e, ...examen} : e))
             );
         } else {
             setExamens((prevExamens) => [examen, ...prevExamens]);

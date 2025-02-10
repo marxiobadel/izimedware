@@ -6,10 +6,9 @@ import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
-import { ColumnFilter, notifyError, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
 import DoctorModal from './modal/DoctorModal';
 import { connect } from 'react-redux';
-import axios from 'axios';
 
 const Doctor = ({currentUser}) => {
     const [doctors, setDoctors] = useState([]);
@@ -193,7 +192,7 @@ const Doctor = ({currentUser}) => {
                     setSkills([...data.skills]); 
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);
@@ -207,18 +206,6 @@ const Doctor = ({currentUser}) => {
             controller.abort();
         }
     }, []);
-
-    const handleSort = (column) => {
-        if (column.canSort) {
-            if (column.isSortedDesc) {
-                column.toggleSortBy(); 
-            } else if (column.isSorted) {
-                column.toggleSortBy(true); 
-            } else {
-                column.toggleSortBy(false); 
-            }
-        }
-    };
 
     return (
         <>

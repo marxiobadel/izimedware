@@ -122,10 +122,10 @@ const Soin = () => {
         setOpenModal(true); 
     }
 
-    const handleAddOrEditSoin = (soin, medical_procedure_id, type) => {
+    const handleAddOrEditSoin = (soin, type) => {
         if (type === 'edit') {
             setSoins((prevSoins) =>
-                prevSoins.map((s) => (s.id === soin.id ? {...s, ...{...soin, medical_procedure_id}} : s))
+                prevSoins.map((s) => (s.id === soin.id ? {...s, ...soin} : s))
             );
         } else {
             setSoins((prevSoins) => [soin, ...prevSoins]);

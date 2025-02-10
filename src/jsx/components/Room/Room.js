@@ -8,7 +8,6 @@ import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
 import RoomModal from './modal/RoomModal';
-import axios from 'axios';
 
 const Room = () => {
     const [rooms, setRooms] = useState([]);
@@ -173,7 +172,7 @@ const Room = () => {
                     setTypes([...data.types]);
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);

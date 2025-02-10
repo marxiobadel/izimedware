@@ -58,16 +58,26 @@ const Invoice = () => {
     }
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('settings/invoice/index')
+            axiosInstance.get('settings/invoice/index', {signal: controller.signal})
                 .then(function({data}) {
                     setType(data.invoice_type);
                     setPreviewImage(data.logo_url);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (error.name === 'CanceledError') {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 });     
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (

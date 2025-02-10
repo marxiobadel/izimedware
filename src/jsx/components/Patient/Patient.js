@@ -8,7 +8,6 @@ import PatientModal from './modal/PatientModal';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
-import axios from 'axios';
 
 const Patient = () => {
     const [patients, setPatients] = useState([]);
@@ -181,7 +180,7 @@ const Patient = () => {
                     setPatients([...data.patients]);
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);

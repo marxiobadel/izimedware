@@ -38,8 +38,6 @@ const MedicalProcedureModal = ({ show, onHide, onSave, medicalProcedure, default
             resetForm();
         }
 
-        console.log(medicalProcedure);
-
         setErrors({});
     }, [medicalProcedure]);
 

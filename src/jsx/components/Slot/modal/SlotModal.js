@@ -138,7 +138,7 @@ const SlotModal = ({currentUser, show, onHide, onSave, slot, doctors}) => {
                                 </div>}
                             </div>
                             <div className="col-sm-6 color-time-picker mb-3">
-                                <label className="form-label">Heure<span className="text-danger">*</span></label>
+                                <label className="form-label">Heure de fin<span className="text-danger">*</span></label>
                                 <TimePickerPicker 
                                     onChange={time => handleOnChange(time, 'end_time')} 
                                     value={inputs.end_time} 

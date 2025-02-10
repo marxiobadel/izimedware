@@ -8,7 +8,6 @@ import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import ConsultationModal from './modal/ConsultationModal';
-import axios from 'axios';
 
 const Consultation = () => {
     const [consultations, setConsultations] = useState([]);
@@ -112,10 +111,10 @@ const Consultation = () => {
         setOpenModal(true); 
     }
 
-    const handleAddOrEditConsultation = (consultation, medical_procedure_id, type) => {
+    const handleAddOrEditConsultation = (consultation, type) => {
         if (type === 'edit') {
             setConsultations((prevState) =>
-                prevState.map((c) => (c.id === consultation.id ? {...c, ...{...consultation, medical_procedure_id}} : c))
+                prevState.map((c) => (c.id === consultation.id ? {...c, ...consultation} : c))
             );
         } else {
             setConsultations((prevState) => [consultation, ...prevState]);
@@ -156,7 +155,7 @@ const Consultation = () => {
                     setMedicalProcedures([...data.medicalProcedures]);
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);

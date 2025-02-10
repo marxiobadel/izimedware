@@ -8,7 +8,6 @@ import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
 import MedicalProcedureModal from './modal/MedicalProcedureModal';
-import axios from 'axios';
 
 const MedicalProcedure = () => {
     const [medicalProcedures, setMedicalProcedures] = useState([]);
@@ -164,7 +163,7 @@ const MedicalProcedure = () => {
                     setDefaultCurrency(data.defaultCurrency);
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);

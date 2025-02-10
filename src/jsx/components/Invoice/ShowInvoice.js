@@ -6,7 +6,6 @@ import axiosInstance from "../../../services/AxiosInstance";
 import PaymentModal from "./modal/PaymentModal";
 import { notifySuccess } from "../../constant/theme";
 import Swal from "sweetalert2";
-import axios from "axios";
 
 const ShowInvoice = () => {
     const { id } = useParams();
@@ -90,7 +89,7 @@ const ShowInvoice = () => {
                     setPatients(data.patients);
                 })
                 .catch(function (error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);

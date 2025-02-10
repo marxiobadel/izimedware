@@ -8,7 +8,6 @@ import { Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { notifyError, notifyInfo, notifySuccess } from '../../constant/theme';
 import AddButton from './Part/AddButton';
-import axios from 'axios';
 
 const CreateInvoice = () => {
     const datas = useMemo(() => [
@@ -194,7 +193,7 @@ const CreateInvoice = () => {
                     setDefaultCurrency(data.defaultCurrency);
                 })
                 .catch(function (error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);

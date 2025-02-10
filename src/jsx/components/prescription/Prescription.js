@@ -7,7 +7,6 @@ import axiosInstance from '../../../services/AxiosInstance';
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../../hooks/useTitle';
 import { ToastContainer } from 'react-toastify';
-import axios from 'axios';
 
 const Prescription = () => {
     const [prescriptions, setPrescriptions] = useState([]);
@@ -133,7 +132,7 @@ const Prescription = () => {
                     setPrescriptions([...data.prescriptions]);
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);

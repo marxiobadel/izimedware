@@ -7,7 +7,6 @@ import Select from 'react-select';
 import { Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { notifyError, notifyInfo, notifySuccess } from '../../constant/theme';
-import axios from 'axios';
 
 const CreatePrescription = () => {
     const [medicines, setMedicines] = useState([]);
@@ -119,7 +118,7 @@ const CreatePrescription = () => {
                     setServices([...data.services]);
                 })
                 .catch(function (error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);
@@ -144,7 +143,7 @@ const CreatePrescription = () => {
                         <div className="card-body">
                             <div className="row align-items-end">
                                 <div className="col-sm-4 col-md-3 mb-3 mb-lg-4">
-                                    <label className="form-label">ID (Patient ou Consultation)</label>
+                                    <label className="form-label">ID (Patient ou consultation ou hospitalisation)</label>
                                     <input type="text"
                                         value={reference}
                                         onChange={event => handleReferenceChange(event.target.value)}

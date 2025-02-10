@@ -48,17 +48,27 @@ const Unity = () => {
     };
 
     useEffect(() => {
+        const controller = new AbortController();
+
         (() => {
-            axiosInstance.get('unities')
+            axiosInstance.get('unities', {signal: controller.signal})
                 .then(function({data}) {
                     setUnities([...data.unities]);
                 })
                 .catch(function(error) {
-                    console.log(error);
+                    if (error.name === 'CanceledError') {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 }).finally(function() {
                     setLoading(false);
                 });     
         })();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (

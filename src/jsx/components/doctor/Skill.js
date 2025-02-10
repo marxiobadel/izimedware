@@ -8,7 +8,6 @@ import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, notifySuccess } from '../../constant/theme';
 import SkillModal from './modal/SkillModal';
-import axios from 'axios';
 
 const Skill = () => {
     const [skills, setSkills] = useState([]);
@@ -161,7 +160,7 @@ const Skill = () => {
                     setSkills([...data.skills]);
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);

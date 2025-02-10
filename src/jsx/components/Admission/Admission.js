@@ -7,12 +7,12 @@ import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
-import axios from 'axios';
 import AdmissionModal from './modal/AdmissionModal';
 
 const Admission = () => {
     const [admissions, setAdmissions] = useState([]);
     const [patients, setPatients] = useState([]);
+    const [doctors, setDoctors] = useState([]);
     const [rooms, setRooms] = useState([]);
     const [beds, setBeds] = useState([]);
 
@@ -193,9 +193,10 @@ const Admission = () => {
                 .then(function({data}) {
                     setAdmissions([...data.admissions]);
                     setPatients([...data.patients]);
+                    setDoctors([...data.doctors]);
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);
@@ -324,6 +325,7 @@ const Admission = () => {
                 admission={editingAdmission}
                 onRoomChange={handleRoomChange}
                 patients={patients}
+                doctors={doctors}
                 rooms={rooms}
                 beds={beds}
             />

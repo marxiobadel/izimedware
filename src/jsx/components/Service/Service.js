@@ -8,7 +8,6 @@ import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
 import ServiceModal from './modal/ServiceModal';
-import axios from 'axios';
 
 const Service = () => {
     const [services, setServices] = useState([]);
@@ -154,7 +153,7 @@ const Service = () => {
                     setServices([...data.services]);
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);
