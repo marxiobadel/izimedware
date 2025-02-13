@@ -38,6 +38,10 @@ export const MenuList = [
                 title:'Créneaux horaires',
                 to: 'slots',
             },
+            {
+                title:'Rendez-vous',
+                to: 'appointments',
+            },
         ]
     },
     {

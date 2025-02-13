@@ -5,7 +5,6 @@ import { registerLocale } from "react-datepicker";
 import fr from "date-fns/locale/fr";
 
 import { IMAGES, SVGICON } from '../../constant/theme';
-import PatientTab from './Element/PatientTab';
 import RecoveredChart from './Element/RecoveredChart';
 import VisitorsChart from './Element/VisitorsChart';
 import RevenuChart from './Element/RevenuChart';
@@ -14,8 +13,10 @@ import { useDocumentTitle } from '../../hooks/useTitle';
 import axiosInstance from '../../../services/AxiosInstance';
 import Appointment from './Element/Appointment';
 import { ToastContainer } from 'react-toastify';
+import { connect } from 'react-redux';
+import Hospitalisation from './Element/Hospitalisation';
 
-const Home = ({title}) => {	
+const Home = ({currentUser, title}) => {	
 	registerLocale("fr", fr);
 
 	const [doctors, setDoctors] = useState([]);
@@ -82,41 +83,7 @@ const Home = ({title}) => {
 				<div className="col-xl-6">
 					<div className="row">
 						<div className="col-xl-12">	
-							<div className="card">
-								<Tab.Container defaultActiveKey="Daily">
-									<div className="card-header d-sm-flex d-block pb-0 border-0">
-										<div className="me-auto pe-3">
-											<h4 className="text-black fs-20 mb-0">Patient Percentage</h4>
-										</div>
-										<div className="card-action card-tabs mt-3 mt-sm-0 mt-3 mb-sm-0 mb-3 mt-sm-0">
-											<Nav as="ul" className="nav nav-tabs">
-												<Nav.Item>
-													<Nav.Link  eventKey="Daily">Daily</Nav.Link>
-												</Nav.Item>
-												<Nav.Item>
-													<Nav.Link  eventKey="Weekly">Weekly</Nav.Link>
-												</Nav.Item>
-												<Nav.Item>
-													<Nav.Link  eventKey="Monthly">Monthly</Nav.Link>
-												</Nav.Item>
-											</Nav>
-										</div>
-									</div>
-									<div className="card-body">
-										<Tab.Content>
-											<Tab.Pane eventKey="Daily">
-												<PatientTab totalpatient="356,730"  patient="45% " recovered="60%" treatment="58%"/>
-											</Tab.Pane>
-											<Tab.Pane eventKey="Weekly">
-												<PatientTab totalpatient="562,084"  patient="64% " recovered="71%" treatment="75%" />
-											</Tab.Pane>
-											<Tab.Pane eventKey="Monthly">
-												<PatientTab totalpatient="786,360"  patient="78% " recovered="83%" treatment="90%" />
-											</Tab.Pane>
-										</Tab.Content>
-									</div>
-								</Tab.Container>
-							</div>
+							<Hospitalisation />
 						</div>
 						<div className="col-xl-6 col-xxl-12 col-md-6">
 							<div className="card">
@@ -234,4 +201,10 @@ const Home = ({title}) => {
 	)
 }
 
-export default Home;
+const mapStateToProps = (state) => {
+    return {
+        currentUser: state.auth.auth.currentUser
+    };
+};
+ 
+export default connect(mapStateToProps)(Home);

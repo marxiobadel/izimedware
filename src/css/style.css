@@ -34059,3 +34059,7 @@ html[dir="rtl"] [direction="rtl"][data-sidebar-style="compact"]:not([data-layout
 .react-datepicker-wrapper {
   width: 100%;
 }
+.text-container {
+  max-width: 250px; /* Set the maximum width */
+  white-space: normal;
+}

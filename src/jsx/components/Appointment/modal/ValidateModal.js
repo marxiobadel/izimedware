@@ -5,7 +5,7 @@ import axiosInstance from "../../../../services/AxiosInstance";
 import Select from 'react-select';
 import { createPortal } from "react-dom";
 
-const ValidateModal = ({ show, onHide, onSave, leave}) => {
+const ValidateModal = ({ show, onHide, onSave, appointment}) => {
     const statuses = [
         {label: 'Rejeté', value: 'rejected'},
         {label: 'En attente', value: 'pending'},
@@ -28,11 +28,11 @@ const ValidateModal = ({ show, onHide, onSave, leave}) => {
     }
 
     useEffect(() => {
-        if (leave) {
-            setSelectedStatus(statuses.find(status => status.value === leave.status));
-            handleOnChange(leave.reason2 ?? '', 'reason2');
+        if (appointment) {
+            setSelectedStatus(statuses.find(status => status.value === appointment.status));
+            handleOnChange(appointment.reason2 ?? '', 'reason2');
         }
-    }, [leave]);
+    }, [appointment]);
 
     useEffect(() => {
         if (textareaRef.current) {
@@ -50,7 +50,7 @@ const ValidateModal = ({ show, onHide, onSave, leave}) => {
 
         axiosInstance.request({
             method: 'PATCH',
-            url: 'leaves/'+ (leave ? leave.id : 0) +'/validate',
+            url: 'appointments/'+ (appointment ? appointment.id : 0) +'/validate',
             data: {...inputs, status},
             headers: {
                 "Content-Type": 'application/json'
@@ -64,7 +64,7 @@ const ValidateModal = ({ show, onHide, onSave, leave}) => {
                 } else {
                     onSave(data.data);
 
-                    notifySuccess(`Congé validé avec succès`);
+                    notifySuccess(`Rendez-vous validé avec succès`);
                 }
             })
             .catch(function(error) {
@@ -79,7 +79,7 @@ const ValidateModal = ({ show, onHide, onSave, leave}) => {
         <Modal className="modal fade" backdrop={true} show={show} onHide={onHide} centered>
             <div className="modal-content">
                 <div className="modal-header">
-                    <h5 className="modal-title">Valider un congé</h5>
+                    <h5 className="modal-title">Valider un rendez-vous</h5>
                     <button type="button" className="btn-close" onClick={onHide}></button>
                 </div>
                 <div className="modal-body">

@@ -117,6 +117,7 @@ import Admission from "./components/Admission/Admission";
 import Soin from "./components/Soin/Soin";
 import Leave from "./components/Leave/Leave";
 import Slot from "./components/Slot/Slot";
+import Appointment from "./components/Appointment/Appointment";
 
 const Markup = () => {
     const allroutes = [
@@ -152,6 +153,7 @@ const Markup = () => {
         { url: "slots", component: <Slot /> },
         { url: "beds", component: <Bed /> },
         { url: "leaves", component: <Leave /> },
+        { url: "appointments", component: <Appointment /> },
         { url: "types/:status", component: <Type /> },
 
         //Apps

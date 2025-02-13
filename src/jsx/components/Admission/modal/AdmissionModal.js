@@ -11,6 +11,25 @@ import { createPortal } from "react-dom";
 const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patients, doctors, rooms, beds}) => {
     registerLocale("fr", fr);
 
+    const statuses = [
+        {label: 'En attente', value: 'pending'},
+        {label: 'Admis', value: 'admitted'},
+        {label: 'Pré-opératoire', value: 'pre-operative'},
+        {label: 'En observation', value: 'under-observation'},
+        {label: 'En traitement', value: 'in-treatment'},
+        {label: 'En rééducation', value: 'in-rehabilitation'},
+        {label: 'Isolement', value: 'isolation'},
+        {label: 'Soins intensifs', value: 'intensive-care'},
+        {label: 'Stable', value: 'stable'},
+        {label: 'Amélioration', value: 'amelioration'},
+        {label: 'Aggravation', value: 'worsening'},
+        {label: 'Transféré', value: 'transferred'},
+        {label: 'Sortie avec suivi', value: 'exit-with-tracking'},
+        {label: 'Sortie sans suivi', value: 'exit-without-tracking'},
+        {label: 'Sortie contre avis médical', value: 'exit-against-medical-advice'},
+        {label: 'Décédé', value: 'deceased'}
+    ];
+
     const [inputs, setInputs] = useState({ 
         reason: '',
         entry_date: new Date(),
@@ -25,6 +44,7 @@ const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patient
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [selectedBed, setSelectedBed] = useState(null);
+    const [selectedStatus, setSelectedStatus] = useState(null);
 
     const handlePatientChange = (option) => {
         setSelectedPatient(option);
@@ -76,6 +96,7 @@ const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patient
         handleBedChange(null);
         handleOnChange(new Date(), 'entry_date');
         handleOnChange(new Date(), 'release_date');
+        setSelectedStatus(null);
     }
 
     useEffect(() => {
@@ -86,6 +107,7 @@ const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patient
             handleRoomChange(rooms.find(r => r.id === admission.room_id) ?? null);
             handleOnChange(new Date(admission.entry_date), 'entry_date');
             handleOnChange(new Date(admission.release_date), 'release_date');
+            setSelectedStatus(statuses.find(status => status.value === admission.status) ?? null);
         } else {
             resetForm();
         }
@@ -104,11 +126,12 @@ const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patient
         const doctor_id = selectedDoctor ? selectedDoctor.id : null;
         const room_id = selectedRoom ? selectedRoom.id : null;
         const bed_id = selectedBed ? selectedBed.id : null;
+        const status = selectedStatus ? selectedStatus.value : null;
 
         axiosInstance.request({
             method: admission ? 'PUT' : 'POST',
             url: admission ? 'admissions/'+ admission.id : 'admissions',
-            data: {...inputs, patient_id, doctor_id, room_id, bed_id, release_date, entry_date},
+            data: {...inputs, status, patient_id, doctor_id, room_id, bed_id, release_date, entry_date},
             headers: {
                 "Content-Type": 'application/json'
             }
@@ -198,7 +221,7 @@ const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patient
                                     <small style={errorStyle}>{errors.doctor_id.join('\n\r')}</small>
                                 </div>}
                             </div>
-                            <div className="col-sm-6 mb-3">                                        
+                            <div className="col-sm-4 mb-3">                                        
                                 <label className="form-label">Chambre</label>
                                 <Select options={rooms} className="custom-react-select" 
                                     placeholder="Choisir une chambre"
@@ -213,7 +236,7 @@ const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patient
                                     <small style={errorStyle}>{errors.room_id.join('\n\r')}</small>
                                 </div>}
                             </div>
-                            <div className="col-sm-6 mb-3">                                        
+                            <div className="col-sm-4 mb-3">                                        
                                 <label className="form-label">Lit<span className="text-danger">*</span></label>
                                 <Select options={beds} className="custom-react-select" 
                                     placeholder={loading ? 'Chargement...' : 'Choisir un lit'}
@@ -225,6 +248,17 @@ const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patient
                                 />
                                 {errors.bed_id && <div className="text-danger">
                                     <small style={errorStyle}>{errors.bed_id.join('\n\r')}</small>
+                                </div>}
+                            </div>
+                            <div className="col-sm-4 mb-3">                                        
+                                <label className="form-label">Statut<span className="text-danger">*</span></label>
+                                <Select options={statuses} className="custom-react-select" 
+                                    placeholder='Choisir un statut'
+                                    value={selectedStatus}
+                                    onChange={setSelectedStatus} 
+                                />
+                                {errors.status && <div className="text-danger">
+                                    <small style={errorStyle}>{errors.status.join('\n\r')}</small>
                                 </div>}
                             </div>
                             <div className="col-sm-12">

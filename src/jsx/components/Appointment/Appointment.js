@@ -1,49 +1,39 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Badge, Col, Dropdown, Row } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../../hooks/useTitle';
 import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
-import AdmissionModal from './modal/AdmissionModal';
-import HelpModal from './modal/HelpModal';
+import ValidateModal from './modal/ValidateModal';
 
-const Admission = () => {
-    const [admissions, setAdmissions] = useState([]);
-    const [patients, setPatients] = useState([]);
-    const [doctors, setDoctors] = useState([]);
-    const [rooms, setRooms] = useState([]);
-    const [beds, setBeds] = useState([]);
-
-    const handleRoomChange = (beds) => {
-        setBeds([...beds]);
-    }
+const Appointment = () => {
+    const [appointments, setAppointments] = useState([]);
 
     const columns = useMemo(() => [
         {
             Header : 'ID',
             Footer : 'ID',
-            accessor: 'reference',
+            accessor: 'id',
             Filter: ColumnFilter,
         },
         {
-            Header : "Date d'admission",
-            Footer : "Date d'admission",
-            accessor: 'format_entry_date',
+            Header : 'Date',
+            Footer : 'Date',
+            accessor: 'format_datetime',
             Filter: ColumnFilter,
         },
         {
-            Header : "Date de sortie",
-            Footer : "Date de sortie",
-            accessor: 'format_release_date',
-            Filter: ColumnFilter,
-        },
-        {
-            Header : "Patient",
-            Footer : "Patient",
+            Header : 'Patient',
+            Footer : 'Patient',
             accessor: 'patient_name',
+            Filter: ColumnFilter,
+        },
+        {
+            Header : 'Médecin',
+            Footer : 'Médecin',
+            accessor: 'doctor_name',
             Filter: ColumnFilter,
         },
         {
@@ -58,19 +48,13 @@ const Admission = () => {
             ),
         },
         {
-            Header : "Chambre",
-            Footer : "Chambre",
-            accessor: 'room_number',
+            Header : 'Raison',
+            Footer : 'Raison',
+            accessor: 'reason1',
             Filter: ColumnFilter,
             Cell: ({ value }) => (
-                <span className={value === 'aucune' ? 'text-warning' : ''}>{value}</span>
+                <div className="text-container">{value}</div>
             ),
-        },
-        {
-            Header : "Lit",
-            Footer : "Lit",
-            accessor: 'bed_number',
-            Filter: ColumnFilter,
         },
         {
             Header: 'Actions',
@@ -88,42 +72,26 @@ const Admission = () => {
                         </svg>
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-end" align="end">
-                        <Dropdown.Item onClick={() => handleEdit(row.original)}>Modifier</Dropdown.Item>
+                        <Dropdown.Item onClick={() => handleValidation(row.original)}>Valider</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
             ),
         }
-    ], [admissions]);
-
-    const [editingAdmission, setEditingAdmission] = useState(null);
+    ], [appointments]);
 
     const [openModal, setOpenModal] = useState(false);
-    const [helpModal, setHelpModal] = useState(false);
+    const [appointment, setAppointment] = useState(null);
    
     const [loading, setLoading] = useState(true);
 
 	const tableInstance = useTable({
 		columns,
-		data: admissions,	
+		data: appointments,	
 		initialState: {pageIndex: 0}
 	}, useFilters, useGlobalFilter, useSortBy, usePagination);
 
-    const handleEdit = (admission) => {
-        setOpenModal(true);
-
-        axiosInstance.get(`admissions/${admission.id}/rooms`)
-            .then(function({data}) {
-                setRooms([...data.rooms]);
-
-                setEditingAdmission(admission);
-            })
-            .catch(function(error) {
-                console.log(error);
-            }); 
-    };
-
-    const handleDelete = (admission) => {
+    const handleDelete = (appointment) => {
         Swal.fire({
             title:'Etes-vous sûr ?',
             text: "Après suppression, vous ne pourrez pas récupérer la donnée supprimée !",
@@ -135,9 +103,9 @@ const Admission = () => {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosInstance.delete(`admissions/${admission.id}`)
+                axiosInstance.delete(`appointments/${appointment.id}`)
                     .then(({data}) => {
-                        setAdmissions((prevAdmissions) => prevAdmissions.filter((a) => a.id !== admission.id));
+                        setAppointments((prevState) => prevState.filter((state) => state.id !== appointment.id));
 
                         notifySuccess(data.message);
                     })
@@ -152,32 +120,20 @@ const Admission = () => {
         })
     };
 
-    const handleAdd = () => {
-        setOpenModal(true); 
-
-        axiosInstance.get(`admissions/rooms`)
-            .then(function({data}) {
-                setRooms([...data.rooms]);
-
-                setEditingAdmission(null);
-            })
-            .catch(function(error) {
-                console.log(error);
-            }); 
-    }
-
-    const handleAddOrEditAdmission = (admission, type) => {
-        if (type === 'edit') {
-            setAdmissions((prevAdmissions) =>
-                prevAdmissions.map((a) => (a.id === admission.id ? {...a, ...admission} : a))
-            );
-        } else {
-            setAdmissions((prevAdmissions) => [admission, ...prevAdmissions]);
-        }
+    const handleValidate = (appointment) => {
+        setAppointments((prevState) =>
+            prevState.map((state) => (state.id === appointment.id ? {...state, ...appointment} : state))
+        );
 
         setOpenModal(false);
-    };
- 
+    }
+
+    const handleValidation = (appointment) => {
+        setAppointment(appointment);
+
+        setOpenModal(true);
+    }
+
     const { 
 		getTableProps, 
 		getTableBodyProps, 
@@ -196,17 +152,15 @@ const Admission = () => {
 
     const {pageIndex} = state;
 
-    useDocumentTitle('Hospitalisation');
+    useDocumentTitle('Rendez-vous');
 
     useEffect(() => {
         const controller = new AbortController();
 
         (() => {
-            axiosInstance.get('admissions', {signal: controller.signal})
+            axiosInstance.get('appointments', {signal: controller.signal})
                 .then(function({data}) {
-                    setAdmissions([...data.admissions]);
-                    setPatients([...data.patients]);
-                    setDoctors([...data.doctors]);
+                    setAppointments([...data.appointments]);
                 })
                 .catch(function(error) {
                     if (error.name === 'CanceledError') {
@@ -228,12 +182,8 @@ const Admission = () => {
         <>
             <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
                 <div className="me-auto">
-                    <h2 className="text-black font-w600">Hospitalisations</h2>
-                    <p className="mb-0">Liste des hospitalisations</p>
-                </div>
-                <div>
-                    <Link to={"#"} className="btn btn-info me-3" onClick={() => setHelpModal(true)}>Aide</Link>
-                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouvelle admission</Link>
+                    <h2 className="text-black font-w600">Rendez-vous</h2>
+                    <p className="mb-0">Liste des rendez-vous</p>
                 </div>
             </div>
             <ToastContainer />
@@ -332,20 +282,14 @@ const Admission = () => {
 					</div>
                 </Col>
             </Row>
-            <AdmissionModal
+            <ValidateModal
                 show={openModal}
                 onHide={() => setOpenModal(false)}
-                onSave={handleAddOrEditAdmission}
-                admission={editingAdmission}
-                onRoomChange={handleRoomChange}
-                patients={patients}
-                doctors={doctors}
-                rooms={rooms}
-                beds={beds}
+                onSave={handleValidate}
+                appointment={appointment}
             />
-            <HelpModal show={helpModal} onHide={() => setHelpModal(false)} />
         </>
     );
 };
 
-export default Admission;
+export default Appointment;
