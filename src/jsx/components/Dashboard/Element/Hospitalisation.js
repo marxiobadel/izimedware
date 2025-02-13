@@ -14,7 +14,7 @@ const Hospitalisation = () => {
                 { signal: controller.signal })
                 .then(function ({ data }) {
                     setData(data);
-                    console.log(data)   
+                    console.log(data);   
                 })
                 .catch(function (error) {
                     if (error.name === 'CanceledError') {
@@ -56,23 +56,20 @@ const Hospitalisation = () => {
                         <Tab.Pane eventKey="Daily">
                             <PatientTab 
                                 totalpatient={data ? data.patients_day_count : 0} 
-                                patient={data ? data.new_patients_day_percent : '0.00 %'} 
-                                recovered="60%"
-                                treatment="58%" />
+                                patients={data ? data.patients_day : []} 
+                            />
                         </Tab.Pane>
                         <Tab.Pane eventKey="Weekly">
                             <PatientTab 
                                 totalpatient={data ? data.patients_week_count : 0} 
-                                patient={data ? data.new_patients_week_percent : '0.00 %'} 
-                                recovered="71%"  
-                                treatment="75%" />
+                                patients={data ? data.patients_week : []} 
+                            />
                         </Tab.Pane>
                         <Tab.Pane eventKey="Monthly">
                             <PatientTab 
                                 totalpatient={data ? data.patients_month_count : 0} 
-                                patient={data ? data.new_patients_month_percent : '0.00 %'}  
-                                recovered="83%" 
-                                treatment="90%" />
+                                patients={data ? data.patients_month : []}  
+                            />
                         </Tab.Pane>
                     </Tab.Content>
                 </div>

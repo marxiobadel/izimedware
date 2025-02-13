@@ -89,8 +89,12 @@ export const isSuperAdmin = (roles) => {
     return roles.some(role => role.name === 'superadmin');
 };
 
+export const getLastFiveYears = () => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 5 }, (_, i) => currentYear - i);
+};
+
 export const IMAGES = {
-    // User : require('../../images/user.jpg'),
     Avatar : require('../../images/avatar/1.jpg'),       
     Avatar2 : require('../../images/avatar/2.jpg'),       
     Avatar3 : require('../../images/avatar/3.jpg'),       
