@@ -106,7 +106,7 @@ const Category = () => {
         axiosInstance.patch(`categories/${category.id}/status`)
             .then(({data}) => {
                 const status = data.data.status;
-                setCategories((prevCategories) => prevCategories.map((c) => (c.id === category.id ? {...c, status} : c)));
+                setCategories((prevState) => prevState.map((state) => (state.id === category.id ? {...state, status} : state)));
 
                 if (status) {
                     notifySuccess('Le statut a été activé avec succès');
@@ -133,7 +133,7 @@ const Category = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`categories/${category.id}`)
                     .then(({data}) => {
-                        setCategories((prevCategories) => prevCategories.filter((c) => c.id !== category.id));
+                        setCategories((prevState) => prevState.filter((state) => state.id !== category.id));
 
                         notifySuccess(data.message);
                     })
@@ -155,11 +155,11 @@ const Category = () => {
 
     const handleAddOrEditCategory = (category, type) => {
         if (type === 'edit') {
-            setCategories((prevCategories) =>
-                prevCategories.map((c) => (c.id === category.id ? {...c, ...category} : c))
+            setCategories((prevState) =>
+                prevState.map((state) => (state.id === category.id ? {...state, ...category} : state))
             );
         } else {
-            setCategories((prevCategories) => [category, ...prevCategories]);
+            setCategories((prevState) => [category, ...prevState]);
         }
 
         setOpenModal(false);

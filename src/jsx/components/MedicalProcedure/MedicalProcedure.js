@@ -100,7 +100,7 @@ const MedicalProcedure = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`medical_procedures/${medicalProcedure.id}`)
                     .then(({data}) => {
-                        setMedicalProcedures((prevState) => prevState.filter((mp) => mp.id !== medicalProcedure.id));
+                        setMedicalProcedures((prevState) => prevState.filter(state => state.id !== medicalProcedure.id));
 
                         notifySuccess(data.message);
                     })
@@ -123,7 +123,7 @@ const MedicalProcedure = () => {
     const handleAddOrEditMedicalProcedure = (medicalProcedure, type) => {
         if (type === 'edit') {
             setMedicalProcedures((prevState) =>
-                prevState.map((mp) => (mp.id === medicalProcedure.id ? {...mp, ...medicalProcedure} : mp))
+                prevState.map(state => (state.id === medicalProcedure.id ? {...state, ...medicalProcedure} : state))
             );
         } else {
             setMedicalProcedures((prevState) => [medicalProcedure, ...prevState]);

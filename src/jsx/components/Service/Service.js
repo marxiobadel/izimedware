@@ -69,7 +69,7 @@ const Service = () => {
                 </Dropdown>
             ),
         }
-    ], [services]);
+    ], []);
 
     const [editingService, setEditingService] = useState(null);
 
@@ -102,7 +102,7 @@ const Service = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`services/${service.id}`)
                     .then(({data}) => {
-                        setServices((prevServices) => prevServices.filter((s) => s.id !== service.id));
+                        setServices((prevState) => prevState.filter((state) => state.id !== service.id));
 
                         notifySuccess(data.message);
                     })
@@ -124,11 +124,11 @@ const Service = () => {
 
     const handleAddOrEditService = (service, type) => {
         if (type === 'edit') {
-            setServices((prevServices) =>
-                prevServices.map((s) => (s.id === service.id ? {...s, ...service} : s))
+            setServices((prevState) =>
+                prevState.map((state) => (state.id === service.id ? {...state, ...service} : state))
             );
         } else {
-            setServices((prevServices) => [service, ...prevServices]);
+            setServices((prevState) => [service, ...prevState]);
         }
 
         setOpenModal(false);

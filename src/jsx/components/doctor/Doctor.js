@@ -96,7 +96,7 @@ const Doctor = ({currentUser}) => {
                 </Dropdown>
             ),
         }
-    ], [doctors]);
+    ], [currentUser.id]);
 
     const [editingDoctor, setEditingDoctor] = useState(null);
 
@@ -129,7 +129,7 @@ const Doctor = ({currentUser}) => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`doctors/${doctor.slug}`)
                     .then(({data}) => {
-                        setDoctors((prevDoctors) => prevDoctors.filter((d) => d.id !== doctor.id));
+                        setDoctors((prevState) => prevState.filter((state) => state.id !== doctor.id));
 
                         notifySuccess(data.message);
                     })
@@ -151,11 +151,11 @@ const Doctor = ({currentUser}) => {
 
     const handleAddOrEditDoctor = (doctor, type) => {
         if (type === 'edit') {
-            setDoctors((prevDoctors) =>
-                prevDoctors.map((d) => (d.id === doctor.id ? {...d, ...doctor} : d))
+            setDoctors((prevState) =>
+                prevState.map((state) => (state.id === doctor.id ? {...state, ...doctor} : state))
             );
         } else {
-            setDoctors((prevDoctors) => [doctor, ...prevDoctors]);
+            setDoctors((prevState) => [doctor, ...prevState]);
         }
 
         setOpenModal(false);

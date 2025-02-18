@@ -69,7 +69,7 @@ const Soin = () => {
                 </Dropdown>
             ),
         }
-    ], [soins]);
+    ], []);
 
     const [editingSoin, setEditingSoin] = useState(null);
 
@@ -102,7 +102,7 @@ const Soin = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`soins/${soin.id}`)
                     .then(({data}) => {
-                        setSoins((prevSoins) => prevSoins.filter((s) => s.id !== soin.id));
+                        setSoins((prevState) => prevState.filter((state) => state.id !== soin.id));
 
                         notifySuccess(data.message);
                     })
@@ -124,11 +124,11 @@ const Soin = () => {
 
     const handleAddOrEditSoin = (soin, type) => {
         if (type === 'edit') {
-            setSoins((prevSoins) =>
-                prevSoins.map((s) => (s.id === soin.id ? {...s, ...soin} : s))
+            setSoins((prevState) =>
+                prevState.map((state) => (state.id === soin.id ? {...state, ...soin} : state))
             );
         } else {
-            setSoins((prevSoins) => [soin, ...prevSoins]);
+            setSoins((prevState) => [soin, ...prevState]);
         }
 
         setOpenModal(false);

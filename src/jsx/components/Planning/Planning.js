@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Badge, Col, Dropdown, Row } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import { useDocumentTitle } from '../../hooks/useTitle';
-import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
-import { ToastContainer } from 'react-toastify';
+import axiosInstance from '../../../services/AxiosInstance';
 import Swal from 'sweetalert2';
+import { useDocumentTitle } from '../../hooks/useTitle';
+import { ToastContainer } from 'react-toastify';
+import { Link } from 'react-router-dom';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
-import BedModal from './modal/BedModal';
+import PlanningModal from './modal/PlanningModal';
+import PrintModal from './modal/PrintModal';
 
-const Bed = () => {
-    const [beds, setBeds] = useState([]);
-    const [rooms, setRooms] = useState([]);
+const Planning = () => {
+    const [plannings, setPlannigs] = useState([]);
+    const [doctors, setDoctors] = useState([]);
+    const [services, setServices] = useState([]);
 
     const columns = useMemo(() => [
         {
@@ -21,19 +23,28 @@ const Bed = () => {
             Filter: ColumnFilter,
         },
         {
-            Header : 'Numéro',
-            Footer : 'Numéro',
-            accessor: 'number',
+            Header : 'Date',
+            Footer : 'Date',
+            accessor: 'format_date',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Chambre',
-            Footer : 'Chambre',
-            accessor: 'room_number',
+            Header : 'Heure de début',
+            Footer : 'Heure de début',
+            accessor: 'format_start_time',
             Filter: ColumnFilter,
-            Cell: ({ value }) => (
-                <span className={value === 'aucune' ? 'text-warning' : ''}>{value}</span>
-            ),
+        },
+        {
+            Header : 'Heure de fin',
+            Footer : 'Heure de fin',
+            accessor: 'format_end_time',
+            Filter: ColumnFilter,
+        },
+        {
+            Header : 'Médecin',
+            Footer : 'Médecin',
+            accessor: 'doctor_name',
+            Filter: ColumnFilter,
         },
         {
             Header : 'Statut',
@@ -45,12 +56,6 @@ const Bed = () => {
 					<Badge bg="" className={`badge-rounded badge-outline-${row.original.status_color}`}>{value}</Badge>
 				</div>
             ),
-        },
-        {
-            Header : 'Ajoutée le',
-            Footer : 'Ajoutée le',
-            accessor: 'created_at',
-            Filter: ColumnFilter,
         },
         {
             Header: 'Actions',
@@ -68,32 +73,36 @@ const Bed = () => {
                         </svg>
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-end" align="end">
+                        <Dropdown.Item onClick={() => handleDuplicate(row.original)}>Dupliquer</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleEdit(row.original)}>Modifier</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
             ),
         }
-    ], [beds]);
+    ], []);
 
-    const [editingBed, setEditingBed] = useState(null);
-
+    const [editingPlanning, setEditingPlanning] = useState(null);
+    
     const [openModal, setOpenModal] = useState(false);
-   
+    const [toDuplicate, setToDuplicate] = useState(false);
+    const [print, setPrint] = useState(false);
+    
     const [loading, setLoading] = useState(true);
 
-	const tableInstance = useTable({
-		columns,
-		data: beds,	
-		initialState: {pageIndex: 0}
-	}, useFilters, useGlobalFilter, useSortBy, usePagination);
+    const tableInstance = useTable({
+        columns,
+        data: plannings,	
+        initialState: {pageIndex: 0}
+    }, useFilters, useGlobalFilter, useSortBy, usePagination);
 
-    const handleEdit = (bed) => {
-        setEditingBed(bed);
+    const handleEdit = (planning) => {
+        setEditingPlanning(planning);
         setOpenModal(true);
+        setToDuplicate(false);
     };
 
-    const handleDelete = (bed) => {
+    const handleDelete = (planning) => {
         Swal.fire({
             title:'Etes-vous sûr ?',
             text: "Après suppression, vous ne pourrez pas récupérer la donnée supprimée !",
@@ -105,9 +114,9 @@ const Bed = () => {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosInstance.delete(`beds/${bed.id}`)
+                axiosInstance.delete(`plannings/${planning.id}`)
                     .then(({data}) => {
-                        setBeds((prevState) => prevState.filter((state) => state.id !== bed.id));
+                        setPlannigs((prevState) => prevState.filter((state) => state.id !== planning.id));
 
                         notifySuccess(data.message);
                     })
@@ -123,50 +132,58 @@ const Bed = () => {
     };
 
     const handleAdd = () => {
-        setEditingBed(null);
+        setEditingPlanning(null);
         setOpenModal(true); 
+        setToDuplicate(false);
     }
 
-    const handleAddOrEditBed = (bed, type) => {
+    const handleDuplicate = (planning) => {
+        setEditingPlanning(planning);
+        setOpenModal(true);
+        setToDuplicate(true);
+    }
+
+    const handleAddOrEditPlanning = (planning, type) => {
         if (type === 'edit') {
-            setBeds((prevState) =>
-                prevState.map((state) => (state.id === bed.id ? {...state, ...bed} : state))
+            setPlannigs((prevState) =>
+                prevState.map((state) => (state.id === planning.id ? {...state, ...planning} : state))
             );
         } else {
-            setBeds((prevState) => [bed, ...prevState]);
+            setPlannigs((prevState) => [planning, ...prevState]);
         }
 
         setOpenModal(false);
     };
- 
+
     const { 
-		getTableProps, 
-		getTableBodyProps, 
-		headerGroups, 
-		prepareRow,
-		state,
-		page,
-		gotoPage,
-		pageCount,
-		pageOptions,
-		nextPage,
-		previousPage,
-		canNextPage,
-		canPreviousPage
-	} = tableInstance;
+        getTableProps, 
+        getTableBodyProps, 
+        headerGroups, 
+        prepareRow,
+        state,
+        page,
+        gotoPage,
+        pageCount,
+        pageOptions,
+        nextPage,
+        previousPage,
+        canNextPage,
+        canPreviousPage
+    } = tableInstance;
 
     const {pageIndex} = state;
 
-    useDocumentTitle('Lits');
+    useDocumentTitle('Planning');
 
     useEffect(() => {
         const controller = new AbortController();
 
         (() => {
-            axiosInstance.get('beds', {signal: controller.signal})
+            axiosInstance.get('plannings', {signal: controller.signal})
                 .then(function({data}) {
-                    setRooms([...data.rooms]);
-                    setBeds([...data.beds]);
+                    setPlannigs([...data.plannings]);
+                    setDoctors([...data.doctors]);
+                    setServices([...data.services]);
                 })
                 .catch(function(error) {
                     if (error.name === 'CanceledError') {
@@ -188,11 +205,12 @@ const Bed = () => {
         <>
             <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
                 <div className="me-auto">
-                    <h2 className="text-black font-w600">Lits</h2>
-                    <p className="mb-0">Liste des lits</p>
+                    <h2 className="text-black font-w600">Plannings</h2>
+                    <p className="mb-0">Liste des plannings</p>
                 </div>
                 <div>
-                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouveau lit</Link>
+                    <Link to={"#"} className="btn btn-dark me-3" onClick={() => setPrint(true)}>Imprimer</Link>
+                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouveau planning</Link>
                 </div>
             </div>
             <ToastContainer />
@@ -250,7 +268,7 @@ const Bed = () => {
                                     </tbody>
                                 </table> 
                                 <div className="d-flex justify-content-between">
-                                    { pageOptions.length > 0 && 
+                                    {pageOptions.length > 0 && 
                                         <span>
                                             Page{' '}
                                             <strong>
@@ -291,15 +309,21 @@ const Bed = () => {
 					</div>
                 </Col>
             </Row>
-            <BedModal
+            <PlanningModal 
                 show={openModal}
                 onHide={() => setOpenModal(false)}
-                onSave={handleAddOrEditBed}
-                bed={editingBed}
-                rooms={rooms}
+                onSave={handleAddOrEditPlanning}
+                toDuplicate={toDuplicate}
+                planning={editingPlanning}
+                doctors={doctors}
+                services={services}
+            />
+            <PrintModal 
+                show={print}
+                onHide={() => setPrint(false)}
             />
         </>
     );
-};
+}
 
-export default Bed;
+export default Planning;

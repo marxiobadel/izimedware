@@ -62,7 +62,7 @@ const Consultation = () => {
                 </Dropdown>
             ),
         }
-    ], [consultations]);
+    ], []);
 
     const [editingConsultation, setEditingConsultation] = useState(null);
 
@@ -95,7 +95,7 @@ const Consultation = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`consultations/${consultation.id}`)
                     .then(({data}) => {
-                        setConsultations((prevState) => prevState.filter((c) => c.id !== consultation.id));
+                        setConsultations((prevState) => prevState.filter((state) => state.id !== consultation.id));
 
                         notifySuccess(data.message);
                     })
@@ -114,7 +114,7 @@ const Consultation = () => {
     const handleAddOrEditConsultation = (consultation, type) => {
         if (type === 'edit') {
             setConsultations((prevState) =>
-                prevState.map((c) => (c.id === consultation.id ? {...c, ...consultation} : c))
+                prevState.map((state) => (state.id === consultation.id ? {...state, ...consultation} : state))
             );
         } else {
             setConsultations((prevState) => [consultation, ...prevState]);

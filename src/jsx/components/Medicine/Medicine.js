@@ -117,7 +117,7 @@ const Medicine = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`medicines/${medicine.slug}`)
                     .then(({data}) => {
-                        setMedicines((prevMedicines) => prevMedicines.filter((m) => m.id !== medicine.id));
+                        setMedicines((prevState) => prevState.filter((state) => state.id !== medicine.id));
 
                         notifySuccess(data.message);
                     })
@@ -139,11 +139,11 @@ const Medicine = () => {
 
     const handleAddOrEditMedicine = (medicine, type) => {
         if (type === 'edit') {
-            setMedicines((prevMedicines) =>
-                prevMedicines.map((m) => (m.id === medicine.id ? {...m, ...medicine} : m))
+            setMedicines((prevState) =>
+                prevState.map((state) => (state.id === medicine.id ? {...state, ...medicine} : state))
             );
         } else {
-            setMedicines((prevMedicines) => [medicine, ...prevMedicines]);
+            setMedicines((prevState) => [medicine, ...prevState]);
         }
 
         setOpenModal(false);

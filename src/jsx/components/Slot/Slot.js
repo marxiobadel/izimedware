@@ -7,7 +7,6 @@ import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
-import axios from 'axios';
 import SlotModal from './modal/SlotModal';
 
 const Slot = () => {
@@ -72,17 +71,19 @@ const Slot = () => {
                         </svg>
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-end" align="end">
+                        <Dropdown.Item onClick={() => handleDuplicate(row.original)}>Dupliquer</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleEdit(row.original)}>Modifier</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
             ),
         }
-    ], [slots]);
+    ], []);
 
     const [editingSlot, setEditingSlot] = useState(null);
 
     const [openModal, setOpenModal] = useState(false);
+    const [toDuplicate, setToDuplicate] = useState(false);
    
     const [loading, setLoading] = useState(true);
 
@@ -95,6 +96,7 @@ const Slot = () => {
     const handleEdit = (slot) => {
         setEditingSlot(slot);
         setOpenModal(true);
+        setToDuplicate(false);
     };
 
     const handleDelete = (slot) => {
@@ -111,7 +113,7 @@ const Slot = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`slots/${slot.id}`)
                     .then(({data}) => {
-                        setSlots((prevSlots) => prevSlots.filter((s) => s.id !== slot.id));
+                        setSlots((prevState) => prevState.filter((state) => state.id !== slot.id));
 
                         notifySuccess(data.message);
                     })
@@ -128,16 +130,23 @@ const Slot = () => {
 
     const handleAdd = () => {
         setEditingSlot(null);
-        setOpenModal(true); 
+        setOpenModal(true);
+        setToDuplicate(false); 
+    }
+
+    const handleDuplicate = (slot) => {
+        setEditingSlot(slot);
+        setOpenModal(true);
+        setToDuplicate(true);
     }
 
     const handleAddOrEditSlot = (slot, type) => {
         if (type === 'edit') {
-            setSlots((prevSlots) =>
-                prevSlots.map((s) => (s.id === slot.id ? {...s, ...slot} : s))
+            setSlots((prevState) =>
+                prevState.map((state) => (state.id === slot.id ? {...state, ...slot} : state))
             );
         } else {
-            setSlots((prevSlots) => [slot, ...prevSlots]);
+            setSlots((prevState) => [slot, ...prevState]);
         }
 
         setOpenModal(false);
@@ -173,7 +182,7 @@ const Slot = () => {
                     setDoctors([...data.doctors]);
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);
@@ -299,6 +308,7 @@ const Slot = () => {
                 show={openModal}
                 onHide={() => setOpenModal(false)}
                 onSave={handleAddOrEditSlot}
+                toDuplicate={toDuplicate}
                 slot={editingSlot}
                 doctors={doctors}
             />

@@ -745,3 +745,14 @@ button.react-calendar__tile.react-calendar__tile--active.react-calendar__tile--r
   color: #d0d0d0 !important;
   opacity: 0.9;
 }
+.applyBtn {
+  background-color: #007bff !important; /* Bleu Bootstrap */
+  color: white !important;
+  font-weight: bold;
+  border-radius: 5px;
+  padding: 8px 12px;
+}
+
+.applyBtn:hover {
+  background-color: #0056b3 !important; /* Bleu foncé au survol */
+}

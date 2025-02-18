@@ -6,6 +6,7 @@ import axiosInstance from "../../../services/AxiosInstance";
 import PaymentModal from "./modal/PaymentModal";
 import { notifySuccess } from "../../constant/theme";
 import Swal from "sweetalert2";
+import { useDocumentTitle } from "../../hooks/useTitle";
 
 const ShowInvoice = () => {
     const { id } = useParams();
@@ -78,6 +79,8 @@ const ShowInvoice = () => {
                 setSaving(false);
             }); 
     }
+
+    useDocumentTitle('Détail d\'une facture');
 
     useEffect(() => {
         const controller = new AbortController();

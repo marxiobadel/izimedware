@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { toast } from 'react-toastify';
 
 export const APPNAME = 'IziMedWare';
@@ -92,6 +93,19 @@ export const isSuperAdmin = (roles) => {
 export const getLastFiveYears = () => {
     const currentYear = new Date().getFullYear();
     return Array.from({ length: 5 }, (_, i) => currentYear - i);
+};
+
+export const rangesPicker = {
+    "Aujourd'hui": [moment(), moment()],
+    "Hier": [moment().subtract(1, "days"), moment().subtract(1, "days")],
+    "Cette semaine": [moment().startOf("week"), moment().endOf("week")],
+    "7 derniers jours": [moment().subtract(6, "days"), moment()],
+    "Ce mois-ci": [moment().startOf("month"), moment().endOf("month")],
+    "Mois dernier": [
+        moment().subtract(1, "month").startOf("month"),
+        moment().subtract(1, "month").endOf("month"),
+    ],
+    "Cette année": [moment().startOf("year"), moment().endOf("year")],
 };
 
 export const IMAGES = {

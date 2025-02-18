@@ -127,7 +127,7 @@ const Leave = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`leaves/${leave.id}`)
                     .then(({data}) => {
-                        setLeaves((prevState) => prevState.filter((p) => p.id !== leave.id));
+                        setLeaves((prevState) => prevState.filter((state) => state.id !== leave.id));
 
                         notifySuccess(data.message);
                     })
@@ -151,7 +151,7 @@ const Leave = () => {
     const handleAddOrEditLeave = (leave, type) => {
         if (type === 'edit') {
             setLeaves((prevState) =>
-                prevState.map((l) => (l.id === leave.id ? {...l, ...leave} : l))
+                prevState.map((state) => (state.id === leave.id ? {...state, ...leave} : state))
             );
         } else {
             setLeaves((prevState) => [leave, ...prevState]);
@@ -162,7 +162,7 @@ const Leave = () => {
 
     const handleValidation = (leave) => {
         setLeaves((prevState) =>
-            prevState.map((l) => (l.id === leave.id ? {...l, ...leave} : l))
+            prevState.map((state) => (state.id === leave.id ? {...state, ...leave} : state))
         );
 
         setValidateModal(false);

@@ -135,7 +135,7 @@ const Type = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`types/${type.id}`)
                     .then(({data}) => {
-                        setTypes((prevTypes) => prevTypes.filter((t) => t.id !== type.id));
+                        setTypes((prevState) => prevState.filter((state) => state.id !== type.id));
 
                         notifySuccess(data.message);
                     })
@@ -157,11 +157,11 @@ const Type = () => {
 
     const handleAddOrEditType = (type, which) => {
         if (which === 'edit') {
-            setTypes((prevTypes) =>
-                prevTypes.map((t) => (t.id === type.id ? {...t, ...type} : t))
+            setTypes((prevState) =>
+                prevState.map((state) => (state.id === type.id ? {...state, ...type} : state))
             );
         } else {
-            setTypes((prevTypes) => [type, ...prevTypes]);
+            setTypes((prevState) => [type, ...prevState]);
         }
 
         setOpenModal(false);

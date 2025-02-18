@@ -94,7 +94,7 @@ const Admission = () => {
                 </Dropdown>
             ),
         }
-    ], [admissions]);
+    ], []);
 
     const [editingAdmission, setEditingAdmission] = useState(null);
 
@@ -137,7 +137,7 @@ const Admission = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`admissions/${admission.id}`)
                     .then(({data}) => {
-                        setAdmissions((prevAdmissions) => prevAdmissions.filter((a) => a.id !== admission.id));
+                        setAdmissions((prevState) => prevState.filter((state) => state.id !== admission.id));
 
                         notifySuccess(data.message);
                     })
@@ -168,11 +168,11 @@ const Admission = () => {
 
     const handleAddOrEditAdmission = (admission, type) => {
         if (type === 'edit') {
-            setAdmissions((prevAdmissions) =>
-                prevAdmissions.map((a) => (a.id === admission.id ? {...a, ...admission} : a))
+            setAdmissions((prevState) =>
+                prevState.map((state) => (state.id === admission.id ? {...state, ...admission} : state))
             );
         } else {
-            setAdmissions((prevAdmissions) => [admission, ...prevAdmissions]);
+            setAdmissions((prevState) => [admission, ...prevState]);
         }
 
         setOpenModal(false);

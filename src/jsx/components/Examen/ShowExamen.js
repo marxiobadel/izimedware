@@ -28,7 +28,7 @@ const ShowExamen = () => {
     const handleDeleteResult = (id) => {
         axiosInstance.delete(`examens/results/${id}`)
             .then(function ({ data }) {
-                setResults((prevState) => prevState.filter((r) => r.id !== id));
+                setResults((prevState) => prevState.filter((state) => state.id !== id));
              
                 notifySuccess(data.message);
             })
@@ -37,21 +37,30 @@ const ShowExamen = () => {
             });
     }
 
-    useDocumentTitle("Détail de l'examen");
+    useDocumentTitle("Détail de l'examen"); 
  
     useEffect(() => {
+        const controller = new AbortController(); 
+
         (() => {
-            axiosInstance.get(`examens/${id}`)
+            axiosInstance.get(`examens/${id}`, {signal: controller.signal})
                 .then(function ({ data }) {
                     setExamen(data.data);
                     setResults(data.data.results);
-                    console.log(data.data.results)
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    if (error.name === 'CanceledError') {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
                 });
         })();
-    }, []);
+
+        return () => {
+            controller.abort();
+        }
+    }, [id]);
 
     return (
         <>
@@ -63,19 +72,19 @@ const ShowExamen = () => {
                         <div className="card-body pb-0">
                             <ul className="list-group list-group-flush">
                                 <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>ID</strong><span class="mb-0">{examen ? examen.reference : '---'}</span>
+                                    <strong>ID</strong><span className="mb-0">{examen ? examen.reference : '---'}</span>
                                 </li>
                                 <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>Type</strong><span class="mb-0">{examen ? examen.type.name : '---'}</span>
+                                    <strong>Type</strong><span className="mb-0">{examen ? examen.type?.name : '---'}</span>
                                 </li>
                                 <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>Date</strong><span class="mb-0">{examen ? examen.format_date : '---'}</span>
+                                    <strong>Date</strong><span className="mb-0">{examen ? examen.format_date : '---'}</span>
                                 </li>
                                 <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>Patient</strong><span class="mb-0">{examen ? examen.patient.reference : '---'}</span>
+                                    <strong>Patient</strong><span className="mb-0">{examen ? examen.patient_reference : '---'}</span>
                                 </li>
                                 <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>Responsable</strong><span class="mb-0">{examen ? examen.doctor.reference : '---'}</span>
+                                    <strong>Responsable</strong><span className="mb-0">{examen ? examen.doctor?.reference : '---'}</span>
                                 </li>
                             </ul>
                         </div>

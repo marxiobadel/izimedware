@@ -6,7 +6,7 @@ import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
-import { ColumnFilter, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
 import SkillModal from './modal/SkillModal';
 
 const Skill = () => {
@@ -70,7 +70,7 @@ const Skill = () => {
                 </Dropdown>
             ),
         }
-    ], [skills]);
+    ], []);
 
     const [editingSkill, setEditingSkill] = useState(null);
 
@@ -103,7 +103,7 @@ const Skill = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`skills/${skill.id}`)
                     .then(({data}) => {
-                        setSkills((prevSkills) => prevSkills.filter((s) => s.id !== skill.id));
+                        setSkills((prevState) => prevState.filter((state) => state.id !== skill.id));
 
                         notifySuccess(data.message);
                     })
@@ -121,11 +121,11 @@ const Skill = () => {
 
     const handleAddOrEditSkill = (skill, type) => {
         if (type === 'edit') {
-            setSkills((prevSkills) =>
-                prevSkills.map((s) => (s.id === skill.id ? {...s, ...skill} : s))
+            setSkills((prevState) =>
+                prevState.map((state) => (state.id === skill.id ? {...state, ...skill} : state))
             );
         } else {
-            setSkills((prevSkills) => [skill, ...prevSkills]);
+            setSkills((prevState) => [skill, ...prevState]);
         }
 
         setOpenModal(false);
@@ -174,18 +174,6 @@ const Skill = () => {
             controller.abort();
         }
     }, []);
-
-    const handleSort = (column) => {
-        if (column.canSort) {
-            if (column.isSortedDesc) {
-                column.toggleSortBy(); 
-            } else if (column.isSorted) {
-                column.toggleSortBy(true); 
-            } else {
-                column.toggleSortBy(false); 
-            }
-        }
-    };
 
     return (
         <>

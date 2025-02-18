@@ -8,7 +8,6 @@ import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
 import ExamenModal from './modal/ExamenModal';
-import axios from 'axios';
 
 const Examen = () => {
     const [examens, setExamens] = useState([]);
@@ -70,7 +69,7 @@ const Examen = () => {
                 </Dropdown>
             ),
         }
-    ], [examens]);
+    ], []);
 
     const [editingExamen, setEditingExamen] = useState(null);
 
@@ -103,7 +102,7 @@ const Examen = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`examens/${examen.id}`)
                     .then(({data}) => {
-                        setExamens((prevExamens) => prevExamens.filter((e) => e.id !== examen.id));
+                        setExamens((prevState) => prevState.filter((state) => state.id !== examen.id));
 
                         notifySuccess(data.message);
                     })
@@ -125,11 +124,11 @@ const Examen = () => {
 
     const handleAddOrEditExamen = (examen, type) => {
         if (type === 'edit') {
-            setExamens((prevExamens) =>
-                prevExamens.map((e) => (e.id === examen.id ? {...e, ...examen} : e))
+            setExamens((prevState) =>
+                prevState.map((state) => (state.id === examen.id ? {...state, ...examen} : state))
             );
         } else {
-            setExamens((prevExamens) => [examen, ...prevExamens]);
+            setExamens((prevState) => [examen, ...prevState]);
         }
 
         setOpenModal(false);
@@ -167,7 +166,7 @@ const Examen = () => {
                     setTypes([...data.types]);
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);

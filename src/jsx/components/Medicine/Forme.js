@@ -6,7 +6,7 @@ import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
-import { ColumnFilter, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
 import FormeModal from './modal/FormeModal';
 import axios from 'axios';
 
@@ -106,7 +106,7 @@ const Forme = () => {
         axiosInstance.patch(`formes/${forme.id}/status`)
             .then(({data}) => {
                 const status = data.data.status;
-                setFormes((prevFormes) => prevFormes.map((f) => (f.id === forme.id ? {...f, status} : f)));
+                setFormes((prevState) => prevState.map((state) => (state.id === forme.id ? {...state, status} : state)));
 
                 if (status) {
                     notifySuccess('Le statut a été activé avec succès');
@@ -133,7 +133,7 @@ const Forme = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`formes/${forme.id}`)
                     .then(({data}) => {
-                        setFormes((prevFormes) => prevFormes.filter((c) => c.id !== forme.id));
+                        setFormes((prevState) => prevState.filter((state) => state.id !== forme.id));
 
                         notifySuccess(data.message);
                     })
@@ -151,11 +151,11 @@ const Forme = () => {
 
     const handleAddOrEditForme = (forme, type) => {
         if (type === 'edit') {
-            setFormes((prevFormes) =>
-                prevFormes.map((f) => (f.id === forme.id ? {...f, ...forme} : f))
+            setFormes((prevState) =>
+                prevState.map((state) => (state.id === forme.id ? {...state, ...forme} : state))
             );
         } else {
-            setFormes((prevFormes) => [forme, ...prevFormes]);
+            setFormes((prevState) => [forme, ...prevState]);
         }
 
         setOpenModal(false);
@@ -204,18 +204,6 @@ const Forme = () => {
             controller.abort();
         }
     }, []);
-
-    const handleSort = (column) => {
-        if (column.canSort) {
-            if (column.isSortedDesc) {
-                column.toggleSortBy(); 
-            } else if (column.isSorted) {
-                column.toggleSortBy(true); 
-            } else {
-                column.toggleSortBy(false); 
-            }
-        }
-    };
 
     return (
         <>

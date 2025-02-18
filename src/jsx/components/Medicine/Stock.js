@@ -92,7 +92,7 @@ const Stock = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`stocks/${stock.id}`)
                     .then(({data}) => {
-                        setStocks((prevStocks) => prevStocks.filter((s) => s.id !== stock.id));
+                        setStocks((prevState) => prevState.filter((state) => state.id !== stock.id));
 
                         notifySuccess(data.message);
                     })
@@ -104,7 +104,7 @@ const Stock = () => {
     };
 
     const handleAdd = (stock) => {
-        setStocks((prevStocks) => [stock, ...prevStocks]);
+        setStocks((prevState) => [stock, ...prevState]);
         
         setOpenModal(false);
     };

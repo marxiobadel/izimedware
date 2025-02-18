@@ -10,24 +10,26 @@ import { connect } from "react-redux";
 import { createPortal } from "react-dom";
 import TimePickerPicker from 'react-time-picker';
 
-const SlotModal = ({currentUser, show, onHide, onSave, toDuplicate, slot, doctors}) => {
+const PlanningModal = ({currentUser, show, onHide, onSave, toDuplicate, planning, doctors, services}) => {
     registerLocale("fr", fr);
 
     const statuses = [
-        {label: 'Reservé', value: 'reserved'},
-        {label: 'Disponible', value: 'free'},
-        {label: 'Indisponible', value: 'busy'}
+        {label: 'Créé', value: 'add'},
+        {label: 'En cours', value: 'processing'},
+        {label: 'Non complété', value: 'incomplete'},
+        {label: 'Fait', value: 'done'}
     ];
 
     const [inputs, setInputs] = useState({
         date: new Date(),
         start_time: new Date(),
         end_time: new Date(),
-        capacity: '1',
+        task: '',
         status: null
     });
 
     const [doctor, setDoctor] = useState(null);
+    const [service, setService] = useState(null);
 
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
@@ -36,33 +38,39 @@ const SlotModal = ({currentUser, show, onHide, onSave, toDuplicate, slot, doctor
         setDoctor(option);
     }
 
+    const handleServiceChange = (option) => {
+        setService(option);
+    }
+
     const handleOnChange = (value, input) => {
         setInputs(prevState => ({...prevState, [input]: value}));
     }
 
     const resetForm = () => {
-        handleOnChange('1', 'capacity');
+        handleOnChange('', 'task');
         handleDoctorChange(currentUser ?? null);
+        handleServiceChange(null);
         handleOnChange(new Date(), 'date');
         handleOnChange(new Date(), 'start_time');
         handleOnChange(new Date(), 'end_time');
-        handleOnChange(null, 'status');
+        handleOnChange(statuses[0], 'status');
     }
     
     useEffect(() => {
-        if (slot) {
-            handleOnChange(slot.capacity, 'capacity');
-            handleDoctorChange(doctors.find(d => d.id === slot.doctor_id));
-            handleOnChange(new Date(slot.date), 'date');
-            handleOnChange(new Date(slot.start_time), 'start_time');
-            handleOnChange(new Date(slot.end_time), 'end_time');
-            handleOnChange(statuses.find(status => status.value === slot.status), 'status');
+        if (planning) {
+            handleOnChange(planning.task ?? '', 'task');
+            handleDoctorChange(doctors.find(d => d.id === planning.doctor_id));
+            handleServiceChange(services.find(s => s.id === planning.service_id));
+            handleOnChange(new Date(planning.date), 'date');
+            handleOnChange(new Date(planning.start_time), 'start_time');
+            handleOnChange(new Date(planning.end_time), 'end_time');
+            handleOnChange(statuses.find(status => status.value === planning.status), 'status');
         } else {
             resetForm();
         }
         
         setErrors({});
-    }, [slot]);
+    }, [planning]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -72,13 +80,14 @@ const SlotModal = ({currentUser, show, onHide, onSave, toDuplicate, slot, doctor
         const date = format(inputs.date, 'yyyy-MM-dd');
         const start_time = typeof inputs.start_time === 'object' ? format(inputs.start_time, 'HH:mm') : inputs.start_time;
         const end_time = typeof inputs.end_time === 'object' ? format(inputs.end_time, 'HH:mm') : inputs.end_time;
+        const service_id = service ? service.id : null;
         const doctor_id = doctor ? doctor.id : null;
         const status = inputs.status ? inputs.status.value : null;
 
         axiosInstance.request({
-            method: slot && !toDuplicate ? 'PUT' : 'POST',
-            url: slot && !toDuplicate ? 'slots/'+ slot.id : 'slots',
-            data: {...inputs, date, start_time, end_time, doctor_id, status},
+            method: planning && !toDuplicate ? 'PUT' : 'POST',
+            url: planning && !toDuplicate ? 'plannings/'+ planning.id : 'plannings',
+            data: {...inputs, date, start_time, end_time, doctor_id, service_id, status},
             headers: {
                 "Content-Type": 'application/json'
             }
@@ -89,11 +98,11 @@ const SlotModal = ({currentUser, show, onHide, onSave, toDuplicate, slot, doctor
                 if (Object.entries(data.data).length === 0 && data.errors) {
                     setErrors({...data.errors});
                 } else {
-                    onSave(data.data, slot && !toDuplicate ? 'edit' : 'add');
+                    onSave(data.data, planning && !toDuplicate ? 'edit' : 'add');
 
                     resetForm();
 
-                    notifySuccess(`Créneau horaire ${toDuplicate ? 'dupliqué' : (slot ? 'modifié' : 'ajouté')} avec succès`);
+                    notifySuccess(`Planning ${toDuplicate ? 'dupliqué' : (planning ? 'modifié' : 'ajouté')} avec succès`);
                 }
             })
             .catch(function(error) {
@@ -108,7 +117,7 @@ const SlotModal = ({currentUser, show, onHide, onSave, toDuplicate, slot, doctor
         <Modal className="modal fade" backdrop={true} show={show} onHide={onHide} centered>
             <div className="modal-content">
                 <div className="modal-header">
-                    <h5 className="modal-title">{(toDuplicate ? 'Dupliquer' : (slot ? 'Modifier' : 'Ajouter')) + ' un créneau horaire'}</h5>
+                    <h5 className="modal-title">{(toDuplicate ? 'Dupliquer' : (planning ? 'Modifier' : 'Ajouter')) + ' un planning'}</h5>
                     <button type="button" className="btn-close" onClick={onHide}></button>
                 </div>
                 <div className="modal-body">
@@ -147,7 +156,7 @@ const SlotModal = ({currentUser, show, onHide, onSave, toDuplicate, slot, doctor
                                     <small style={errorStyle}>{errors.end_time.join('\n\r')}</small>
                                 </div>}
                             </div>
-                            <div className="col-sm-12 mb-3">                                        
+                            <div className="col-sm-7 mb-3">                                        
                                 <label className="form-label">Personnel médical<span className="text-danger">*</span></label>
                                 <Select options={doctors} className="custom-react-select" 
                                     placeholder='Choisir un membre'
@@ -161,19 +170,7 @@ const SlotModal = ({currentUser, show, onHide, onSave, toDuplicate, slot, doctor
                                     <small style={errorStyle}>{errors.doctor_id.join('\n\r')}</small>
                                 </div>}
                             </div>
-                            <div className="col-sm-6 mb-3">
-                                <label className="form-label">Nombre de patient<span className="text-danger">*</span></label>
-                                <input
-                                    type="number"
-                                    value={inputs.capacity} 
-                                    onChange={event => handleOnChange(event.target.value, 'capacity')} 
-                                    className="form-control"
-                                />
-                                {errors.capacity && <div className="text-danger">
-                                    <small style={errorStyle}>{errors.capacity.join('\n\r')}</small>
-                                </div>}
-                            </div>
-                            <div className="col-sm-6 mb-3">                                        
+                            <div className="col-sm-5 mb-3">                                        
                                 <label className="form-label">Statut<span className="text-danger">*</span></label>
                                 <Select options={statuses} className="custom-react-select" 
                                     placeholder='Choisir un statut'
@@ -184,13 +181,39 @@ const SlotModal = ({currentUser, show, onHide, onSave, toDuplicate, slot, doctor
                                     <small style={errorStyle}>{errors.status.join('\n\r')}</small>
                                 </div>}
                             </div>
+                            <div className="col-sm-12 mb-3">                                        
+                                <label className="form-label">Département<span className="text-danger">*</span></label>
+                                <Select options={services} className="custom-react-select" 
+                                    placeholder='Choisir un département'
+                                    isSearchable
+                                    value={service}
+                                    onChange={handleServiceChange} 
+                                    getOptionValue={s => s.id}
+                                    getOptionLabel={s => s.name}
+                                />
+                                {errors.service_id && <div className="text-danger">
+                                    <small style={errorStyle}>{errors.service_id.join('\n\r')}</small>
+                                </div>}
+                            </div>
+                            <div className="col-sm-12">
+                                <label className="form-label">Tâche</label>
+                                <textarea
+                                    rows={3}
+                                    value={inputs.task} 
+                                    onChange={event => handleOnChange(event.target.value, 'task')} 
+                                    className="form-control"
+                                ></textarea>
+                                {errors.task && <div className="text-danger">
+                                    <small style={errorStyle}>{errors.task.join('\n\r')}</small>
+                                </div>}
+                            </div>
                         </div>
                     </form>
                 </div>
                 <div className="modal-footer">
                     <button type="button" className="btn btn-danger btn-sm light" onClick={onHide}>Fermer</button>
                     <button type="button" className="btn btn-primary btn-sm" onClick={handleSubmit} disabled={saving}>
-                        {slot && !toDuplicate ? 'Mettre à jour' : 'Sauvegarder'}
+                        {planning && !toDuplicate ? 'Mettre à jour' : 'Sauvegarder'}
                     </button>
                 </div>
             </div>
@@ -204,4 +227,4 @@ const mapStateToProps = (state) => {
     };
 };
  
-export default connect(mapStateToProps)(SlotModal);
+export default connect(mapStateToProps)(PlanningModal);

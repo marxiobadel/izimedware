@@ -82,7 +82,7 @@ const Invoice = ({currentUser}) => {
                 </Dropdown>
             ),
         }
-    ], [invoices]);
+    ], [currentUser]);
 
     const [loading, setLoading] = useState(true);
 
@@ -108,7 +108,7 @@ const Invoice = ({currentUser}) => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`invoices/${invoice.id}`)
                     .then(({data}) => {
-                        setInvoices((prevInvoices) => prevInvoices.filter((i) => i.id !== invoice.id));
+                        setInvoices((prevState) => prevState.filter((state) => state.id !== invoice.id));
 
                         notifySuccess(data.message);
                     })

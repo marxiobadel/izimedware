@@ -58,6 +58,7 @@ const Prescription = () => {
                         </svg>
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-end" align="end">
+                        <Dropdown.Item as={Link} to={`/prescriptions/${row.original.id}`}>Détail</Dropdown.Item>
                         <Dropdown.Item as={Link} to={`/prescriptions/${row.original.id}/edit`}>Modifier</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
                     </Dropdown.Menu>
@@ -88,7 +89,7 @@ const Prescription = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`prescriptions/${prescription.id}`)
                     .then(({data}) => {
-                        setPrescriptions((prevPrescriptions) => prevPrescriptions.filter((p) => p.id !== prescription.id));
+                        setPrescriptions((prevState) => prevState.filter((state) => state.id !== prescription.id));
 
                         notifySuccess(data.message);
                     })

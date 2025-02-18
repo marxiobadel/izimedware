@@ -77,7 +77,7 @@ const Room = () => {
                 </Dropdown>
             ),
         }
-    ], [rooms]);
+    ], []);
 
     const [editingRoom, setEditingRoom] = useState(null);
 
@@ -110,7 +110,7 @@ const Room = () => {
             if (result.isConfirmed) {
                 axiosInstance.delete(`rooms/${room.id}`)
                     .then(({data}) => {
-                        setRooms((prevRooms) => prevRooms.filter((r) => r.id !== room.id));
+                        setRooms((prevState) => prevState.filter((state) => state.id !== room.id));
 
                         notifySuccess(data.message);
                     })
@@ -132,11 +132,11 @@ const Room = () => {
 
     const handleAddOrEditRoom = (room, type) => {
         if (type === 'edit') {
-            setRooms((prevRooms) =>
-                prevRooms.map((r) => (r.id === room.id ? {...r, ...room} : r))
+            setRooms((prevState) =>
+                prevState.map(state => (state.id === room.id ? {...state, ...room} : state))
             );
         } else {
-            setRooms((prevRooms) => [room, ...prevRooms]);
+            setRooms((prevState) => [room, ...prevState]);
         }
 
         setOpenModal(false);

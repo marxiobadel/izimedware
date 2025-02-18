@@ -118,6 +118,9 @@ import Soin from "./components/Soin/Soin";
 import Leave from "./components/Leave/Leave";
 import Slot from "./components/Slot/Slot";
 import Appointment from "./components/Appointment/Appointment";
+import Report from "./components/Report/Report";
+import Planning from "./components/Planning/Planning";
+import ShowPrescription from "./components/prescription/ShowPrescription";
 
 const Markup = () => {
     const allroutes = [
@@ -145,6 +148,7 @@ const Markup = () => {
         { url: "prescriptions", component: <Prescription /> },
         { url: "prescriptions/create", component: <CreatePrescription /> },
         { url: "prescriptions/:id/edit", component: <EditPrescription /> },
+        { url: "prescriptions/:id", component: <ShowPrescription /> },
         { url: "examinations", component: <Examen /> },
         { url: "examinations/:id", component: <ShowExamen /> },
         { url: "admissions", component: <Admission /> },
@@ -154,6 +158,8 @@ const Markup = () => {
         { url: "beds", component: <Bed /> },
         { url: "leaves", component: <Leave /> },
         { url: "appointments", component: <Appointment /> },
+        { url: "plannings", component: <Planning /> },
+        { url: "reports", component: <Report /> },
         { url: "types/:status", component: <Type /> },
 
         //Apps

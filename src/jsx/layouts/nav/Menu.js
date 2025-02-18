@@ -42,6 +42,10 @@ export const MenuList = [
                 title:'Rendez-vous',
                 to: 'appointments',
             },
+            {
+                title:'Planning',
+                to: 'plannings',
+            },
         ]
     },
     {
@@ -214,6 +218,18 @@ export const MenuList = [
                 title:'Type',
                 to: 'types/leave',
             },
+        ]
+    },
+    {
+        id: 'report',
+        title:'Rapport',
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="flaticon-381-notepad" />,
+        content : [
+            {
+                title:'Voir',
+                to: 'reports',
+            }
         ]
     },
     {
