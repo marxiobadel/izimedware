@@ -79,7 +79,7 @@ const Patient = () => {
                         </svg>
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-end" align="end">
-                        <Dropdown.Item as={Link} to={`/patient-details/${row.original.slug}`}>Détails</Dropdown.Item>
+                        <Dropdown.Item as={Link} to={`/patient-details/${row.original.id}`}>Détails</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleEdit(row.original)}>Modifier</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
                     </Dropdown.Menu>
@@ -117,7 +117,7 @@ const Patient = () => {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosInstance.delete(`patients/${patient.slug}`)
+                axiosInstance.delete(`patients/${patient.id}`)
                     .then(({data}) => {
                         setPatients((prevState) => prevState.filter((state) => state.id !== patient.id));
 

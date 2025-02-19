@@ -74,7 +74,7 @@ const PatientModal = ({ show, onHide, onSave, patient}) => {
         const date_of_birth = inputs.date_of_birth ? format(inputs.date_of_birth, 'yyyy-MM-dd') : null;
         const gender = genderOption ? genderOption.value : null;
 
-        const url = patient ? 'patients/'+ patient.slug : 'patients';
+        const url = patient ? 'patients/'+ patient.id : 'patients';
         const type = patient ? 'edit' : 'add';
         const message = patient ? 'modifié' : 'ajouté';
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Badge, Col, Dropdown, Row } from 'react-bootstrap';
+import { Badge, Button, Col, Dropdown, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../../hooks/useTitle';
 import axiosInstance from '../../../services/AxiosInstance';
@@ -7,70 +7,62 @@ import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
-import AdmissionModal from './modal/AdmissionModal';
-import HelpModal from './modal/HelpModal';
+import axios from 'axios';
+import InsuranceModal from './modal/InsuranceModal';
 
-const Admission = () => {
-    const [admissions, setAdmissions] = useState([]);
-    const [patients, setPatients] = useState([]);
-    const [doctors, setDoctors] = useState([]);
-    const [rooms, setRooms] = useState([]);
-    const [beds, setBeds] = useState([]);
-    const [statuses, setStatuses] = useState([]);
-
-    const handleRoomChange = (beds) => {
-        setBeds([...beds]);
-    }
+const Insurance = () => {
+    const [insurances, setInsurances] = useState([]);
 
     const columns = useMemo(() => [
         {
             Header : 'ID',
             Footer : 'ID',
-            accessor: 'reference',
+            accessor: 'id',
             Filter: ColumnFilter,
         },
         {
-            Header : "Date d'admission",
-            Footer : "Date d'admission",
-            accessor: 'format_entry_date',
+            Header : 'Nom de la compagnie',
+            Footer : 'Nom de la compagnie',
+            accessor: 'name',
             Filter: ColumnFilter,
         },
         {
-            Header : "Date de sortie",
-            Footer : "Date de sortie",
-            accessor: 'format_release_date',
+            Header : 'Type de couverture',
+            Footer : 'Type de couverture',
+            accessor: 'type',
             Filter: ColumnFilter,
         },
         {
-            Header : "Patient",
-            Footer : "Patient",
-            accessor: 'patient_name',
+            Header : 'Téléphone',
+            Footer : 'Téléphone',
+            accessor: 'phone',
             Filter: ColumnFilter,
-        },
-        {
-            Header : 'Statut',
-            Footer : 'Statut',
-            accessor: 'status_label',
-            Filter: ColumnFilter,
-            Cell: ({ value, row }) => (
-                <div className="bootstrap-badge text-center">
-					<Badge bg="" className={`badge-rounded badge-outline-${row.original.status_color}`}>{value}</Badge>
-				</div>
+            Cell: ({ value }) => ( 
+                <div className={value !== 'aucun' ? '' : 'text-warning'}>{value}</div>
             ),
         },
         {
-            Header : "Chambre",
-            Footer : "Chambre",
-            accessor: 'room_number',
+            Header : 'E-mail',
+            Footer : 'E-mail',
+            accessor: 'email',
             Filter: ColumnFilter,
-            Cell: ({ value }) => (
-                <span className={value === 'aucune' ? 'text-warning' : ''}>{value}</span>
+            Cell: ({ value }) => ( 
+                <div className={value !== 'aucun' ? '' : 'text-warning'}>{value}</div>
             ),
         },
         {
-            Header : "Lit",
-            Footer : "Lit",
-            accessor: 'bed_number',
+            Header : 'Site web',
+            Footer : 'Site web',
+            accessor: 'website',
+            Filter: ColumnFilter,
+            Cell: ({ value }) => ( 
+                <div className={value !== 'aucun' ? '' : 'text-warning'}>{value}</div>
+            ),
+        },
+        {
+            Header : 'Ajoutée le',
+            Footer : 'Ajoutée le',
+            accessor: 'created_at',
             Filter: ColumnFilter,
         },
         {
@@ -97,34 +89,24 @@ const Admission = () => {
         }
     ], []);
 
-    const [editingAdmission, setEditingAdmission] = useState(null);
+    const [editingInsurance, setEditingInsurance] = useState(null);
 
     const [openModal, setOpenModal] = useState(false);
-    const [helpModal, setHelpModal] = useState(false);
    
     const [loading, setLoading] = useState(true);
 
 	const tableInstance = useTable({
 		columns,
-		data: admissions,	
+		data: insurances,	
 		initialState: {pageIndex: 0}
 	}, useFilters, useGlobalFilter, useSortBy, usePagination);
 
-    const handleEdit = (admission) => {
+    const handleEdit = (insurance) => {
+        setEditingInsurance(insurance);
         setOpenModal(true);
-
-        axiosInstance.get(`admissions/${admission.id}/rooms`)
-            .then(function({data}) {
-                setRooms([...data.rooms]);
-
-                setEditingAdmission(admission);
-            })
-            .catch(function(error) {
-                console.log(error);
-            }); 
     };
 
-    const handleDelete = (admission) => {
+    const handleDelete = (insurance) => {
         Swal.fire({
             title:'Etes-vous sûr ?',
             text: "Après suppression, vous ne pourrez pas récupérer la donnée supprimée !",
@@ -136,9 +118,9 @@ const Admission = () => {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosInstance.delete(`admissions/${admission.id}`)
+                axiosInstance.delete(`insurances/${insurance.id}`)
                     .then(({data}) => {
-                        setAdmissions((prevState) => prevState.filter((state) => state.id !== admission.id));
+                        setInsurances((prevState) => prevState.filter((state) => state.id !== insurance.id));
 
                         notifySuccess(data.message);
                     })
@@ -154,26 +136,17 @@ const Admission = () => {
     };
 
     const handleAdd = () => {
+        setEditingInsurance(null);
         setOpenModal(true); 
-
-        axiosInstance.get(`admissions/rooms`)
-            .then(function({data}) {
-                setRooms([...data.rooms]);
-
-                setEditingAdmission(null);
-            })
-            .catch(function(error) {
-                console.log(error);
-            }); 
     }
 
-    const handleAddOrEditAdmission = (admission, type) => {
+    const handleAddOrEditInsurance = (insurance, type) => {
         if (type === 'edit') {
-            setAdmissions((prevState) =>
-                prevState.map((state) => (state.id === admission.id ? {...state, ...admission} : state))
+            setInsurances((prevState) =>
+                prevState.map((state) => (state.id === insurance.id ? {...state, ...insurance} : state))
             );
         } else {
-            setAdmissions((prevState) => [admission, ...prevState]);
+            setInsurances((prevState) => [insurance, ...prevState]);
         }
 
         setOpenModal(false);
@@ -197,21 +170,18 @@ const Admission = () => {
 
     const {pageIndex} = state;
 
-    useDocumentTitle('Hospitalisation');
+    useDocumentTitle('Assurances');
 
     useEffect(() => {
         const controller = new AbortController();
 
         (() => {
-            axiosInstance.get('admissions', {signal: controller.signal})
+            axiosInstance.get('insurances', {signal: controller.signal})
                 .then(function({data}) {
-                    setAdmissions([...data.admissions]);
-                    setPatients([...data.patients]);
-                    setDoctors([...data.doctors]);
-                    setStatuses([...data.statuses]); 
+                    setInsurances([...data.insurances]);
                 })
                 .catch(function(error) {
-                    if (error.name === 'CanceledError') {
+                    if (axios.isCancel(error)) {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);
@@ -230,12 +200,11 @@ const Admission = () => {
         <>
             <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
                 <div className="me-auto">
-                    <h2 className="text-black font-w600">Hospitalisations</h2>
-                    <p className="mb-0">Liste des hospitalisations</p>
+                    <h2 className="text-black font-w600">Assurances</h2>
+                    <p className="mb-0">Liste des assurances</p>
                 </div>
                 <div>
-                    <Link to={"#"} className="btn btn-info me-3" onClick={() => setHelpModal(true)}>Aide</Link>
-                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouvelle admission</Link>
+                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouvelle assurance</Link>
                 </div>
             </div>
             <ToastContainer />
@@ -334,21 +303,14 @@ const Admission = () => {
 					</div>
                 </Col>
             </Row>
-            <AdmissionModal
+            <InsuranceModal
                 show={openModal}
                 onHide={() => setOpenModal(false)}
-                onSave={handleAddOrEditAdmission}
-                admission={editingAdmission}
-                onRoomChange={handleRoomChange}
-                patients={patients}
-                doctors={doctors}
-                rooms={rooms}
-                beds={beds}
-                statuses={statuses}
+                onSave={handleAddOrEditInsurance}
+                insurance={editingInsurance}
             />
-            <HelpModal show={helpModal} onHide={() => setHelpModal(false)} />
         </>
     );
 };
 
-export default Admission;
+export default Insurance;

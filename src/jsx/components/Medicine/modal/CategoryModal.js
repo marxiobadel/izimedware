@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "react-bootstrap";
 import { errorStyle, notifySuccess } from '../../../constant/theme';
 import axiosInstance from "../../../../services/AxiosInstance";
+import { createPortal } from "react-dom";
 
 const CategoryModal = ({ show, onHide, onSave, category}) => {
     const [inputs, setInputs] = useState({ name: '' });
@@ -62,7 +63,7 @@ const CategoryModal = ({ show, onHide, onSave, category}) => {
             });  
     };
 
-    return (
+    return createPortal(
         <Modal className="modal fade" backdrop={true} dialogClassName="modal-sm" show={show} onHide={onHide} centered>
             <div className="modal-content">
                 <div className="modal-header">
@@ -92,7 +93,7 @@ const CategoryModal = ({ show, onHide, onSave, category}) => {
                     </button>
                 </div>
             </div>
-        </Modal>
+        </Modal>, document.body
     )
 }
 

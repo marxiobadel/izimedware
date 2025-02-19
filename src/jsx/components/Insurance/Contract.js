@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Badge, Col, Dropdown, Row } from 'react-bootstrap';
+import { Col, Dropdown, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../../hooks/useTitle';
 import axiosInstance from '../../../services/AxiosInstance';
@@ -7,70 +7,48 @@ import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
-import AdmissionModal from './modal/AdmissionModal';
-import HelpModal from './modal/HelpModal';
+import ContractModal from './modal/ContractModal';
 
-const Admission = () => {
-    const [admissions, setAdmissions] = useState([]);
+const Contract = () => {
+    const [contracts, setContracts] = useState([]);
+    const [insurances, setInsurances] = useState([]);
     const [patients, setPatients] = useState([]);
-    const [doctors, setDoctors] = useState([]);
-    const [rooms, setRooms] = useState([]);
-    const [beds, setBeds] = useState([]);
-    const [statuses, setStatuses] = useState([]);
-
-    const handleRoomChange = (beds) => {
-        setBeds([...beds]);
-    }
 
     const columns = useMemo(() => [
         {
             Header : 'ID',
             Footer : 'ID',
-            accessor: 'reference',
+            accessor: 'id',
             Filter: ColumnFilter,
         },
         {
-            Header : "Date d'admission",
-            Footer : "Date d'admission",
-            accessor: 'format_entry_date',
+            Header : 'Numéro de contrat',
+            Footer : 'Numéro de contrat',
+            accessor: 'number',
             Filter: ColumnFilter,
         },
         {
-            Header : "Date de sortie",
-            Footer : "Date de sortie",
-            accessor: 'format_release_date',
-            Filter: ColumnFilter,
-        },
-        {
-            Header : "Patient",
-            Footer : "Patient",
+            Header : 'Patient',
+            Footer : 'Patient',
             accessor: 'patient_name',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Statut',
-            Footer : 'Statut',
-            accessor: 'status_label',
+            Header : 'Assurance',
+            Footer : 'Assurance',
+            accessor: 'insurance_name',
             Filter: ColumnFilter,
-            Cell: ({ value, row }) => (
-                <div className="bootstrap-badge text-center">
-					<Badge bg="" className={`badge-rounded badge-outline-${row.original.status_color}`}>{value}</Badge>
-				</div>
-            ),
         },
         {
-            Header : "Chambre",
-            Footer : "Chambre",
-            accessor: 'room_number',
+            Header : 'Date de début',
+            Footer : 'Date de début',
+            accessor: 'format_start_date',
             Filter: ColumnFilter,
-            Cell: ({ value }) => (
-                <span className={value === 'aucune' ? 'text-warning' : ''}>{value}</span>
-            ),
         },
         {
-            Header : "Lit",
-            Footer : "Lit",
-            accessor: 'bed_number',
+            Header : 'Date de fin',
+            Footer : 'Date de fin',
+            accessor: 'format_end_date',
             Filter: ColumnFilter,
         },
         {
@@ -97,34 +75,24 @@ const Admission = () => {
         }
     ], []);
 
-    const [editingAdmission, setEditingAdmission] = useState(null);
+    const [editingContract, setEditingContract] = useState(null);
 
     const [openModal, setOpenModal] = useState(false);
-    const [helpModal, setHelpModal] = useState(false);
    
     const [loading, setLoading] = useState(true);
 
 	const tableInstance = useTable({
 		columns,
-		data: admissions,	
+		data: contracts,	
 		initialState: {pageIndex: 0}
 	}, useFilters, useGlobalFilter, useSortBy, usePagination);
 
-    const handleEdit = (admission) => {
+    const handleEdit = (contract) => {
+        setEditingContract(contract);
         setOpenModal(true);
-
-        axiosInstance.get(`admissions/${admission.id}/rooms`)
-            .then(function({data}) {
-                setRooms([...data.rooms]);
-
-                setEditingAdmission(admission);
-            })
-            .catch(function(error) {
-                console.log(error);
-            }); 
     };
 
-    const handleDelete = (admission) => {
+    const handleDelete = (contract) => {
         Swal.fire({
             title:'Etes-vous sûr ?',
             text: "Après suppression, vous ne pourrez pas récupérer la donnée supprimée !",
@@ -136,9 +104,9 @@ const Admission = () => {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosInstance.delete(`admissions/${admission.id}`)
+                axiosInstance.delete(`contracts/${contract.id}`)
                     .then(({data}) => {
-                        setAdmissions((prevState) => prevState.filter((state) => state.id !== admission.id));
+                        setContracts((prevState) => prevState.filter((state) => state.id !== contract.id));
 
                         notifySuccess(data.message);
                     })
@@ -154,26 +122,17 @@ const Admission = () => {
     };
 
     const handleAdd = () => {
+        setEditingContract(null);
         setOpenModal(true); 
-
-        axiosInstance.get(`admissions/rooms`)
-            .then(function({data}) {
-                setRooms([...data.rooms]);
-
-                setEditingAdmission(null);
-            })
-            .catch(function(error) {
-                console.log(error);
-            }); 
     }
 
-    const handleAddOrEditAdmission = (admission, type) => {
+    const handleAddOrEditContract = (contract, type) => {
         if (type === 'edit') {
-            setAdmissions((prevState) =>
-                prevState.map((state) => (state.id === admission.id ? {...state, ...admission} : state))
+            setContracts((prevState) =>
+                prevState.map((state) => (state.id === contract.id ? {...state, ...contract} : state))
             );
         } else {
-            setAdmissions((prevState) => [admission, ...prevState]);
+            setContracts((prevState) => [contract, ...prevState]);
         }
 
         setOpenModal(false);
@@ -197,18 +156,17 @@ const Admission = () => {
 
     const {pageIndex} = state;
 
-    useDocumentTitle('Hospitalisation');
+    useDocumentTitle('Contrats d\'assurances');
 
     useEffect(() => {
         const controller = new AbortController();
 
         (() => {
-            axiosInstance.get('admissions', {signal: controller.signal})
+            axiosInstance.get('contracts', {signal: controller.signal})
                 .then(function({data}) {
-                    setAdmissions([...data.admissions]);
+                    setContracts([...data.contracts]);
                     setPatients([...data.patients]);
-                    setDoctors([...data.doctors]);
-                    setStatuses([...data.statuses]); 
+                    setInsurances([...data.insurances]);
                 })
                 .catch(function(error) {
                     if (error.name === 'CanceledError') {
@@ -230,12 +188,11 @@ const Admission = () => {
         <>
             <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
                 <div className="me-auto">
-                    <h2 className="text-black font-w600">Hospitalisations</h2>
-                    <p className="mb-0">Liste des hospitalisations</p>
+                    <h2 className="text-black font-w600">Contrats d'assurances</h2>
+                    <p className="mb-0">Liste des contrats d'assurances</p>
                 </div>
                 <div>
-                    <Link to={"#"} className="btn btn-info me-3" onClick={() => setHelpModal(true)}>Aide</Link>
-                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouvelle admission</Link>
+                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouveau contrat</Link>
                 </div>
             </div>
             <ToastContainer />
@@ -334,21 +291,16 @@ const Admission = () => {
 					</div>
                 </Col>
             </Row>
-            <AdmissionModal
+            <ContractModal
                 show={openModal}
                 onHide={() => setOpenModal(false)}
-                onSave={handleAddOrEditAdmission}
-                admission={editingAdmission}
-                onRoomChange={handleRoomChange}
+                onSave={handleAddOrEditContract}
+                contract={editingContract}
                 patients={patients}
-                doctors={doctors}
-                rooms={rooms}
-                beds={beds}
-                statuses={statuses}
+                insurances={insurances}
             />
-            <HelpModal show={helpModal} onHide={() => setHelpModal(false)} />
         </>
     );
 };
 
-export default Admission;
+export default Contract;

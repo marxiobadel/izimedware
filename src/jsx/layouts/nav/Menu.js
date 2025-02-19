@@ -18,8 +18,32 @@ export const MenuList = [
                 title: 'Liste',
                 to: 'patients',                 
             },
+            {
+                title: "Contrat d'assurance",
+                to: 'contracts',
+            },
+            {
+                title:'Assurances',
+                to: 'insurances',
+            },
         ],
-    },     
+    },  
+    {
+        id: 'antecedents',
+        title: 'Antécédents médicaux',	
+        classsChange: 'mm-collapse',		
+        iconStyle: <i className="flaticon-381-networking" />,
+        content: [
+            {
+                title: 'Liste',
+                to: 'antecedents',                 
+            },
+            {
+                title:'Type',
+                to: 'types/antecedent',
+            },
+        ],
+    },    
     {
         id: 'doctors',
         title:'Personnel médical',

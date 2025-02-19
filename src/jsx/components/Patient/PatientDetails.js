@@ -1,9 +1,11 @@
-import React from 'react';
-import {Link} from 'react-router-dom'
-import { Dropdown } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import {Link, useParams} from 'react-router-dom'
+import {Dropdown} from 'react-bootstrap';
 
-import { IMAGES } from '../../constant/theme';
+import { IMAGES, patient_cover } from '../../constant/theme';
 import PatientPieChart from '../Dashboard/Element/PatientPieChart';
+import axiosInstance from '../../../services/AxiosInstance';
+import { useDocumentTitle } from '../../hooks/useTitle';
 
 const statisticBlog = [
     { title:'Immunities' , progress:'80%', color:'#5F74BF'},
@@ -13,14 +15,43 @@ const statisticBlog = [
 ];
 
 const PatientDetails = () => {
+    const {id} = useParams(); 
+
+    const [patient, setPatient] = useState({});
+
+    useDocumentTitle('Détail du patient');
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        (() => {
+            axiosInstance.get(`patients/${id}`, {signal: controller.signal})
+                .then(function ({ data }) {
+                    setPatient({...data.data});
+                    console.log(data);
+                })
+                .catch(function (error) {
+                    if (error.name === 'CanceledError') {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
+                });
+        })();
+
+        return () => {
+            controller.abort();
+        }
+    }, []);
+
     return (
         <>
             <div className="form-head page-titles d-flex align-items-center mb-sm-4 mb-3">
                 <div className="me-auto">
-                    <h2 className="text-black font-w600">Patient Details</h2>
+                    <h2 className="text-black font-w600">Détails du patient</h2>
                     <ol className="breadcrumb">
                         <li className="breadcrumb-item active"><Link to={"#"}>Patient</Link></li>
-                        <li className="breadcrumb-item"><Link to={"#"}>#P-0616</Link></li>
+                        <li className="breadcrumb-item"><Link to={"#"}>{patient ? patient.reference : '---'}</Link></li>
                     </ol>
                 </div>
                 <div className="d-flex">
@@ -29,12 +60,7 @@ const PatientDetails = () => {
                             In Treatment
                             <i className="las la-angle-down ms-2 scale5"></i>
                         </Dropdown.Toggle>
-                        <Dropdown.Menu className="dropdown-menu-end" align="end">
-                            <Dropdown.Item>Edit</Dropdown.Item>
-                            <Dropdown.Item>Delete</Dropdown.Item>
-                        </Dropdown.Menu>
                     </Dropdown>
-                    <Link to={"/app-profile"} className="btn btn-outline-primary">Update Profile</Link>
                 </div>
             </div>  
             <div className="row">
@@ -42,69 +68,78 @@ const PatientDetails = () => {
                     <div className="row">
                         <div className="col-xl-12">
                             <div className="card details-card">
-                                <img src={IMAGES.Bannerbg} alt="" className="bg-img" />
+                                <img src={patient_cover} alt="" className="bg-img" />
                                 <div className="card-body">
                                     <div className="d-sm-flex mb-3">
                                         <div className="img-card mb-sm-0 mb-3">	
-                                            <img src={IMAGES.profileimg2} alt="" /> 
+                                            <img src={patient ? patient.avatar_url : IMAGES.profileimg2} alt={patient ? patient.shortname : '---'} /> 
                                             <div className="info d-flex align-items-center p-md-3 p-2 bg-primary">
                                                 <svg className="me-3 d-sm-inline-block d-none" width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M28.75 12.5C28.7538 11.8116 28.568 11.1355 28.213 10.5458C27.8581 9.95597 27.3476 9.47527 26.7376 9.15632C26.1276 8.83737 25.4415 8.69248 24.7547 8.73752C24.0678 8.78257 23.4065 9.01581 22.8434 9.4117C22.2803 9.80758 21.837 10.3508 21.5621 10.9819C21.2872 11.613 21.1913 12.3076 21.2849 12.9896C21.3785 13.6715 21.6581 14.3146 22.0929 14.8482C22.5277 15.3819 23.101 15.7855 23.75 16.015V20C23.75 21.6576 23.0915 23.2473 21.9194 24.4194C20.7473 25.5915 19.1576 26.25 17.5 26.25C15.8424 26.25 14.2527 25.5915 13.0806 24.4194C11.9085 23.2473 11.25 21.6576 11.25 20V18.65C13.3301 18.3482 15.2323 17.3083 16.6092 15.7203C17.9861 14.1322 18.746 12.1019 18.75 10V2.5C18.75 2.16848 18.6183 1.85054 18.3839 1.61612C18.1495 1.3817 17.8315 1.25 17.5 1.25H13.75C13.4185 1.25 13.1005 1.3817 12.8661 1.61612C12.6317 1.85054 12.5 2.16848 12.5 2.5C12.5 2.83152 12.6317 3.14946 12.8661 3.38388C13.1005 3.6183 13.4185 3.75 13.75 3.75H16.25V10C16.25 11.6576 15.5915 13.2473 14.4194 14.4194C13.2473 15.5915 11.6576 16.25 10 16.25C8.34239 16.25 6.75268 15.5915 5.58058 14.4194C4.40848 13.2473 3.75 11.6576 3.75 10V3.75H6.25C6.58152 3.75 6.89946 3.6183 7.13388 3.38388C7.3683 3.14946 7.5 2.83152 7.5 2.5C7.5 2.16848 7.3683 1.85054 7.13388 1.61612C6.89946 1.3817 6.58152 1.25 6.25 1.25H2.5C2.16848 1.25 1.85054 1.3817 1.61612 1.61612C1.3817 1.85054 1.25 2.16848 1.25 2.5V10C1.25402 12.1019 2.01386 14.1322 3.3908 15.7203C4.76773 17.3083 6.6699 18.3482 8.75 18.65V20C8.75 22.3206 9.67187 24.5462 11.3128 26.1872C12.9538 27.8281 15.1794 28.75 17.5 28.75C19.8206 28.75 22.0462 27.8281 23.6872 26.1872C25.3281 24.5462 26.25 22.3206 26.25 20V16.015C26.9792 15.7599 27.6114 15.2848 28.0591 14.6552C28.5069 14.0256 28.7483 13.2726 28.75 12.5Z" fill="white"/>
                                                 </svg>
                                                 <div>
-                                                    <p className="fs-14 text-white op5 mb-1">Disease</p>
+                                                    <p className="fs-14 text-white op5 mb-1">Maladie</p>
                                                     <span className="fs-18 text-white">Cold & Flu</span>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="card-info d-flex align-items-start">
                                             <div className="me-auto pe-3">
-                                                <h2 className="font-w600 mb-2 text-black">Samuel Hawkins Sitepu</h2>
-                                                <p className="mb-2">#P-00016</p>
+                                                <h2 className="font-w600 mb-2 text-black">{}</h2>
+                                                <p className="mb-2">{patient ? patient.fullname : '---'}</p>
                                                 <span className="date">
-                                                <i className="las la-clock"></i>
-                                                Join on 21 August 2020, 12:45 AM</span>
+                                                    <i className="las la-clock"></i>
+                                                    Créé le {patient ? patient.created_at : '---'}
+                                                </span>
                                             </div>
                                             <span className="mr-ico bg-primary">
-                                                <i className="fa-solid fa-mars"></i>
+                                                {patient ? 
+                                                <>
+                                                {patient.gender === 'male' ?
+                                                    <i className="fa-solid fa-mars"></i> : 
+                                                    patient.gender === 'female' ? 
+                                                    <i className="fa-solid fa-venus"></i> : 
+                                                    <i className="fa-solid fa-venus-mars"></i>
+                                                }
+                                                </>
+                                                : '---'}
                                             </span>
                                         </div>
                                     </div>
-                                    <h4 className="fs-20 text-black font-w600">Story About Disease</h4>
-                                    <p>
-                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
-                                    </p>
-                                    <p>
-                                        Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi
-                                    </p>
                                 </div>
                             </div>
                         </div>
-                        <div className="col-lg-7">
-                            <div className="card">
-                                <div className="card-body">
-                                    <div className="row">
-                                        <div className="col-sm-7 mb-sm-0 mb-3">
-                                            <div className="d-flex">
+                        <div className="col-lg-6">
+                            <div className="row">
+                                <div className="col-lg-12 col-sm-6">
+                                    <div className="card">
+                                        <div className="card-body">
+                                            <div className="media align-items-center">
                                                 <i className="las la-map-marker text-primary fs-34 me-3"></i>
-                                                <div>
-                                                    <span className="d-block mb-1">Address</span>
-                                                    <p className="fs-18 mb-0 text-black">795 Folsom Ave, Suite 600 San Francisco, <strong className="d-block">CADGE 94107</strong></p>
+                                                <div className="media-body">
+                                                    <span className="d-block mb-1">Adresse</span>
+                                                    <p className="fs-18 mb-0 text-black">{patient ? patient.address : '---'}</p>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="col-sm-5">
-                                            <div className="map-bx">
-                                                <img src={IMAGES.Map} alt="" />
-                                                <Link to={"#"} className="btn btn-sm btn-primary p-1 fs-12">View in Fullscreen</Link>
-                                                <i className="las la-map-marker"></i>
+                                    </div>
+                                </div>
+                                <div className="col-lg-12 col-sm-6">
+                                    <div className="card">
+                                        <div className="card-body">
+                                            <div className="media align-items-center">
+                                                <i className="las la-calendar-check fs-30 text-primary me-3" />
+                                                <div className="media-body">
+                                                    <span className="d-block mb-1">Date de naissance</span>
+                                                    <p className="fs-18 mb-0 text-black">{patient ? patient.date_of_birth : '---'}</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="col-lg-5">
+                        <div className="col-md-6">
                             <div className="row">
                                 <div className="col-lg-12 col-sm-6">
                                     <div className="card">
@@ -112,8 +147,8 @@ const PatientDetails = () => {
                                             <div className="media align-items-center">
                                                 <i className="las la-phone fs-30 text-primary me-3" />
                                                 <div className="media-body">
-                                                    <span className="d-block mb-1">Phone</span>
-                                                    <p className="fs-18 mb-0 text-black">+12 5123 5512 66</p>
+                                                    <span className="d-block mb-1">Téléphone</span>
+                                                    <p className="fs-18 mb-0 text-black">{patient ? patient.phone : '---'}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -125,8 +160,8 @@ const PatientDetails = () => {
                                             <div className="media align-items-center">
                                                 <i className="las la-envelope-open fs-30 text-primary me-3" />
                                                 <div className="media-body">
-                                                    <span className="d-block mb-1">Email</span>
-                                                    <p className="fs-18 mb-0 text-black">info@mail.com</p>
+                                                    <span className="d-block mb-1">E-mail</span>
+                                                    <p className="fs-18 mb-0 text-black">{patient ? patient.email : '---'}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -218,21 +253,6 @@ const PatientDetails = () => {
                                             ))}                                            
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-xl-12">
-                            <div className="card">
-                                <div className="card-header border-0 pb-0">
-                                    <h4 className="fs-20 text-black mb-0">Note for patient</h4>
-                                    <Link to={"#"}>
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path fillRule="evenodd" clipRule="evenodd" d="M20.8684 8.09625C20.9527 8.25375 21 8.43375 21 8.625V18.75C21 21.2351 18.9862 23.25 16.5 23.25H4.125C3.504 23.25 3 22.746 3 22.125V1.875C3 1.254 3.504 0.75 4.125 0.75H13.125C13.3162 0.75 13.4963 0.797251 13.6538 0.881626L13.6571 0.883874C13.7449 0.929999 13.827 0.989626 13.9013 1.0605L13.9204 1.07962L20.6704 7.82962L20.6895 7.84875C20.7615 7.92413 20.82 8.00625 20.8673 8.09287L20.8684 8.09625ZM12 3H5.25V21H16.5C17.7431 21 18.75 19.9931 18.75 18.75V9.75H13.125C12.504 9.75 12 9.246 12 8.625V3ZM9.75 18.75H14.25C14.871 18.75 15.375 18.246 15.375 17.625C15.375 17.004 14.871 16.5 14.25 16.5H9.75C9.129 16.5 8.625 17.004 8.625 17.625C8.625 18.246 9.129 18.75 9.75 18.75ZM8.625 14.25H15.375C15.996 14.25 16.5 13.746 16.5 13.125C16.5 12.504 15.996 12 15.375 12H8.625C8.004 12 7.5 12.504 7.5 13.125C7.5 13.746 8.004 14.25 8.625 14.25ZM17.1592 7.5L14.25 4.59075V7.5H17.1592Z" fill="black"/>
-                                        </svg>
-                                    </Link>
-                                </div>
-                                <div className="card-body pt-3">
-                                    <p className="mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequa</p>
                                 </div>
                             </div>
                         </div>

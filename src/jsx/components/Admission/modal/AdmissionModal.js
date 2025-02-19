@@ -8,27 +8,8 @@ import fr from "date-fns/locale/fr";
 import { format } from 'date-fns';
 import { createPortal } from "react-dom";
 
-const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patients, doctors, rooms, beds}) => {
+const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patients, doctors, rooms, beds, statuses}) => {
     registerLocale("fr", fr);
-
-    const statuses = [
-        {label: 'En attente', value: 'pending'},
-        {label: 'Admis', value: 'admitted'},
-        {label: 'Pré-opératoire', value: 'pre-operative'},
-        {label: 'En observation', value: 'under-observation'},
-        {label: 'En traitement', value: 'in-treatment'},
-        {label: 'En rééducation', value: 'in-rehabilitation'},
-        {label: 'Isolement', value: 'isolation'},
-        {label: 'Soins intensifs', value: 'intensive-care'},
-        {label: 'Stable', value: 'stable'},
-        {label: 'Amélioration', value: 'amelioration'},
-        {label: 'Aggravation', value: 'worsening'},
-        {label: 'Transféré', value: 'transferred'},
-        {label: 'Sortie avec suivi', value: 'exit-with-tracking'},
-        {label: 'Sortie sans suivi', value: 'exit-without-tracking'},
-        {label: 'Sortie contre avis médical', value: 'exit-against-medical-advice'},
-        {label: 'Décédé', value: 'deceased'}
-    ];
 
     const [inputs, setInputs] = useState({ 
         reason: '',

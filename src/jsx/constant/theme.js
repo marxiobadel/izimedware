@@ -108,6 +108,8 @@ export const rangesPicker = {
     "Cette année": [moment().startOf("year"), moment().endOf("year")],
 };
 
+export const patient_cover = require('../../images/patient-cover.jpg');
+
 export const IMAGES = {
     Avatar : require('../../images/avatar/1.jpg'),       
     Avatar2 : require('../../images/avatar/2.jpg'),       
@@ -174,10 +176,8 @@ export const IMAGES = {
     Map : require('../../images/map.jpg'),
     Bannerbg2 : require('../../images/bg2.jpg'),
     profile3png : require('../../images/profile/3.png'),
-    
-    
-   
 };
+
 export const SVGICON = {
     dropsvg : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M13.0001 12C13.0001 11.4477 12.5523 11 12.0001 11C11.4478 11 11.0001 11.4477 11.0001 12C11.0001 12.5523 11.4478 13 12.0001 13C12.5523 13 13.0001 12.5523 13.0001 12Z" stroke="#2E2E2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

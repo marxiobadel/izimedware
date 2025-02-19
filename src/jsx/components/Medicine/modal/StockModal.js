@@ -6,6 +6,7 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import fr from "date-fns/locale/fr";
 import { format } from 'date-fns';
 import axiosInstance from "../../../../services/AxiosInstance";
+import { createPortal } from "react-dom";
 
 const StockModal = ({ show, onHide, onSave, medicines }) => {
     registerLocale("fr", fr);
@@ -73,7 +74,7 @@ const StockModal = ({ show, onHide, onSave, medicines }) => {
             });  
     }
 
-    return (
+    return createPortal(
         <Modal className="modal fade" show={show} onHide={onHide} centered>
             <div className="modal-content">
                 <div className="modal-header">
@@ -130,7 +131,7 @@ const StockModal = ({ show, onHide, onSave, medicines }) => {
                     </button>
                 </div>
             </div>
-        </Modal>
+        </Modal>, document.body
     )
 }
 
