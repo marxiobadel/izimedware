@@ -145,7 +145,7 @@ const Markup = () => {
         { url: "categories", component: <Category /> },
         { url: "formes", component: <Forme /> },
         { url: "stocks", component: <Stock /> },
-        { url: "doctor-details/:slug", component: <DoctorDetails /> },
+        { url: "doctor-details/:id", component: <DoctorDetails /> },
         { url: "reviews", component: <Reviews /> },
         { url: "doctors", component: <Doctor /> },
         { url: "general", component: <General /> },

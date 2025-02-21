@@ -112,7 +112,7 @@ const DoctorModal = ({ show, onHide, onSave, doctor, roles, skills}) => {
         const role_names = selectedRoles.length > 0 ? selectedRoles.map(role => role.name) : [];
         const skill_id = skill ? skill.id : null;
 
-        const url = doctor ? 'doctors/'+ doctor.slug : 'doctors';
+        const url = doctor ? 'doctors/'+ doctor.id : 'doctors';
         const message = doctor ? 'modifié' : 'ajouté';
 
         axiosInstance.post(url, {...inputs, date_of_birth, gender, role_names, skill_id}, {

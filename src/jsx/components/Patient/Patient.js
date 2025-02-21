@@ -48,7 +48,7 @@ const Patient = () => {
         {
             Header : 'Téléphone',
             Footer : 'Téléphone',
-            accessor: 'phone',
+            accessor: 'phone_label',
             Filter: ColumnFilter,
         },
         {

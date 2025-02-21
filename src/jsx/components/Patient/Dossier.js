@@ -1,55 +1,67 @@
-import { useEffect, useMemo, useState } from "react";
-import { ColumnFilter, handleSort, notifyError, notifySuccess } from "../../constant/theme";
-import { Badge, Col, Dropdown, Row } from "react-bootstrap";
-import axiosInstance from "../../../services/AxiosInstance";
-import Swal from "sweetalert2";
-import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from "react-table";
-import { useDocumentTitle } from "../../hooks/useTitle";
-import AntecedentModal from "./modal/AntecedentModal";
-import { ToastContainer } from "react-toastify";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useMemo } from 'react';
+import { Button, Col, Dropdown, Row } from 'react-bootstrap';
+import axiosInstance from '../../../services/AxiosInstance';
+import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
+import { ToastContainer } from 'react-toastify';
+import Swal from 'sweetalert2';
+import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
+import DossierModal from './modal/DossierModal';
+import { Link } from 'react-router-dom';
 
-const Antecedent = () => {
-    const [antecedents, setAntecedents] = useState([]);
-    const [types, setTypes] = useState([]);
-    const [patients, setPatients] = useState([]);
-    const [statuses, setStatuses] = useState([]);
+const Dossier = ({patient_id, change, onChange}) => {
+    const [dossiers, setDossiers] = useState([]);
+    const [doctors, setDoctors] = useState([]);
 
     const columns = useMemo(() => [
         {
             Header : 'ID',
             Footer : 'ID',
-            accessor: 'id',
+            accessor: 'reference',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Type',
-            Footer : 'Type',
-            accessor: 'type.name',
+            Header : 'Maladie',
+            Footer : 'Maladie',
+            accessor: 'desease_label',
             Filter: ColumnFilter,
+            Cell: ({ value }) => (
+                <span className={value === 'non définie' ? 'text-warning' : ''}>{value}</span>
+            ),
         },
         {
-            Header : 'Patient',
-            Footer : 'Patient',
-            accessor: 'patient_name',
+            Header : 'Tension artérielle',
+            Footer : 'Tension artérielle',
+            accessor: 'blood_pressure',
             Filter: ColumnFilter,
+            Cell: ({ value }) => (
+                <span className={value === 'non définie' ? 'text-warning' : ''}>{value}</span>
+            ),
         },
         {
-            Header : 'Date de diagnostic',
-            Footer : 'Date de diagnostic',
-            accessor: 'format_date',
+            Header : 'Poids',
+            Footer : 'Poids',
+            accessor: 'weight_label',
             Filter: ColumnFilter,
+            Cell: ({ value }) => (
+                <span className={value === 'non défini' ? 'text-warning' : ''}>{value}</span>
+            ),
         },
         {
             Header : 'Statut',
             Footer : 'Statut',
-            accessor: 'status_label',
-            Filter: ColumnFilter,
+            accessor: 'status',
+            disableFilters: true,
+            disableSortBy: true,
             Cell: ({ value, row }) => (
-                <div className="bootstrap-badge text-center">
-					<Badge bg="" className={`badge-rounded badge-outline-${row.original.status_color}`}>{value}</Badge>
-				</div>
+                <div className="text-center">
+                    <Button type="button" disabled={false}
+                        onClick={() => handleChangeStatus(row.original)} className="btn-xs" 
+                        variant={value ? "success btn-rounded" : "warning btn-rounded"}>
+                        {value ? "ouvert" : "fermé"}
+                    </Button>
+                </div>
             ),
+            Filter: ColumnFilter,
         },
         {
             Header: 'Actions',
@@ -75,24 +87,43 @@ const Antecedent = () => {
         }
     ], []);
 
-    const [editingAntecedent, setEditingAntecedent] = useState(null);
-    
+    const [editingDossier, setEditingDossier] = useState(null);
+
     const [openModal, setOpenModal] = useState(false);
-    
+   
     const [loading, setLoading] = useState(true);
 
-    const tableInstance = useTable({
+	const tableInstance = useTable({
 		columns,
-		data: antecedents,	
+		data: dossiers,	
 		initialState: {pageIndex: 0}
 	}, useFilters, useGlobalFilter, useSortBy, usePagination);
 
-    const handleEdit = (antecedent) => {
-        setEditingAntecedent(antecedent);
+    const handleEdit = (dossier) => {
+        setEditingDossier(dossier);
         setOpenModal(true);
     };
 
-    const handleDelete = (antecedent) => {
+    const handleChangeStatus = (dossier) => {
+        axiosInstance.patch(`dossiers/${dossier.id}/status`)
+            .then(({data}) => {
+                const status = data.data.status;
+                setDossiers((prevState) => prevState.map((state) => (state.id === dossier.id ? {...state, status} : state)));
+
+                if (status) {
+                    notifySuccess('Le dossier a été ouvert avec succès');
+                } else {
+                    notifySuccess('Le dossier a été fermé avec succès');
+                }
+
+                onChange(!change);
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    };
+
+    const handleDelete = (dossier) => {
         Swal.fire({
             title:'Etes-vous sûr ?',
             text: "Après suppression, vous ne pourrez pas récupérer la donnée supprimée !",
@@ -104,11 +135,12 @@ const Antecedent = () => {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosInstance.delete(`antecedents/${antecedent.id}`)
+                axiosInstance.delete(`dossiers/${dossier.id}`)
                     .then(({data}) => {
-                        setAntecedents((prevState) => prevState.filter((state) => state.id !== antecedent.id));
+                        setDossiers((prevState) => prevState.filter((state) => state.id !== dossier.id));
 
                         notifySuccess(data.message);
+                        onChange(!change);
                     })
                     .catch(error => {
                         if (error.response && error.response.data) {
@@ -122,52 +154,49 @@ const Antecedent = () => {
     };
 
     const handleAdd = () => {
-        setEditingAntecedent(null);
+        setEditingDossier(null);
         setOpenModal(true); 
     }
 
-    const handleAddOrEditAntecedent = (antecedent, type) => {
+    const handleAddOrEditDossier = (dossier, type) => {
         if (type === 'edit') {
-            setAntecedents((prevState) =>
-                prevState.map((state) => (state.id === antecedent.id ? {...state, ...antecedent} : state))
+            setDossiers((prevState) =>
+                prevState.map(state => (state.id === dossier.id ? {...state, ...dossier} : state))
             );
         } else {
-            setAntecedents((prevState) => [antecedent, ...prevState]);
+            setDossiers((prevState) => [dossier, ...prevState]);
         }
 
         setOpenModal(false);
+        onChange(!change);
     };
-
+ 
     const { 
-        getTableProps, 
-        getTableBodyProps, 
-        headerGroups, 
-        prepareRow,
-        state,
-        page,
-        gotoPage,
-        pageCount,
-        pageOptions,
-        nextPage,
-        previousPage,
-        canNextPage,
-        canPreviousPage
-    } = tableInstance;
+		getTableProps, 
+		getTableBodyProps, 
+		headerGroups, 
+		prepareRow,
+		state,
+		page,
+		gotoPage,
+		pageCount,
+		pageOptions,
+		nextPage,
+		previousPage,
+		canNextPage,
+		canPreviousPage
+	} = tableInstance;
 
     const {pageIndex} = state;
-
-    useDocumentTitle('Antécédents médicaux');
 
     useEffect(() => {
         const controller = new AbortController();
 
         (() => {
-            axiosInstance.get('antecedents', {signal: controller.signal})
+            axiosInstance.get(`patients/${patient_id}/dossiers`, {signal: controller.signal})
                 .then(function({data}) {
-                    setAntecedents([...data.antecedents]);
-                    setPatients([...data.patients]);
-                    setTypes([...data.types]); 
-                    setStatuses([...data.statuses]); 
+                    setDossiers([...data.dossiers]);
+                    setDoctors([...data.doctors]);
                 })
                 .catch(function(error) {
                     if (error.name === 'CanceledError') {
@@ -187,49 +216,49 @@ const Antecedent = () => {
 
     return (
         <>
-            <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
-                <div className="me-auto">
-                    <h2 className="text-black font-w600">Antécédents médicaux</h2>
-                    <p className="mb-0">Liste des antécédents médicaux</p>
-                </div>
-                <div>
-                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouveau antécédent</Link>
-                </div>
-            </div>
             <ToastContainer />
             <Row>
 				<Col lg="12">
                     <div className="card">
                         <div className="card-body">	
+                            <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
+                                <div className="me-auto">
+                                    <h2 className="text-black font-w600">Dossiers</h2>
+                                    <p className="mb-0">Liste des Dossiers</p>
+                                </div>
+                                <div>
+                                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouveau dossier</Link>
+                                </div>
+                            </div>
                             <div className="table-responsive">
                                 <table {...getTableProps()} className="table dataTable display">
                                     <thead>
-                                        {headerGroups.map(headerGroup => (
-                                            <tr {...headerGroup.getHeaderGroupProps()}>
-                                                {headerGroup.headers.map(column => (
-                                                    <th {...column.getHeaderProps()} className="align-top">
-                                                        <span onClick={() => handleSort(column)} 
-                                                            style={{ cursor: column.canSort ? 'pointer' : 'default' }}>
-                                                            {column.render('Header')}
-                                                            {column.canSort && (
-                                                                <span className="ml-1">
-                                                                    {column.isSorted ? (
-                                                                        column.isSortedDesc ?  
-                                                                            <i className="fa fa-arrow-down ms-2 fs-14"  style={{opacity: '0.7'}} />
-                                                                                :  
-                                                                            <i className="fa fa-arrow-up ms-2 fs-14" style={{opacity: '0.7'}} /> 
-                                                                        ) 
-                                                                            : 
-                                                                        (<i className="fa fa-sort ms-2 fs-14"  style={{opacity: '0.3'}} />) 
-                                                                    }
-                                                                </span>
-                                                            )}
-                                                        </span>
-                                                        {column.canFilter ? column.render('Filter') : null}
-                                                    </th>
-                                                ))}
-                                            </tr>
-                                        ))}
+                                    {headerGroups.map(headerGroup => (
+                                        <tr {...headerGroup.getHeaderGroupProps()}>
+                                            {headerGroup.headers.map(column => (
+                                                <th {...column.getHeaderProps()} className="align-top">
+                                                    <span onClick={() => handleSort(column)} 
+                                                        style={{ cursor: column.canSort ? 'pointer' : 'default' }}>
+                                                        {column.render('Header')}
+                                                        {column.canSort && (
+                                                            <span className="ml-1">
+                                                                {column.isSorted ? (
+                                                                    column.isSortedDesc ?  
+                                                                        <i className="fa fa-arrow-down ms-2 fs-14"  style={{opacity: '0.7'}} />
+                                                                            :  
+                                                                        <i className="fa fa-arrow-up ms-2 fs-14" style={{opacity: '0.7'}} /> 
+                                                                    ) 
+                                                                        : 
+                                                                    (<i className="fa fa-sort ms-2 fs-14"  style={{opacity: '0.3'}} />) 
+                                                                }
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                    {column.canFilter ? column.render('Filter') : null}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    ))}
                                     </thead> 
                                     <tbody {...getTableBodyProps()} className="">
                                         {loading ?
@@ -292,17 +321,16 @@ const Antecedent = () => {
 					</div>
                 </Col>
             </Row>
-            <AntecedentModal
+            <DossierModal 
                 show={openModal}
                 onHide={() => setOpenModal(false)}
-                onSave={handleAddOrEditAntecedent}
-                antecedent={editingAntecedent}
-                patients={patients}
-                types={types}
-                statuses={statuses}
+                onSave={handleAddOrEditDossier}
+                dossier={editingDossier}
+                patient_id={patient_id}
+                doctors={doctors}
             />
         </>
     );
-}
+};
 
-export default Antecedent;
+export default Dossier;

@@ -5,7 +5,7 @@ import {
     Logout,
 } from '../store/actions/AuthActions';
 
-export function login(email, password, local = false) {
+export function login(email, password) {
     let baseURL = 'https://medware.izipresta.com';
 
     const postData = {
@@ -14,7 +14,7 @@ export function login(email, password, local = false) {
         returnSecureToken: true,
     };
 
-    if (local) {
+    if (process.env.REACT_APP_ENV === 'local') {
         baseURL = 'http://localhost:8000';
     } 
 

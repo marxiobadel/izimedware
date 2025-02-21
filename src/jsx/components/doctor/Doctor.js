@@ -51,7 +51,7 @@ const Doctor = ({currentUser}) => {
         {
             Header : 'Téléphone',
             Footer : 'Téléphone',
-            accessor: 'phone',
+            accessor: 'phone_label',
             Filter: ColumnFilter,
             Cell: ({ value }) => ( 
                 <div className={value !== 'aucun' ? '' : 'text-warning'}>
@@ -87,7 +87,7 @@ const Doctor = ({currentUser}) => {
                         </svg>
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-end" align="end">
-                        <Dropdown.Item as={Link} to={`/doctor-details/${row.original.slug}`}>Détails</Dropdown.Item>
+                        <Dropdown.Item as={Link} to={`/doctor-details/${row.original.id}`}>Détails</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleEdit(row.original)}>Modifier</Dropdown.Item>
                         {currentUser.id !== row.original.id &&
                             <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
@@ -127,7 +127,7 @@ const Doctor = ({currentUser}) => {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosInstance.delete(`doctors/${doctor.slug}`)
+                axiosInstance.delete(`doctors/${doctor.id}`)
                     .then(({data}) => {
                         setDoctors((prevState) => prevState.filter((state) => state.id !== doctor.id));
 
