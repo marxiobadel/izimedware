@@ -6,19 +6,13 @@ import {
 } from '../store/actions/AuthActions';
 
 export function login(email, password) {
-    let baseURL = 'https://medware.izipresta.com';
-
     const postData = {
         email,
         password,
         returnSecureToken: true,
     };
 
-    if (process.env.REACT_APP_ENV === 'local') {
-        baseURL = 'http://localhost:8000';
-    } 
-
-    return axios.post(`${baseURL}/api/login`, postData, {withCredentials: true});
+    return axios.post(`${process.env.REACT_APP_BASE_URL}login`, postData, {withCredentials: true});
 }
 
 export function formatError(errorResponse) {

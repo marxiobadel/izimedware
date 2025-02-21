@@ -1,22 +1,7 @@
 import axios from 'axios';
 import { store } from '../store/store';
 
-let baseURL = '';
-
-switch (process.env.REACT_APP_ENV) {
-    case 'local':
-        baseURL = 'http://localhost:8000/api/'
-        break;
-    case 'production':
-        baseURL = 'https://medware.izipresta.com/api/'
-        break;
-    default:
-        baseURL = 'https://react-course-b798e-default-rtdb.firebaseio.com/'
-        break;
-}
-
-const axiosInstance = axios.create({baseURL});
-
+const axiosInstance = axios.create({baseURL: process.env.REACT_APP_BASE_URL});
 
 axiosInstance.interceptors.request.use(
     (config) => {
