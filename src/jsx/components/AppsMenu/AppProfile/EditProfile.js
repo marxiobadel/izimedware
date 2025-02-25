@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Select from 'react-select';
 import DatePicker, { registerLocale } from "react-datepicker";
 
-import { GENDER, IMAGES, notifyError, notifySuccess } from '../../../constant/theme';
+import { GENDER, IMAGES, isMember, notifyError, notifySuccess } from '../../../constant/theme';
 import PageTitle from '../../../layouts/PageTitle';
 import axiosInstance from '../../../../services/AxiosInstance';
-import { connect } from 'react-redux';
 import { useDocumentTitle } from '../../../hooks/useTitle';
 import fr from "date-fns/locale/fr";
 import { format } from 'date-fns';
 import { ToastContainer } from 'react-toastify';
 import emitter from '../../../../context/eventEmitter';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
-function EditProfile ({currentUser}) {
+function EditProfile () {
     registerLocale("fr", fr);
 
     const preStyle = {
@@ -24,17 +25,21 @@ function EditProfile ({currentUser}) {
         objectFit: 'cover',
         height: 130
     }
-     
+
     const [inputs, setInputs] = useState({
-        lastname: currentUser ? currentUser.lastname : '',
-        firstname: currentUser ? currentUser.firstname : '',
-        email: currentUser ? currentUser.email : '',
-        address: currentUser && currentUser.address ? currentUser.address : '',
-        phone: currentUser && currentUser.phone ? currentUser.phone : '',
-        date_of_birth: currentUser && currentUser.birthday ? new Date(currentUser.birthday) : null,
-        gender: currentUser ? GENDER.find(gender => gender.value === currentUser.gender) : null,
+        lastname: '',
+        firstname: '',
+        biography: '',
+        email: '',
+        address: '',
+        phone: '',
+        date_of_birth: null,
+        gender: null,
         avatar: null
     });
+
+    const [skills, setSkills] = useState([]);
+    const [roles, setRoles] = useState([]);
 
     const [avatarPreview, setAvatarPreview] = useState('');
 
@@ -42,7 +47,9 @@ function EditProfile ({currentUser}) {
 
     const [saving, setSaving] = useState(false); 
 
-    const [displayName, setDisplayName] = useState(currentUser ? currentUser.shortname : '---');
+    const [displayName, setDisplayName] = useState('---');
+
+    const [createdAt, setCreatedAt] = useState('---');
  
     const handleOnChange = (value, input) => {
         setInputs(prevState => ({...prevState, [input]: value}));
@@ -79,7 +86,7 @@ function EditProfile ({currentUser}) {
         event.preventDefault();
 
         const date_of_birth = inputs.date_of_birth ? format(inputs.date_of_birth, 'yyyy-MM-dd') : null;
-        const gender = inputs.gender.value;
+        const gender = inputs.gender ? inputs.gender.value : null;
 
         setSaving(true);
             
@@ -113,9 +120,35 @@ function EditProfile ({currentUser}) {
 
     useDocumentTitle('Modifier le profil');
 
+    useEffect(() => {
+        const tokenDetailsString = localStorage.getItem('userDetails');
+
+        const tokenDetails = JSON.parse(tokenDetailsString);
+
+        if (tokenDetails) {
+            const currentUser = tokenDetails.currentUser;
+            
+            handleOnChange(currentUser.lastname, 'lastname');
+            handleOnChange(currentUser.firstname, 'firstname');
+            handleOnChange(currentUser.biography ?? '', 'biography');
+            handleOnChange(currentUser.email, 'email');
+            handleOnChange(currentUser.address ?? '', 'address');
+            handleOnChange(currentUser.phone ?? '', 'phone');
+            handleOnChange(currentUser.birthday ? new Date(currentUser.birthday) : null, 'date_of_birth');
+            handleOnChange(GENDER.find(gender => gender.value === currentUser.gender), 'gender');
+           
+            setDisplayName(currentUser.shortname);
+            setAvatarPreview(currentUser.avatar_url);
+            setCreatedAt(currentUser.created_at);
+
+            setSkills([...currentUser.skills]);
+            setRoles([...currentUser.roles]);
+        }
+    }, []);
+
     return(
         <>
-            <PageTitle pageContent={'Modifier le profil'} motherMenu={'Paramètres'}  activeMenu={'Modifier le profil'}/> 
+            <PageTitle pageContent='Modifier le profil' motherMenu='Paramètres'  activeMenu='Modifier le profil'/> 
             <ToastContainer />
             <div className="row">
                 <div className="col-xl-3 col-lg-4">
@@ -125,11 +158,7 @@ function EditProfile ({currentUser}) {
                                 <div className="p-5">
                                     <div className="author-profile">
                                         <div className="author-media">
-                                        {avatarPreview ? 
-                                            <img style={avatarStyle} src={avatarPreview} alt={currentUser ? currentUser.lastname : '---'} />
-                                            :
-                                            <img style={avatarStyle} src={currentUser ? currentUser.avatar_url : IMAGES.User1} alt={currentUser ? currentUser.lastname : '---'} />
-                                        }
+                                            <img style={avatarStyle} src={avatarPreview ? avatarPreview : IMAGES.User1} alt={inputs.lastname} />
                                             <div className="upload-link" title="" data-toggle="tooltip" data-placement="right" data-original-title="update">
                                                 <input type="file" className="update-flie" onChange={handleImageChange} />
                                                 <i className="fa fa-camera"></i>
@@ -137,18 +166,11 @@ function EditProfile ({currentUser}) {
                                         </div>
                                         <div className="author-info">
                                             <h6 className="title">{displayName}</h6>
-                                            {currentUser && currentUser.skills && currentUser.skills.length > 0 &&
-                                                <span>{currentUser.skills[0].name}</span> 
+                                            {skills.length > 0 &&
+                                                <span>{skills[0].name}</span> 
                                             }
                                         </div>
                                     </div>
-                                </div>
-                                <div className="info-list">
-                                    <ul>
-                                        <li><Link to={"/app-profile"}>Models</Link><span>36</span></li>
-                                        <li><Link to={"/uc-lightgallery"}>Gallery</Link><span>3</span></li>
-                                        <li><Link to={"/app-profile"}>Lessons</Link><span>1</span></li>
-                                    </ul>
                                 </div>
                             </div>
                             <div className="card-footer">
@@ -157,7 +179,7 @@ function EditProfile ({currentUser}) {
                                 </div>
                                 <div className="input-group">
                                     <div className="form-control rounded text-primary text-center bg-white">
-                                        {currentUser ? currentUser.created_at : 'Inconnue'}
+                                        {createdAt}
                                     </div>
                                 </div>
                             </div>
@@ -193,7 +215,7 @@ function EditProfile ({currentUser}) {
                                         </div>}
                                     </div>
                                     <div className="col-sm-6 mb-3">                                        
-                                        <label className="form-label">Gender</label>
+                                        <label className="form-label">Sexe</label>
                                         <Select options={GENDER} className="custom-react-select" 
                                             placeholder='Choisir un sexe'
                                             value={inputs.gender}
@@ -244,6 +266,19 @@ function EditProfile ({currentUser}) {
                                             <pre style={preStyle}>{errors.email.join('\n\r')}</pre>
                                         </div>}
                                     </div>
+                                    {isMember(roles) &&
+                                    <div className="col-sm-12">
+                                        <label className="form-label">Biographie</label>
+                                        <CKEditor
+                                            editor={ ClassicEditor }
+                                            data={inputs.biography}
+                                            onChange={( event, editor ) => handleOnChange(editor.getData(), 'biography')}
+                                            config={{language: "fr"}}
+                                        />
+                                        {errors.biography && <div className="text-danger fs-12 mt-1">
+                                            <pre style={preStyle}>{errors.biography.join('\n\r')}</pre>
+                                        </div>}
+                                    </div>}
                                 </div>
                             </div>
                             <div className="card-footer align-items-center d-flex justify-content-between">
@@ -258,10 +293,5 @@ function EditProfile ({currentUser}) {
     )
 }
 
-const mapStateToProps = (state) => {
-    return {
-        currentUser: state.auth.auth.currentUser
-    };
-};
  
-export default connect(mapStateToProps)(EditProfile);
+export default EditProfile;

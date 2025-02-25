@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { IMAGES } from "../../constant/theme";
+import parse from 'html-react-parser';
 
 const Information = ({ doctor, coverUrl }) => {
     return (
@@ -35,6 +36,12 @@ const Information = ({ doctor, coverUrl }) => {
                             </span>
                         </div>
                     </div>
+                    {doctor && doctor.biography &&
+                    <>
+                        <h4 className="fs-20 text-black font-w600">Biographie</h4>
+                        {parse(doctor.biography)}
+                    </>
+                    }
                 </div>
             </div>
         </div>

@@ -50,6 +50,9 @@ const Patient = () => {
             Footer : 'Téléphone',
             accessor: 'phone_label',
             Filter: ColumnFilter,
+            Cell: ({ value }) => (
+                <span className={value === 'aucun' ? 'text-warning' : ''}>{value}</span>
+            )
         },
         {
             Header : 'Naissance',

@@ -53,11 +53,9 @@ const Doctor = ({currentUser}) => {
             Footer : 'Téléphone',
             accessor: 'phone_label',
             Filter: ColumnFilter,
-            Cell: ({ value }) => ( 
-                <div className={value !== 'aucun' ? '' : 'text-warning'}>
-                    {value}
-                </div>
-            ),
+            Cell: ({ value }) => (
+                <span className={value === 'aucun' ? 'text-warning' : ''}>{value}</span>
+            )
         },
         {
             Header : 'Naissance',
