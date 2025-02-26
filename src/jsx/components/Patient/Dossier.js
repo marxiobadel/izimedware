@@ -56,7 +56,7 @@ const Dossier = ({patient_id, onCountChange}) => {
                 <div className="text-center">
                     <Button type="button" disabled={false}
                         onClick={() => handleChangeStatus(row.original)} className="btn-xs" 
-                        variant={value ? "success btn-rounded" : "warning btn-rounded"}>
+                        variant={value ? "outline-success btn-rounded" : "outline-warning btn-rounded"}>
                         {value ? "ouvert" : "fermé"}
                     </Button>
                 </div>

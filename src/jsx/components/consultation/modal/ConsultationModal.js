@@ -17,7 +17,6 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
         patient_id: null,
         doctor_id: null,
         date: new Date(),
-        observation: '',
     });
 
     const [doctor, setDoctor] = useState(null);
@@ -45,7 +44,6 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
 
     const resetForm = () => {
         handleOnChange('', 'reason');
-        handleOnChange('', 'observation');
         handleDoctorChange(currentUser ?? null);
         handlePatientChange(null);
         handleMedicalProcedureChange(null);
@@ -55,7 +53,6 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
     useEffect(() => {
         if (consultation) {
             handleOnChange(consultation.reason, 'reason');
-            handleOnChange(consultation.observation ?? '', 'observation');
             handleDoctorChange(doctors.find(d => d.id === consultation.doctor_id));
             handlePatientChange(patients.find(p => p.id === consultation.patient_id));
             handleMedicalProcedureChange(medicalProcedures.find(mp => mp.id === consultation.medical_procedure_id));
@@ -185,18 +182,6 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
                                 ></textarea>
                                 {errors.reason && <div className="text-danger">
                                     <small style={errorStyle}>{errors.reason.join('\n\r')}</small>
-                                </div>}
-                            </div>
-                            <div className="col-sm-12 mb-3">
-                                <label className="form-label">Observation</label>
-                                <textarea 
-                                    rows={4}
-                                    value={inputs.observation} 
-                                    onChange={event => handleOnChange(event.target.value, 'observation')} 
-                                    className="form-control"
-                                ></textarea>
-                                {errors.observation && <div className="text-danger">
-                                    <small style={errorStyle}>{errors.observation.join('\n\r')}</small>
                                 </div>}
                             </div>
                         </div>

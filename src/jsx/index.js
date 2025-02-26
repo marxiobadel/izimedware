@@ -125,6 +125,7 @@ import Insurance from "./components/Insurance/Insurance";
 import Contract from "./components/Insurance/Contract";
 import Antecedent from "./components/Antecedent/Antecedent";
 import ShowDossier from "./components/Patient/ShowDossier";
+import ShowConsultation from "./components/consultation/ShowConsultation";
 
 const Markup = () => {
     const allroutes = [
@@ -152,6 +153,7 @@ const Markup = () => {
         { url: "doctors", component: <Doctor /> },
         { url: "general", component: <General /> },
         { url: "consultations", component: <Consultation /> },
+        { url: "consultations/:id", component: <ShowConsultation /> },
         { url: "departments", component: <Service /> },
         { url: "prescriptions", component: <Prescription /> },
         { url: "prescriptions/create", component: <CreatePrescription /> },

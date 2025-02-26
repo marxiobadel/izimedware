@@ -5,30 +5,30 @@ import { ToastContainer } from "react-toastify";
 import { useEffect, useState } from "react";
 import { useDocumentTitle } from "../../hooks/useTitle";
 import { Accordion } from "react-bootstrap";
-import ResultModal from "./modal/ResultModal";
 import { notifySuccess } from "../../constant/theme";
+import ObservationModal from "./modal/ObservationModal";
 
-const ShowExamen = () => {
+const ShowConsultation = () => {
     const { id } = useParams();
 
-    const [examen, setExamen] = useState(null);
+    const [consultation, setConsultation] = useState(null);
 
-    const [results, setResults] = useState([]);
+    const [observations, setObservations] = useState([]);
 
     const [openModal, setOpenModal] = useState(false);
 
-    const handleSaveResult = (result) => {
-        setResults([...results, result]);
+    const handleSaveObservation = (observation) => {
+        setObservations([...observations, observation]);
 
-        notifySuccess("Résultat ajouté avec succès.");
+        notifySuccess("Observation ajoutée avec succès.");
 
         setOpenModal(false);
     }
 
-    const handleDeleteResult = (id) => {
-        axiosInstance.delete(`examens/results/${id}`)
+    const handleDeleteObservation = (id) => {
+        axiosInstance.delete(`consultations/observations/${id}`)
             .then(function ({ data }) {
-                setResults((prevState) => prevState.filter((state) => state.id !== id));
+                setObservations((prevState) => prevState.filter((state) => state.id !== id));
              
                 notifySuccess(data.message);
             })
@@ -37,16 +37,16 @@ const ShowExamen = () => {
             });
     }
 
-    useDocumentTitle("Détail de l'examen"); 
+    useDocumentTitle("Détail de la consultation"); 
  
     useEffect(() => {
         const controller = new AbortController(); 
 
         (() => {
-            axiosInstance.get(`examens/${id}`, {signal: controller.signal})
+            axiosInstance.get(`consultations/${id}`, {signal: controller.signal})
                 .then(function ({ data }) {
-                    setExamen(data.data);
-                    setResults(data.data.results);
+                    setConsultation(data.data);
+                    setObservations(data.data.observations);
                 })
                 .catch(function (error) {
                     if (error.name === 'CanceledError') {
@@ -64,36 +64,37 @@ const ShowExamen = () => {
 
     return (
         <>
-            <PageTitle pageContent={''} motherMenu={'Examen'} activeMenu={"Détail de l'examen"} />
+            <PageTitle pageContent={''} motherMenu={'Consultation'} activeMenu={"Détail de consultation"} />
             <ToastContainer />
             <div className="row">
                 <div className="col-md-4">
-                    <div className="card">
-                        <div className="card-body pb-0">
-                            <ul className="list-group list-group-flush">
-                                <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>ID</strong><span className="mb-0">{examen ? examen.reference : '---'}</span>
-                                </li>
-                                <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>Type</strong><span className="mb-0">{examen ? examen.type?.name : '---'}</span>
-                                </li>
-                                <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>Date</strong><span className="mb-0">{examen ? examen.format_date : '---'}</span>
-                                </li>
-                                <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>Patient</strong><span className="mb-0">{examen ? examen.patient_reference : '---'}</span>
-                                </li>
-                                <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>Responsable</strong><span className="mb-0">{examen ? examen.doctor?.reference : '---'}</span>
-                                </li>
-                            </ul>
+                    <div className="row">
+                        <div className="col-md-12">
+                            <div className="card">
+                                <div className="card-body pb-0">
+                                    <ul className="list-group list-group-flush">
+                                        <li className="list-group-item d-flex px-0 justify-content-between">
+                                            <strong>ID</strong><span className="mb-0">{consultation ? consultation.reference : '---'}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex px-0 justify-content-between">
+                                            <strong>Date</strong><span className="mb-0">{consultation ? consultation.format_date : '---'}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex px-0 justify-content-between">
+                                            <strong>Patient</strong><span className="mb-0">{consultation ? consultation.patient?.reference : '---'}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex px-0 justify-content-between">
+                                            <strong>Responsable</strong><span className="mb-0">{consultation ? consultation.doctor?.reference : '---'}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div className="col-md-8">
                     <div className="card">
                         <div className="card-header">
-                            <span>Résultats</span>
+                            <span>Observations</span>
                             <span className="float-right">
                                 <button onClick={() => setOpenModal(true)} type="button" className="btn btn-xs btn-primary">
                                     <i className="fa fa-plus"></i>
@@ -101,27 +102,27 @@ const ShowExamen = () => {
                             </span>
                         </div>
                         <div className="card-body pb-0">
-                            {examen && results && 
-                            (results.length === 0 ? 
+                            {consultation && observations && 
+                            (observations.length === 0 ? 
                                 <div className="d-flex align-items-center justify-content-center">
-                                    Aucun résultat d'examen
+                                    Aucune observation
                                 </div> :
                                 <Accordion className="accordion accordion-rounded-stylish accordion-bordered" defaultActiveKey="0">
-                                    {results.map((result, i) => (
+                                    {observations.map((observation, i) => (
                                     <Accordion.Item  key={i} eventKey={`${i}`}>
                                         <Accordion.Header className="accordion-header accordion-header-primary">
-                                            Résultat #{i + 1} - {result.created_at}
+                                            Observation #{i + 1} - {observation.created_at}
                                             <span className="accordion-header-indicator "></span>					              
                                         </Accordion.Header>
                                         <Accordion.Collapse eventKey={`${i}`} className="accordion__body">
                                             <div className="accordion-body">
-                                                {result.content}
+                                                {observation.content}
                                                 <div className="text-end mt-2">
-                                                    {result.file_url &&
-                                                    <Link to={'#'} onClick={() => window.open(result.file_url, "_blank", "noopener,noreferrer")}>
+                                                    {observation.file_url &&
+                                                    <Link to={'#'} onClick={() => window.open(observation.file_url, "_blank", "noopener,noreferrer")}>
                                                         <i className="fa fa-download text-dark me-3"></i>
                                                     </Link>}
-                                                    <Link to={'#'} onClick={() => handleDeleteResult(result.id)}>
+                                                    <Link to={'#'} onClick={() => handleDeleteObservation(observation.id)}>
                                                         <i className="fa fa-trash text-danger"></i>
                                                     </Link>
                                                 </div>
@@ -135,15 +136,15 @@ const ShowExamen = () => {
                     </div>
                 </div>
             </div>
-            <ResultModal 
+            <ObservationModal
                 id={id}
                 show={openModal}
                 onHide={() => setOpenModal(false)}
-                onSave={handleSaveResult}
-                examen={examen}
+                onSave={handleSaveObservation}
+                consultation={consultation}
             />
         </>
     )
 }
 
-export default ShowExamen;
+export default ShowConsultation;
