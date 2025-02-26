@@ -15,7 +15,11 @@ const PatientDetails = () => {
     const [coverUrl, setCoverUrl] = useState(null);
     const [latestDossier, setLatestDossier] = useState(null);
 
-    const [change, setChange] = useState(true);
+    const [change, setChange] = useState(0);
+
+    const handleCountChange = (newChange) => {
+        setChange(newChange);
+    }
 
     useDocumentTitle('Détail du patient');
 
@@ -28,7 +32,6 @@ const PatientDetails = () => {
                     setPatient({...data.data});
                     setCoverUrl(data.cover_url);
                     setLatestDossier(data.latestDossier);
-                    console.log(data);
                 })
                 .catch(function (error) {
                     if (error.name === 'CanceledError') {
@@ -71,7 +74,7 @@ const PatientDetails = () => {
                             </div>}
                             {typeof patient === 'object' &&
                             <div className="col-xl-12">
-                                <Dossier patient_id={patient.id} change={change} onChange={setChange} />
+                                <Dossier patient_id={patient.id} onCountChange={handleCountChange} />
                             </div>}
                         </>
                         : 

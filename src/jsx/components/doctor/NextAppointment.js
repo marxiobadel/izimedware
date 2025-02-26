@@ -5,7 +5,7 @@ const NextAppointment = ({ nextAppointment }) => {
     const targetTime = new Date(nextAppointment.time);
 
     const [progress, setProgress] = useState(0);
-    const [remainingTime,  setRemainingTime] = useState('');
+    const [remainingTime,  setRemainingTime] = useState('00:00:00');
 
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -31,10 +31,12 @@ const NextAppointment = ({ nextAppointment }) => {
                 setRemainingTime(
                     `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
                 );
-            }
+            }   
         }, 1000);
 
-        return () => clearInterval(intervalId);
+        return () => { 
+            clearInterval(intervalId);
+        }  
     }, [targetTime]);
 
     return (

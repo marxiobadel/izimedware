@@ -30,7 +30,6 @@ const DoctorDetails = () => {
                     setPatients(data.patients);
                     setAppointments(data.appointments);
                     setNextAppointment({...data.nextAppointment});
-                    console.log(data.nextAppointment);    
                 })
                 .catch(function (error) {
                     if (error.name === 'CanceledError') {

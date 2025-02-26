@@ -8,7 +8,7 @@ import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../cons
 import DossierModal from './modal/DossierModal';
 import { Link } from 'react-router-dom';
 
-const Dossier = ({patient_id, change, onChange}) => {
+const Dossier = ({patient_id, onCountChange}) => {
     const [dossiers, setDossiers] = useState([]);
     const [doctors, setDoctors] = useState([]);
 
@@ -79,6 +79,7 @@ const Dossier = ({patient_id, change, onChange}) => {
                         </svg>
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-end" align="end">
+                        <Dropdown.Item as={Link} to={`/dossiers/${row.original.id}`}>Détails</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleEdit(row.original)}>Modifier</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
                     </Dropdown.Menu>
@@ -116,7 +117,7 @@ const Dossier = ({patient_id, change, onChange}) => {
                     notifySuccess('Le dossier a été fermé avec succès');
                 }
 
-                onChange(!change);
+                onCountChange((prevState) => prevState + 1);
             })
             .catch(error => {
                 console.log(error)
@@ -140,7 +141,7 @@ const Dossier = ({patient_id, change, onChange}) => {
                         setDossiers((prevState) => prevState.filter((state) => state.id !== dossier.id));
 
                         notifySuccess(data.message);
-                        onChange(!change);
+                        onCountChange((prevState) => prevState + 1);
                     })
                     .catch(error => {
                         if (error.response && error.response.data) {
@@ -168,7 +169,7 @@ const Dossier = ({patient_id, change, onChange}) => {
         }
 
         setOpenModal(false);
-        onChange(!change);
+        onCountChange((prevState) => prevState + 1);
     };
  
     const { 
