@@ -190,7 +190,7 @@ const ShowDossier = () => {
                         </div>
                         {dossier && dossier.patient &&
                         <div className="card-footer mt-0">
-                            <Link as="button" to={`patient-details/${dossier.patient.id}`} className="btn btn-primary btn-lg btn-block">
+                            <Link as="button" to={`/patient-details/${dossier.patient.id}`} className="btn btn-primary btn-lg btn-block">
                                 Voir le profil
                             </Link>
                         </div>}
