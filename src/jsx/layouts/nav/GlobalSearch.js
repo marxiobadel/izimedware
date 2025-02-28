@@ -58,7 +58,7 @@ const GlobalSearch = () => {
                     onChange={(e) => setQuery(e.target.value)} 
                     className="form-control" placeholder="Rechercher ici..." />
                 <div className="input-group-append">
-                    <span className="input-group-text"><Link to={"#"}><i className="flaticon-381-search-2" /></Link></span>
+                    <span className="input-group-text"><i className="flaticon-381-search-2" /></span>
                 </div>
             </div>
             <div

@@ -5,7 +5,7 @@ import { errorStyle, notifySuccess } from '../../../constant/theme';
 import axiosInstance from "../../../../services/AxiosInstance";
 import { createPortal } from "react-dom";
 
-const DossierModal = ({ show, onHide, onSave, dossier, patient_id, doctors}) => {
+const DossierModal = ({ show, onHide, onSave, dossier, patient_id, doctors, services}) => {
     const [inputs, setInputs] = useState({
         desease: '',
         systolic_blood_pressure: '',
@@ -19,12 +19,17 @@ const DossierModal = ({ show, onHide, onSave, dossier, patient_id, doctors}) => 
     });
 
     const [selectedDoctor, setSelectedDoctor] = useState(null);
+    const [selectedService, setSelectedService] = useState(null);
 
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
     
     const handleDoctorChange = (option) => {
         setSelectedDoctor(option);
+    }
+
+    const handleServiceChange = (option) => {
+        setSelectedService(option);
     }
 
     const handleOnChange = (value, input) => {
@@ -42,6 +47,7 @@ const DossierModal = ({ show, onHide, onSave, dossier, patient_id, doctors}) => 
         handleOnChange('', 'weight');
         handleOnChange('', 'size');
         handleDoctorChange(null);
+        handleServiceChange(null);
     }
     
     useEffect(() => {
@@ -55,7 +61,8 @@ const DossierModal = ({ show, onHide, onSave, dossier, patient_id, doctors}) => 
             handleOnChange(dossier.oxygen_saturation ?? '', 'oxygen_saturation');
             handleOnChange(dossier.weight ?? '', 'weight');
             handleOnChange(dossier.size ?? '', 'size');
-            handleDoctorChange(doctors.find(doctor => doctor.id === dossier.doctor_id));
+            handleDoctorChange(doctors.find(doctor => doctor.id === dossier.doctor_id) ?? null);
+            handleServiceChange(services.find(service => service.id === dossier.service_id) ?? null);
         } else {
             resetForm();
         }
@@ -69,12 +76,13 @@ const DossierModal = ({ show, onHide, onSave, dossier, patient_id, doctors}) => 
         setSaving(true);
 
         const doctor_id = selectedDoctor ? selectedDoctor.id : null;
+        const service_id = selectedService ? selectedService.id : null;
 
         const url = dossier ? 'dossiers/'+ dossier.id : 'patients/'+ patient_id + '/dossiers';
         const type = dossier ? 'edit' : 'add';
         const message = dossier ? 'modifié' : 'ajouté';
 
-        axiosInstance.post(url, {...inputs, doctor_id}, {
+        axiosInstance.post(url, {...inputs, doctor_id, service_id}, {
             headers: { "Content-Type": "application/json" }
         })
             .then(function(response) {
@@ -99,7 +107,7 @@ const DossierModal = ({ show, onHide, onSave, dossier, patient_id, doctors}) => 
     };
 
     return createPortal(
-        <Modal className="modal fade" backdrop={true} dialogClassName="modal-lg" show={show} onHide={onHide} centered>
+        <Modal className="modal fade" backdrop={true} show={show} onHide={onHide} centered>
             <div className="modal-content">
                 <div className="modal-header">
                     <h5 className="modal-title">{(dossier ? 'Modifier' : 'Ajouter') + ' un dossier'}</h5>
@@ -237,7 +245,21 @@ const DossierModal = ({ show, onHide, onSave, dossier, patient_id, doctors}) => 
                                     <small style={errorStyle}>{errors.size.join('\n\r')}</small>
                                 </div>}
                             </div>
-                            
+                            <div className="col-sm-12">                                        
+                                <label className="form-label">Département<span className="text-danger">*</span></label>
+                                <Select options={services} className="custom-react-select" 
+                                    isClearable={false}
+                                    placeholder='Sélectionnez un département'
+                                    isSearchable={false}
+                                    value={selectedService}
+                                    onChange={handleServiceChange} 
+                                    getOptionValue={s => s.id}
+                                    getOptionLabel={s => s.name}
+                                />
+                                {errors.service_id && <div className="text-danger">
+                                    <small style={errorStyle}>{errors.service_id.join('\n\r')}</small>
+                                </div>}
+                            </div>
                         </div>
                     </form>
                 </div>

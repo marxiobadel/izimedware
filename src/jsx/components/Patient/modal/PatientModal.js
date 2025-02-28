@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "react-bootstrap";
 import DatePicker, { registerLocale } from "react-datepicker";
 import Select from 'react-select';
-import { errorStyle, GENDER, notifySuccess } from '../../../constant/theme';
+import { bloodGroups, errorStyle, GENDER, notifySuccess } from '../../../constant/theme';
 import fr from "date-fns/locale/fr";
 import { format } from 'date-fns';
 import axiosInstance from "../../../../services/AxiosInstance";
@@ -24,12 +24,17 @@ const PatientModal = ({ show, onHide, onSave, patient}) => {
     });
 
     const [genderOption, setGenderOption] = useState(null);
+    const [bloodGroup, setBloodGroup] = useState(null);
 
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
     
     const handleGenderChange = (option) => {
         setGenderOption(option);
+    }
+
+    const handleBloodGroupChange = (option) => {
+        setBloodGroup(option);
     }
 
     const handleOnChange = (value, input) => {
@@ -43,6 +48,7 @@ const PatientModal = ({ show, onHide, onSave, patient}) => {
         handleOnChange('', 'address');
         handleOnChange('', 'email');
         handleGenderChange(null);
+        handleBloodGroupChange(null);
         handleOnChange(new Date(), 'date_of_birth');
         handleOnChange('', 'password');
         handleOnChange('', 'password_confirmation');
@@ -55,7 +61,8 @@ const PatientModal = ({ show, onHide, onSave, patient}) => {
             handleOnChange(patient.phone ?? '', 'phone');
             handleOnChange(patient.address ?? '', 'address');
             handleOnChange(patient.email, 'email');
-            handleGenderChange(GENDER.find(gender => gender.value === patient.gender));
+            handleGenderChange(GENDER.find(gender => gender.value === patient.gender) ?? null);
+            handleBloodGroupChange(bloodGroups.find(bg => bg.value === patient.blood_group) ?? null);
             handleOnChange(patient.birthday ? new Date(patient.birthday) : null, 'date_of_birth');
             handleOnChange('', 'password');
             handleOnChange('', 'password_confirmation');
@@ -73,12 +80,13 @@ const PatientModal = ({ show, onHide, onSave, patient}) => {
 
         const date_of_birth = inputs.date_of_birth ? format(inputs.date_of_birth, 'yyyy-MM-dd') : null;
         const gender = genderOption ? genderOption.value : null;
+        const blood_group = bloodGroup ? bloodGroup.value : null;
 
         const url = patient ? 'patients/'+ patient.id : 'patients';
         const type = patient ? 'edit' : 'add';
         const message = patient ? 'modifié' : 'ajouté';
 
-        axiosInstance.post(url, {...inputs, date_of_birth, gender}, {
+        axiosInstance.post(url, {...inputs, date_of_birth, gender, blood_group}, {
             headers: { "Content-Type": "application/json" }
         })
             .then(function(response) {
@@ -132,12 +140,10 @@ const PatientModal = ({ show, onHide, onSave, patient}) => {
                                     <small style={errorStyle}>{errors.firstname.join('\n\r')}</small>
                                 </div>}
                             </div>
-                            <div className="col-sm-6 mb-3">                                        
-                                <label className="form-label">Gender<span className="text-danger">*</span></label>
+                            <div className="col-sm-4 mb-3">                                        
+                                <label className="form-label">Sexe<span className="text-danger">*</span></label>
                                 <Select options={GENDER} className="custom-react-select" 
-                                    isClearable={false}
                                     placeholder='Choisir un sexe'
-                                    isSearchable={false}
                                     value={genderOption}
                                     onChange={handleGenderChange} 
                                 />
@@ -145,7 +151,18 @@ const PatientModal = ({ show, onHide, onSave, patient}) => {
                                     <small style={errorStyle}>{errors.gender.join('\n\r')}</small>
                                 </div>}
                             </div>
-                            <div className="col-sm-6 mb-3">
+                            <div className="col-sm-4 mb-3">                                        
+                                <label className="form-label">Groupe saguin<span className="text-danger">*</span></label>
+                                <Select options={bloodGroups} className="custom-react-select" 
+                                    placeholder='Choisir un groupe sanguin'
+                                    value={bloodGroup}
+                                    onChange={handleBloodGroupChange} 
+                                />
+                                {errors.blood_group && <div className="text-danger">
+                                    <small style={errorStyle}>{errors.blood_group.join('\n\r')}</small>
+                                </div>}
+                            </div>
+                            <div className="col-sm-4 mb-3">
                                 <label className="form-label">Date de naissance<span className="text-danger">*</span></label> <br />
                                 <DatePicker 
                                     locale="fr"

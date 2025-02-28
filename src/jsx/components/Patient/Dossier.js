@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 const Dossier = ({patient_id, onCountChange}) => {
     const [dossiers, setDossiers] = useState([]);
     const [doctors, setDoctors] = useState([]);
+    const [services, setServices] = useState([]);
 
     const columns = useMemo(() => [
         {
@@ -198,6 +199,7 @@ const Dossier = ({patient_id, onCountChange}) => {
                 .then(function({data}) {
                     setDossiers([...data.dossiers]);
                     setDoctors([...data.doctors]);
+                    setServices([...data.services]);
                 })
                 .catch(function(error) {
                     if (error.name === 'CanceledError') {
@@ -329,6 +331,7 @@ const Dossier = ({patient_id, onCountChange}) => {
                 dossier={editingDossier}
                 patient_id={patient_id}
                 doctors={doctors}
+                services={services}
             />
         </>
     );

@@ -106,7 +106,7 @@ const UiTab = () => {
           </Card>
         </Col>
         <Col xl={6}>
-          <Card>
+          <Card> 
             <Card.Header>
               <Card.Title>Nav Pills Tabs</Card.Title>
             </Card.Header>

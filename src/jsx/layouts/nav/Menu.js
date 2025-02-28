@@ -19,6 +19,10 @@ export const MenuList = [
                 to: 'patients',                 
             },
             {
+                title: "Dossiers",
+                to: 'dossiers',
+            },
+            {
                 title: "Contrat d'assurance",
                 to: 'contracts',
             },

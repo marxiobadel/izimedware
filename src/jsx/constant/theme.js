@@ -115,6 +115,17 @@ export const calculateAge = (birthdate) => {
     return age;
 };
 
+export const bloodGroups = [
+    {label: 'O-', value: 'O-'},
+    {label: 'O+', value: 'O+'},
+    {label: 'A-', value: 'A-'},
+    {label: 'A+', value: 'A+'},
+    {label: 'B-', value: 'B-'},
+    {label: 'B+', value: 'B+'},
+    {label: 'AB-', value: 'AB-'},
+    {label: 'AB+', value: 'AB+'},
+];
+
 export const removeStringAndSpace = (text, stringToRemove) => {
     if (!text) return "";
     
