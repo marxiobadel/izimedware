@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDocumentTitle } from "../../hooks/useTitle";
-import { useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import axiosInstance from "../../../services/AxiosInstance";
 import bg5 from '../../../images/big/img5.jpg';
 import profile from "../../../images/profile/profile.png";
@@ -9,6 +9,8 @@ import Data from "./Dossier/Data";
 import Header from "./Dossier/Header";
 import { ToastContainer } from "react-toastify";
 import VitalSigns from "./Dossier/VitalSigns";
+
+export const DataContext = createContext();
 
 const ShowDossier = () => {
     const { id } = useParams();
@@ -26,7 +28,6 @@ const ShowDossier = () => {
             axiosInstance.get(`dossiers/${id}`, { signal: controller.signal })
                 .then(function ({ data }) {
                     setDossier({ ...data.data });
-                    console.log(data); 
                 })
                 .catch(function (error) {
                     if (error.name === 'CanceledError') {
@@ -74,6 +75,7 @@ const ShowDossier = () => {
                             <img
                                 src={dossier ? dossier.patient.avatar_url : profile}
                                 width="100"
+                                style={{height: '100px', objectFit: 'cover'}}
                                 className="img-fluid rounded-circle"
                                 alt={dossier ? dossier.patient.fullname : '---'}
                             />
@@ -106,11 +108,13 @@ const ShowDossier = () => {
                     </div>
                 </div>
             </div>
-            <div className="row">
-                <div className="col-12">
-                    <Data dossier={dossier} />
+            {dossier &&
+                <div className="row">
+                    <div className="col-12">
+                        <DataContext.Provider value={dossier}><Data /></DataContext.Provider>
+                    </div>
                 </div>
-            </div>
+            }
         </>
     );
 }

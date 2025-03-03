@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import DatePicker from "react-datepicker";
 import {Link} from 'react-router-dom';
 import axiosInstance from '../../../../services/AxiosInstance';
-import { format } from 'date-fns';
+import {format} from 'date-fns';
 import Select from 'react-select';
 import AppointmentModal from '../modal/AppointmentModal';
-import { notifySuccess } from '../../../constant/theme';
+import {notifySuccess} from '../../../constant/theme';
 
 const selectStyles = {
     control: (provided) => ({
@@ -14,7 +14,7 @@ const selectStyles = {
     }),
 };
 
-const Appointment = ({locale, doctors}) => {
+const Appointment = ({locale, doctors, patients, currentUser, dossier_id = null, patient_id = null, save = () => {}}) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [selectedSlot, setSelectedSlot] = useState(null);
@@ -23,9 +23,11 @@ const Appointment = ({locale, doctors}) => {
 
     const [slots, setSlots] = useState([]);
 
-    const handleSave = () => {
+    const handleSave = (appointment) => {
         setOpenModal(false);
         notifySuccess(`Rendez-vous sauvegardé avec succès. Merci de patientez...`);
+
+        save(appointment);
     }
 
     const handleOpen = (slot) => {
@@ -61,7 +63,7 @@ const Appointment = ({locale, doctors}) => {
 
     return (
         <>
-            <div className="card appointment-schedule">
+            <div className="card appointment-schedule" style={dossier_id === null ? {} : { border: '1px solid rgba(0, 0, 0, 0.18)', borderRadius: '20px'}}>
                 <div className="card-header pb-0 border-0">
                     <h3 className="fs-20 text-black mb-0">Calendrier des rendez-vous</h3>
                     <Select options={doctors} 
@@ -89,7 +91,8 @@ const Appointment = ({locale, doctors}) => {
                             </div>
                         </div>
                         <div className="col-xl-6 col-xxl-12  col-md-6 height415 dz-scroll" id="appointment-schedule">
-                            {slots.map((item, index) => (
+                            {slots.length > 0 ?
+                            slots.map((item, index) => (
                                 <div className="d-flex pb-3 border-bottom mb-3 align-items-end" key={index}>
                                     <div className="me-auto">
                                         <p className="text-black font-w600 mb-2"></p>
@@ -114,7 +117,11 @@ const Appointment = ({locale, doctors}) => {
                                         </Link>
                                     }
                                 </div>
-                            ))}
+                            ))
+                            :
+                                <div className="d-flex justify-content-center align-items-center">
+                                    Aucun créneau horaire de disponible.
+                                </div>}
                         </div>
                     </div>
                 </div>
@@ -124,6 +131,10 @@ const Appointment = ({locale, doctors}) => {
                 onHide={() => setOpenModal(false)}
                 onSave={handleSave}
                 slot={selectedSlot}
+                patients={patients}
+                currentUser={currentUser}
+                dossier_id={dossier_id}
+                patient_id={patient_id}
             />
         </>
     )

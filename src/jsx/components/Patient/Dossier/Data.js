@@ -1,5 +1,5 @@
 import { Card, Nav, Tab } from "react-bootstrap";
-import Appointment from "./Appointment";
+import DossierAppointment from "./Appointment";
 import Consultation from "./Consultation";
 import Prescription from "./Prescription";
 import Examen from "./Examen";
@@ -11,7 +11,7 @@ const Data = ({dossier}) => {
         <Card>
             <Card.Body>
                 <Tab.Container defaultActiveKey="appointments">
-                    <Nav as="ul" className="nav-pills mb-4 light">
+                    <Nav as="ul" className="nav-pills mb-5 light">
                         <Nav.Item as="li"><Nav.Link eventKey="appointments">Rendez-vous</Nav.Link></Nav.Item>
                         <Nav.Item as="li"><Nav.Link eventKey="consultations">Consultations</Nav.Link></Nav.Item>
                         <Nav.Item as="li"><Nav.Link eventKey="prescriptions">Prescriptions</Nav.Link></Nav.Item>
@@ -20,11 +20,7 @@ const Data = ({dossier}) => {
                         <Nav.Item as="li"><Nav.Link eventKey="treatments">Soins</Nav.Link></Nav.Item>
                     </Nav>
                     <Tab.Content>
-                        <Tab.Pane eventKey="appointments">
-                            {dossier && dossier.appointments &&
-                                <Appointment data={dossier.appointments} />
-                            }
-                        </Tab.Pane>
+                        <Tab.Pane eventKey="appointments"><DossierAppointment /></Tab.Pane>
                         <Tab.Pane eventKey="consultations">
                             {dossier && dossier.consultations &&
                                 <Consultation data={dossier.consultations} />

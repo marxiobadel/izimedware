@@ -4,7 +4,7 @@ import {
   Row,
   Col,
   Card,
-  
+
   Tooltip,
   OverlayTrigger,
   Button,
@@ -58,27 +58,27 @@ const UiPopOver = () => {
                             ? "right"
                             : placement.toLowerCase()
                           : width < 700
-                          ? placement === "Right"
-                            ? "top"
-                            : width < 385
-                            ? placement === "Left"
-                              ? "bottom"
-                              : placement.toLowerCase()
+                            ? placement === "Right"
+                              ? "top"
+                              : width < 385
+                                ? placement === "Left"
+                                  ? "bottom"
+                                  : placement.toLowerCase()
+                                : placement.toLowerCase()
                             : placement.toLowerCase()
-                          : placement.toLowerCase()
                       }
                       responsive={true}
                       overlay={
-						 <Tooltip className='toltip-popover'
-								id={`popover-positioned-${placement.toLowerCase()}`}
-							>
-							<h3 className='popover-header'>{`Popover on ${placement}`}</h3> 
-							<strong>
-								Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor.
-							</strong>
-						</Tooltip>  
-						  
-                        
+                        <Tooltip className='toltip-popover'
+                          id={`popover-positioned-${placement.toLowerCase()}`}
+                        >
+                          <h3 className='popover-header'>{`Popover on ${placement}`}</h3>
+                          <strong>
+                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor.
+                          </strong>
+                        </Tooltip>
+
+
                       }
                     >
                       <Button variant="primary" size="sm" className="me-2 mt-3 px-4">

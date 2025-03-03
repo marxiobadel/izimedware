@@ -14,10 +14,14 @@ export const GENDER = [
     { value: 'other', label: 'Autre' }
 ];
 
-export const notifyInfo = (message) => {
+export const notifyInfo = (message, autoClose = 5000) => {
+    if (String(message).length > 50) {
+        autoClose = 10000;
+    }
+
     toast.info(message, {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: autoClose,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
