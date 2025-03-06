@@ -1,12 +1,12 @@
 import { Card, Nav, Tab } from "react-bootstrap";
 import DossierAppointment from "./Appointment";
-import Consultation from "./Consultation";
-import Prescription from "./Prescription";
-import Examen from "./Examen";
-import Admission from "./Admission";
-import Soin from "./Soin";
+import DossierConsultation from "./Consultation";
+import DossierPrescription from "./Prescription";
+import DossierExamen from "./Examen";
+import DossierAdmission from "./Admission";
+import DossierSoin from "./Soin";
 
-const Data = ({dossier}) => {
+const Data = () => {
     return (
         <Card>
             <Card.Body>
@@ -21,31 +21,11 @@ const Data = ({dossier}) => {
                     </Nav>
                     <Tab.Content>
                         <Tab.Pane eventKey="appointments"><DossierAppointment /></Tab.Pane>
-                        <Tab.Pane eventKey="consultations">
-                            {dossier && dossier.consultations &&
-                                <Consultation data={dossier.consultations} />
-                            }
-                        </Tab.Pane>
-                        <Tab.Pane eventKey="prescriptions">
-                            {dossier && dossier.prescriptions &&
-                                <Prescription data={dossier.prescriptions} />
-                            }
-                        </Tab.Pane>
-                        <Tab.Pane eventKey="examens">
-                            {dossier && dossier.examens &&
-                                <Examen data={dossier.examens} />
-                            }
-                        </Tab.Pane>
-                        <Tab.Pane eventKey="admissions">
-                            {dossier && dossier.admissions &&
-                                <Admission data={dossier.admissions} />
-                            }
-                        </Tab.Pane>
-                        <Tab.Pane eventKey="treatments">
-                            {dossier && dossier.soins &&
-                                <Soin data={dossier.soins} />
-                            }
-                        </Tab.Pane>
+                        <Tab.Pane eventKey="consultations"><DossierConsultation /></Tab.Pane>
+                        <Tab.Pane eventKey="prescriptions"><DossierPrescription /></Tab.Pane>
+                        <Tab.Pane eventKey="examens"><DossierExamen /></Tab.Pane>
+                        <Tab.Pane eventKey="admissions"><DossierAdmission /></Tab.Pane>
+                        <Tab.Pane eventKey="treatments"><DossierSoin /> </Tab.Pane>
                     </Tab.Content>
                 </Tab.Container>
             </Card.Body>

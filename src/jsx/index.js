@@ -127,12 +127,14 @@ import Antecedent from "./components/Antecedent/Antecedent";
 import ShowDossier from "./components/Patient/ShowDossier";
 import ShowConsultation from "./components/consultation/ShowConsultation";
 import Dossier from "./components/Patient/Dossier/Dossier";
+import Notification from "./components/Notification/Notification";
 
 const Markup = () => {
     const allroutes = [
         // Dashboard
         { url: "", component: <Home title='Tableau de bord' /> },
         { url: "dashboard", component: <Home title='Tableau de bord' /> },
+        { url: "notifications", component: <Notification /> },
         { url: "patients", component: <Patient /> },
         { url: "antecedents", component: <Antecedent /> },
         { url: "insurances", component: <Insurance /> },

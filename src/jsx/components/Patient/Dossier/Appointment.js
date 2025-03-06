@@ -14,7 +14,7 @@ import { notifyError, notifySuccess } from "../../../constant/theme";
 const DossierAppointment = ({ currentUser }) => {
     registerLocale("fr", fr);
 
-    const { id: dossier_id, patient_id } = useContext(DataContext);
+    const dossier = useContext(DataContext);
 
     let width = window.innerWidth;
 
@@ -78,7 +78,7 @@ const DossierAppointment = ({ currentUser }) => {
         const controller = new AbortController();
 
         (() => {
-            axiosInstance.get(`dossiers/${dossier_id}/appointments`,
+            axiosInstance.get(`dossiers/${dossier.id}/appointments`,
                 { signal: controller.signal })
                 .then(function ({ data }) {
                     setAppointments(data.appointments);
@@ -110,8 +110,7 @@ const DossierAppointment = ({ currentUser }) => {
                         locale={fr}
                         patients={patients}
                         doctors={doctors}
-                        dossier_id={dossier_id}
-                        patient_id={patient_id}
+                        dossier={dossier}
                         currentUser={currentUser}
                         save={handleAdd} />
                 </div>
@@ -146,7 +145,7 @@ const DossierAppointment = ({ currentUser }) => {
                                                 </Dropdown.Menu>
                                             </Dropdown>
                                         </div>
-                                        <div className="card-body p-0 pb-3">
+                                        <div className="card-body p-0">
                                             <ul className="list-group list-group-flush">
                                                 <li className="list-group-item d-flex justify-content-between">
                                                     <span className="mb-0 title">ID patient :</span>

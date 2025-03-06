@@ -97,6 +97,8 @@ const Admission = () => {
         }
     ], []);
 
+    const [action, setAction] = useState(0);
+
     const [editingAdmission, setEditingAdmission] = useState(null);
 
     const [openModal, setOpenModal] = useState(false);
@@ -161,6 +163,7 @@ const Admission = () => {
                 setRooms([...data.rooms]);
 
                 setEditingAdmission(null);
+                setAction((prevState) => prevState + 1);
             })
             .catch(function(error) {
                 console.log(error);
@@ -335,6 +338,7 @@ const Admission = () => {
                 </Col>
             </Row>
             <AdmissionModal
+                action={action}
                 show={openModal}
                 onHide={() => setOpenModal(false)}
                 onSave={handleAddOrEditAdmission}

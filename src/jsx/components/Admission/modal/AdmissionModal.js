@@ -8,7 +8,7 @@ import fr from "date-fns/locale/fr";
 import { format } from 'date-fns';
 import { createPortal } from "react-dom";
 
-const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patients, doctors, rooms, beds, statuses}) => {
+const AdmissionModal = ({ action, show, onHide, onSave, admission, onRoomChange, patients, doctors, rooms, beds, statuses, dossier}) => {
     registerLocale("fr", fr);
 
     const [inputs, setInputs] = useState({ 
@@ -71,14 +71,20 @@ const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patient
 
     const resetForm = () => {
         handleOnChange('', 'reason');
-        handlePatientChange(null);
-        handleDoctorChange(null);
+        handlePatientChange(dossier ? patients.find(p => p.id === dossier.patient_id) : null);
+        handleDoctorChange(dossier ? (doctors.find(d => d.id === dossier.doctor_id) ?? null) : null);
         handleRoomChange(null);
         handleBedChange(null);
         handleOnChange(new Date(), 'entry_date');
         handleOnChange(new Date(), 'release_date');
         setSelectedStatus(null);
     }
+
+    useEffect(() => {
+        resetForm();
+
+        setErrors({});
+    }, [action]);
 
     useEffect(() => {
         if (admission) {
@@ -89,8 +95,6 @@ const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patient
             handleOnChange(new Date(admission.entry_date), 'entry_date');
             handleOnChange(new Date(admission.release_date), 'release_date');
             setSelectedStatus(statuses.find(status => status.value === admission.status) ?? null);
-        } else {
-            resetForm();
         }
 
         setErrors({});
@@ -108,11 +112,12 @@ const AdmissionModal = ({ show, onHide, onSave, admission, onRoomChange, patient
         const room_id = selectedRoom ? selectedRoom.id : null;
         const bed_id = selectedBed ? selectedBed.id : null;
         const status = selectedStatus ? selectedStatus.value : null;
+        const dossier_id = dossier ? dossier.id : null;
 
         axiosInstance.request({
             method: admission ? 'PUT' : 'POST',
             url: admission ? 'admissions/'+ admission.id : 'admissions',
-            data: {...inputs, status, patient_id, doctor_id, room_id, bed_id, release_date, entry_date},
+            data: {...inputs, status, patient_id, dossier_id, doctor_id, room_id, bed_id, release_date, entry_date},
             headers: {
                 "Content-Type": 'application/json'
             }

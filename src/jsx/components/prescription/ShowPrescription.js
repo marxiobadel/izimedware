@@ -57,7 +57,7 @@ const ShowPrescription = () => {
         return () => {
             controller.abort();
         }
-    }, []);
+    }, [id]);
 
     return (
         <>
@@ -86,10 +86,16 @@ const ShowPrescription = () => {
                                             <span className="mb-0">{prescription ? prescription.patient_name : '---'}</span>
                                         </li>
                                         <li className="list-group-item d-flex px-0 justify-content-between">
+                                            <strong>Département</strong>
+                                            <span className="mb-0">{prescription ? prescription?.service.name : '---'}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex px-0 justify-content-between">
                                             <strong>Origine</strong>
-                                            <span className="mb-0">
-                                                {prescription ? (prescription.admission ? 'Hospitalisation' : (prescription.consultation ? 'Consultation' : 'Patient')) 
+                                            <span className="mb-0 text-primary">
+                                                {prescription ? (prescription.admission ? 'hospitalisation' : (prescription.consultation ? 'consultation' : 'patient')) 
                                                 : '---'}
+                                                <span className="ms-1 fs-6">({prescription ? (prescription.admission ? prescription.admission.reference : (prescription.consultation ? 
+                                                prescription.consultation.reference : prescription.patient.reference)) : '---'})</span>
                                             </span>
                                         </li>
                                     </ul>

@@ -10,7 +10,7 @@ import { connect } from "react-redux";
 import { createPortal } from "react-dom";
 import TimePickerPicker from 'react-time-picker';
 
-const SoinModal = ({currentUser, show, onHide, onSave, soin, doctors, types, medicalProcedures}) => {
+const SoinModal = ({currentUser, show, onHide, onSave, soin, doctors, types, medicalProcedures, dossier = null}) => {
     registerLocale("fr", fr);
 
     const [inputs, setInputs] = useState({
@@ -76,6 +76,7 @@ const SoinModal = ({currentUser, show, onHide, onSave, soin, doctors, types, med
 
         setSaving(true);
 
+        const dossier_id = dossier ? dossier.id : null;
         const date = format(inputs.date, 'yyyy-MM-dd');
         const time = typeof inputs.time === 'object' ? format(inputs.time, 'HH:mm') : inputs.time;
         const doctor_id = doctor ? doctor.id : null;
@@ -85,7 +86,7 @@ const SoinModal = ({currentUser, show, onHide, onSave, soin, doctors, types, med
         axiosInstance.request({
             method: soin ? 'PUT' : 'POST',
             url: soin ? 'soins/'+ soin.id : 'soins',
-            data: {...inputs, date, time, type_id, doctor_id, medical_procedure_id},
+            data: {...inputs, date, time, type_id, doctor_id, medical_procedure_id, dossier_id},
             headers: {
                 "Content-Type": 'application/json'
             }

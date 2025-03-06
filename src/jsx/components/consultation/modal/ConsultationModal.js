@@ -9,7 +9,8 @@ import axiosInstance from "../../../../services/AxiosInstance";
 import { connect } from "react-redux";
 import { createPortal } from "react-dom";
 
-const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doctors, patients, medicalProcedures}) => {
+const ConsultationModal = 
+    ({action, currentUser, show, onHide, onSave, consultation, doctors, patients, medicalProcedures, dossier = null}) => {
     registerLocale("fr", fr);
 
     const [inputs, setInputs] = useState({
@@ -43,24 +44,30 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
     }
 
     const resetForm = () => {
+        const doctor = dossier ? (doctors.find(d => d.id === dossier.doctor_id) ?? null) : (currentUser ?? null);
+        
         handleOnChange('', 'reason');
-        handleDoctorChange(currentUser ?? null);
-        handlePatientChange(null);
+        handleDoctorChange(doctor);
+        handlePatientChange(dossier ? patients.find(p => p.id === dossier.patient_id) : null);
         handleMedicalProcedureChange(null);
         handleOnChange(new Date(), 'date');
     }
+
+    useEffect(() => {
+        resetForm();
+
+        setErrors({});
+    }, [action]);
     
     useEffect(() => {
         if (consultation) {
             handleOnChange(consultation.reason, 'reason');
-            handleDoctorChange(doctors.find(d => d.id === consultation.doctor_id));
-            handlePatientChange(patients.find(p => p.id === consultation.patient_id));
-            handleMedicalProcedureChange(medicalProcedures.find(mp => mp.id === consultation.medical_procedure_id));
+            handleDoctorChange(doctors.find(d => d.id === consultation.doctor_id) ?? null);
+            handlePatientChange(patients.find(p => p.id === consultation.patient_id) ?? null);
+            handleMedicalProcedureChange(medicalProcedures.find(mp => mp.id === consultation.medical_procedure_id) ?? null);
             handleOnChange(new Date(consultation.date), 'date');
-        } else {
-            resetForm();
-        }
-        
+        } 
+
         setErrors({});
     }, [consultation]);
 
@@ -73,13 +80,14 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
         const patient_id = patient ? patient.id : null;
         const doctor_id = doctor ? doctor.id : null;
         const medical_procedure_id = medicalProcedure ? medicalProcedure.id : null;
+        const dossier_id = dossier ? dossier.id : null;
 
         axiosInstance.request({
             method: consultation ? 'PUT' : 'POST',
             url: consultation ? 'consultations/'+ consultation.id : 'consultations',
-            data: {...inputs, date, patient_id, doctor_id, medical_procedure_id},
+            data: {...inputs, date, patient_id, doctor_id, medical_procedure_id, dossier_id},
             headers: {
-                "Content-Type": 'Application/json'
+                "Content-Type": 'application/json'
             }
         })
             .then(function(response) {
@@ -136,6 +144,7 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
                                     placeholder='Choisir un patient'
                                     isSearchable
                                     value={patient}
+                                    isDisabled={dossier ? true : false}
                                     onChange={handlePatientChange} 
                                     getOptionValue={p => p.id}
                                     getOptionLabel={p => p.fullname}
@@ -196,8 +205,7 @@ const ConsultationModal = ({currentUser, show, onHide, onSave, consultation, doc
             </div>
         </Modal>, document.body
     )
-}
-
+};
 
 const mapStateToProps = (state) => {
     return {

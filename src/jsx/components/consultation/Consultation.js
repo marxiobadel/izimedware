@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axiosInstance from '../../../services/AxiosInstance';
-import { ColumnFilter, handleSort, notifySuccess } from '../../constant/theme';
+import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
 import { Col, Dropdown, Row } from 'react-bootstrap';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { useDocumentTitle } from '../../hooks/useTitle';
@@ -14,6 +14,8 @@ const Consultation = () => {
     const [patients, setPatients] = useState([]);
     const [doctors, setDoctors] = useState([]);
     const [medicalProcedures, setMedicalProcedures] = useState([]);
+
+    const [action, setAction] = useState(0);
 
     const columns = useMemo(() => [
         {
@@ -101,13 +103,18 @@ const Consultation = () => {
                         notifySuccess(data.message);
                     })
                     .catch(error => {
-                        console.log(error)
+                        if (error.response && error.response.data) {
+                            notifyError('Désolé ! Cette donnée ne peut être supprimée.');
+                        } else {
+                            console.log(error);
+                        }
                     })
             }
         })
     };
 
     const handleAdd = () => {
+        setAction((prevState) => prevState + 1);
         setEditingConsultation(null);
         setOpenModal(true); 
     }
@@ -279,6 +286,7 @@ const Consultation = () => {
                 </Col>
             </Row>
             <ConsultationModal 
+                action={action}
                 show={openModal}
                 onHide={() => setOpenModal(false)}
                 onSave={handleAddOrEditConsultation}

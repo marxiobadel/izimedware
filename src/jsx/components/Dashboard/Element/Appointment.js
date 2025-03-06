@@ -14,7 +14,7 @@ const selectStyles = {
     }),
 };
 
-const Appointment = ({locale, doctors, patients, currentUser, dossier_id = null, patient_id = null, save = () => {}}) => {
+const Appointment = ({locale, doctors, patients, currentUser, dossier = null, save = () => {}}) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [selectedSlot, setSelectedSlot] = useState(null);
@@ -63,7 +63,7 @@ const Appointment = ({locale, doctors, patients, currentUser, dossier_id = null,
 
     return (
         <>
-            <div className="card appointment-schedule" style={dossier_id === null ? {} : { border: '1px solid rgba(0, 0, 0, 0.18)', borderRadius: '20px'}}>
+            <div className="card appointment-schedule" style={dossier === null ? {} : { border: '1px solid rgba(0, 0, 0, 0.18)', borderRadius: '20px'}}>
                 <div className="card-header pb-0 border-0">
                     <h3 className="fs-20 text-black mb-0">Calendrier des rendez-vous</h3>
                     <Select options={doctors} 
@@ -133,8 +133,7 @@ const Appointment = ({locale, doctors, patients, currentUser, dossier_id = null,
                 slot={selectedSlot}
                 patients={patients}
                 currentUser={currentUser}
-                dossier_id={dossier_id}
-                patient_id={patient_id}
+                dossier={dossier}
             />
         </>
     )

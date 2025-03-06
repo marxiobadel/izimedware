@@ -5,10 +5,13 @@ import { ToastContainer } from 'react-toastify';
 import PageTitle from '../../layouts/PageTitle';
 import Select from 'react-select';
 import { Table } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { notifyError, notifyInfo, notifySuccess } from '../../constant/theme';
 
 const CreatePrescription = () => {
+    const [searchParams] = useSearchParams();
+    const dossier_id = searchParams.get("dossier_id");
+    
     const [medicines, setMedicines] = useState([]);
     const [doctors, setDoctors] = useState([]);
     const [services, setServices] = useState([]);
@@ -69,7 +72,7 @@ const CreatePrescription = () => {
         const service_id = selectedService ? selectedService.id : null;
 
         axiosInstance.post('prescriptions', 
-            {medicines: inputs, reference, doctor_id, service_id}, {
+            {medicines: inputs, reference, doctor_id, service_id, dossier_id}, {
             headers: { "Content-Type": "application/json" }
         })
             .then(function(response) {

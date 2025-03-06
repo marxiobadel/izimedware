@@ -9,7 +9,7 @@ import axiosInstance from "../../../../services/AxiosInstance";
 import { connect } from "react-redux";
 import { createPortal } from "react-dom";
 
-const ExamenModal = ({currentUser, show, onHide, onSave, examen, doctors, types, medicalProcedures}) => {
+const ExamenModal = ({currentUser, show, onHide, onSave, examen, doctors, types, medicalProcedures, dossier = null}) => {
     registerLocale("fr", fr);
 
     const [inputs, setInputs] = useState({
@@ -69,15 +69,16 @@ const ExamenModal = ({currentUser, show, onHide, onSave, examen, doctors, types,
 
         setSaving(true);
 
+        const dossier_id = dossier ? dossier.id : null;
         const date = format(inputs.date, 'yyyy-MM-dd');
         const doctor_id = doctor ? doctor.id : null;
         const type_id = type ? type.id : null;
         const medical_procedure_id = medicalProcedure ? medicalProcedure.id : null;
-
+    
         axiosInstance.request({
             method: examen ? 'PUT' : 'POST',
             url: examen ? 'examens/'+ examen.id : 'examens',
-            data: {...inputs, date, type_id, doctor_id, medical_procedure_id},
+            data: {...inputs, date, type_id, doctor_id, medical_procedure_id, dossier_id},
             headers: {
                 "Content-Type": 'application/json'
             }

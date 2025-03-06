@@ -5,7 +5,7 @@ import axiosInstance from "../../../../services/AxiosInstance";
 import { format } from 'date-fns';
 import Select from 'react-select';
 
-const AppointmentModal = ({ show, onHide, onSave, slot, patients, currentUser, dossier_id = null, patient_id = null}) => {
+const AppointmentModal = ({ show, onHide, onSave, slot, patients, currentUser, dossier = null}) => {
     const [inputs, setInputs] = useState({ reason1: '' });
 
     const [saving, setSaving] = useState(false);
@@ -19,16 +19,21 @@ const AppointmentModal = ({ show, onHide, onSave, slot, patients, currentUser, d
     const handleOnChange = (value, input) => {
         setInputs(prevState => ({...prevState, [input]: value}));
     }
-    
+     
     const handleSubmit = (e) => {
         e.preventDefault();
 
         setSaving(true);
 
-        if (dossier_id === null) {
+        let patient_id = null;
+
+        if (dossier === null) {
             patient_id = isPatient(currentUser.roles) ? currentUser.id : (selectedPatient ? selectedPatient.id : null)
+        } else {
+            patient_id = dossier.patient_id;
         }
 
+        const dossier_id = dossier === null ? null : dossier.id;
         const date = format(new Date(slot.date), 'yyyy-MM-dd');
         const time = format(new Date(slot.start_time), 'HH:mm');
         const doctor_id = slot.doctor_id;
@@ -73,7 +78,7 @@ const AppointmentModal = ({ show, onHide, onSave, slot, patients, currentUser, d
                 <div className="modal-body">
                     <form>
                         <div className="row">
-                            {!isPatient(currentUser.roles) && dossier_id === null &&
+                            {!isPatient(currentUser.roles) && dossier === null &&
                                 <div className="col-sm-12 mb-3">                                        
                                     <label className="form-label">Patient<span className="text-danger">*</span></label>
                                     <Select options={patients} className="custom-react-select" 
