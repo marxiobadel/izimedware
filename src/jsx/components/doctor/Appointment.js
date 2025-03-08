@@ -143,7 +143,7 @@ const Appointment = ({appointments, setAppointments}) => {
             <Row>
 				<Col lg="12">
                     <div className="card">
-                        <div className="card-body">	
+                        <div className="card-body pb-0">	
                             <div className="table-responsive">
                                 <table {...getTableProps()} className="table dataTable display">
                                     <thead>
@@ -151,24 +151,9 @@ const Appointment = ({appointments, setAppointments}) => {
                                             <tr {...headerGroup.getHeaderGroupProps()}>
                                                 {headerGroup.headers.map(column => (
                                                     <th {...column.getHeaderProps()} className="align-top">
-                                                        <span onClick={() => handleSort(column)} 
-                                                            style={{ cursor: column.canSort ? 'pointer' : 'default' }}>
+                                                        <span onClick={() => handleSort(column)}>
                                                             {column.render('Header')}
-                                                            {column.canSort && (
-                                                                <span className="ml-1">
-                                                                    {column.isSorted ? (
-                                                                        column.isSortedDesc ?  
-                                                                            <i className="fa fa-arrow-down ms-2 fs-14"  style={{opacity: '0.7'}} />
-                                                                                :  
-                                                                            <i className="fa fa-arrow-up ms-2 fs-14" style={{opacity: '0.7'}} /> 
-                                                                        ) 
-                                                                            : 
-                                                                        (<i className="fa fa-sort ms-2 fs-14"  style={{opacity: '0.3'}} />) 
-                                                                    }
-                                                                </span>
-                                                            )}
                                                         </span>
-                                                        {column.canFilter ? column.render('Filter') : null}
                                                     </th>
                                                 ))}
                                             </tr>

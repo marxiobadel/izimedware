@@ -32,6 +32,7 @@
     "pusher-js": "^8.4.0",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
+    "react-big-calendar": "^1.10.1",
     "react-bootstrap": "^2.8.0",
     "react-bootstrap-daterangepicker": "^8.0.0",
     "react-calendar": "^4.6.0",

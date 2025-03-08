@@ -89,6 +89,7 @@ const Admission = () => {
                         </svg>
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-end" align="end">
+                        <Dropdown.Item as={Link} to={`/admissions/${row.original.id}`}>Détails</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleEdit(row.original)}>Modifier</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
                     </Dropdown.Menu>

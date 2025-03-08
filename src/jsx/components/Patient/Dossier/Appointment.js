@@ -81,9 +81,9 @@ const DossierAppointment = ({ currentUser }) => {
             axiosInstance.get(`dossiers/${dossier.id}/appointments`,
                 { signal: controller.signal })
                 .then(function ({ data }) {
-                    setAppointments(data.appointments);
-                    setPatients(data.patients);
-                    setDoctors(data.doctors);
+                    setAppointments([...data.appointments].reverse());
+                    setPatients([...data.patients]);
+                    setDoctors([...data.doctors]);
                 })
                 .catch(function (error) {
                     if (error.name === 'CanceledError') {

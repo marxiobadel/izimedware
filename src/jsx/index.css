@@ -756,3 +756,8 @@ button.react-calendar__tile.react-calendar__tile--active.react-calendar__tile--r
 .applyBtn:hover {
   background-color: #0056b3 !important; /* Bleu foncé au survol */
 }
+
+.rbc-calendar {
+  position: relative;
+  z-index: 1;
+}

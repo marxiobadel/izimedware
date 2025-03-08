@@ -52,8 +52,7 @@ const DossierPrescription = ({currentUser}) => {
             axiosInstance.get(`dossiers/${dossier.id}/prescriptions`,
                 { signal: controller.signal })
                 .then(function ({ data }) {
-                    setPrescriptions(data.prescriptions);
-                    console.log(data); 
+                    setPrescriptions([...data.prescriptions].reverse());
                 })
                 .catch(function (error) {
                     if (error.name === 'CanceledError') {

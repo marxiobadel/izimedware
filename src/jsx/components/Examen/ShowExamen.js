@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axiosInstance from "../../../services/AxiosInstance";
 import PageTitle from "../../layouts/PageTitle";
 import { ToastContainer } from "react-toastify";
@@ -7,6 +7,7 @@ import { useDocumentTitle } from "../../hooks/useTitle";
 import { Accordion } from "react-bootstrap";
 import ResultModal from "./modal/ResultModal";
 import { notifySuccess } from "../../constant/theme";
+import Result from "./Result";
 
 const ShowExamen = () => {
     const { id } = useParams();
@@ -29,7 +30,7 @@ const ShowExamen = () => {
         axiosInstance.delete(`examens/results/${id}`)
             .then(function ({ data }) {
                 setResults((prevState) => prevState.filter((state) => state.id !== id));
-             
+
                 notifySuccess(data.message);
             })
             .catch(function (error) {
@@ -37,16 +38,16 @@ const ShowExamen = () => {
             });
     }
 
-    useDocumentTitle("Détail de l'examen"); 
- 
+    useDocumentTitle("Détail de l'examen");
+
     useEffect(() => {
-        const controller = new AbortController(); 
+        const controller = new AbortController();
 
         (() => {
-            axiosInstance.get(`examens/${id}`, {signal: controller.signal})
+            axiosInstance.get(`examens/${id}`, { signal: controller.signal })
                 .then(function ({ data }) {
                     setExamen(data.data);
-                    setResults(data.data.results);
+                    setResults(data.data.results.reverse());
                 })
                 .catch(function (error) {
                     if (error.name === 'CanceledError') {
@@ -68,25 +69,29 @@ const ShowExamen = () => {
             <ToastContainer />
             <div className="row">
                 <div className="col-md-4">
-                    <div className="card">
-                        <div className="card-body pb-0">
-                            <ul className="list-group list-group-flush">
-                                <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>ID</strong><span className="mb-0">{examen ? examen.reference : '---'}</span>
-                                </li>
-                                <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>Type</strong><span className="mb-0">{examen ? examen.type?.name : '---'}</span>
-                                </li>
-                                <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>Date</strong><span className="mb-0">{examen ? examen.format_date : '---'}</span>
-                                </li>
-                                <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>Patient</strong><span className="mb-0">{examen ? examen.patient_reference : '---'}</span>
-                                </li>
-                                <li className="list-group-item d-flex px-0 justify-content-between">
-                                    <strong>Responsable</strong><span className="mb-0">{examen ? examen.doctor?.reference : '---'}</span>
-                                </li>
-                            </ul>
+                    <div className="row">
+                        <div className="col-12">
+                            <div className="card">
+                                <div className="card-body pb-0">
+                                    <ul className="list-group list-group-flush">
+                                        <li className="list-group-item d-flex px-0 justify-content-between">
+                                            <strong>ID</strong><span className="mb-0">{examen ? examen.reference : '---'}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex px-0 justify-content-between">
+                                            <strong>Type</strong><span className="mb-0">{examen ? examen.type?.name : '---'}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex px-0 justify-content-between">
+                                            <strong>Date</strong><span className="mb-0">{examen ? examen.format_date : '---'}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex px-0 justify-content-between">
+                                            <strong>Patient</strong><span className="mb-0">{examen ? examen.patient_reference : '---'}</span>
+                                        </li>
+                                        <li className="list-group-item d-flex px-0 justify-content-between">
+                                            <strong>Responsable</strong><span className="mb-0">{examen ? examen.doctor?.reference : '---'}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -101,41 +106,22 @@ const ShowExamen = () => {
                             </span>
                         </div>
                         <div className="card-body pb-0">
-                            {examen && results && 
-                            (results.length === 0 ? 
-                                <div className="d-flex align-items-center justify-content-center">
-                                    Aucun résultat d'examen
-                                </div> :
-                                <Accordion className="accordion accordion-rounded-stylish accordion-bordered" defaultActiveKey="0">
-                                    {results.map((result, i) => (
-                                    <Accordion.Item  key={i} eventKey={`${i}`}>
-                                        <Accordion.Header className="accordion-header accordion-header-primary">
-                                            Résultat #{i + 1} - {result.created_at}
-                                            <span className="accordion-header-indicator "></span>					              
-                                        </Accordion.Header>
-                                        <Accordion.Collapse eventKey={`${i}`} className="accordion__body">
-                                            <div className="accordion-body">
-                                                {result.content}
-                                                <div className="text-end mt-2">
-                                                    {result.file_url &&
-                                                    <Link to={'#'} onClick={() => window.open(result.file_url, "_blank", "noopener,noreferrer")}>
-                                                        <i className="fa fa-download text-dark me-3"></i>
-                                                    </Link>}
-                                                    <Link to={'#'} onClick={() => handleDeleteResult(result.id)}>
-                                                        <i className="fa fa-trash text-danger"></i>
-                                                    </Link>
-                                                </div>
-                                            </div>
-                                        </Accordion.Collapse>
-                                    </Accordion.Item>
-                                    ))}
-                                </Accordion>
-                            )}
+                            {examen && results &&
+                                (results.length === 0 ?
+                                    <div className="d-flex align-items-center justify-content-center">
+                                        Aucun résultat d'examen
+                                    </div> :
+                                    <Accordion className="accordion accordion-rounded-stylish accordion-bordered" defaultActiveKey="0">
+                                        {results.map((result, i) => (
+                                            <Result key={i} result={result} index={i} destroy={handleDeleteResult} />
+                                        ))}
+                                    </Accordion>
+                                )}
                         </div>
                     </div>
                 </div>
             </div>
-            <ResultModal 
+            <ResultModal
                 id={id}
                 show={openModal}
                 onHide={() => setOpenModal(false)}

@@ -46,6 +46,7 @@ const Appointment = ({locale, doctors, patients, currentUser, dossier = null, sa
                 {signal: controller.signal})
                 .then(function({data}) {
                     setSlots(data);
+                    console.log(data)
                 })
                 .catch(function(error) {
                     if (error.name === 'CanceledError') {
@@ -98,6 +99,8 @@ const Appointment = ({locale, doctors, patients, currentUser, dossier = null, sa
                                         <p className="text-black font-w600 mb-2"></p>
                                         <ul>
                                             <li><i className="las la-clock"></i>{item.format_start_time} - {item.format_end_time}</li>
+                                            {!selectedDoctor &&
+                                            <li><i className="las la-user"></i>{item.doctor_name}</li>}
                                             <li className={`text-${item.status_color}`}>
                                                 {item.status === "free" ?
                                                     <i className="las la-plus-circle"></i> : 

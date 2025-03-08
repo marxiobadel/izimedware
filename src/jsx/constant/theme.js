@@ -119,6 +119,10 @@ export const calculateAge = (birthdate) => {
     return age;
 };
 
+export const isImageUrl = (url) => {
+    return /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(url);
+};
+
 export const bloodGroups = [
     {label: 'O-', value: 'O-'},
     {label: 'O+', value: 'O+'},
