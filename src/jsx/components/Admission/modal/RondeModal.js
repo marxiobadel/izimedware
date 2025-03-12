@@ -97,7 +97,7 @@ const RondeModal = ({ show, onHide, onSave, ronde, admission, doctors }) => {
         <Modal className="modal fade" backdrop={true} show={show} onHide={onHide} centered>
             <div className="modal-content">
                 <div className="modal-header">
-                    <h5 className="modal-title">{`${ronde ? 'Modifier': 'Ajouter'} un visiteur`}</h5>
+                    <h5 className="modal-title">{`${ronde ? 'Modifier': 'Ajouter'} une ronde`}</h5>
                     <button type="button" className="btn-close" onClick={onHide}></button>
                 </div>
                 <div className="modal-body">

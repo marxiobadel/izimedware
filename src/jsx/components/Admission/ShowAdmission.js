@@ -8,11 +8,18 @@ import Autorisation from "./Autorisation";
 import Interdiction from "./Interdiction";
 import Visiteur from "./Visiteur";
 import Ronde from "./Ronde";
+import Soin from "./Soin";
+import Examen from "./Examen";
+import Prescription from "./Prescription";
 
 const ShowAdmission = () => {
     const { id } = useParams();
 
     const navigate = useNavigate();
+
+    const [openSoinModal, setOpenSoinModal] = useState(false);
+    const [openExamenModal, setOpenExamenModal] = useState(false);
+    const [openPrescriptionModal, setOpenPrescriptionModal] = useState(false);
 
     const [admission, setAdmission] = useState(null);
 
@@ -25,7 +32,7 @@ const ShowAdmission = () => {
             axiosInstance.get(`admissions/${id}`, { signal: controller.signal })
                 .then(function ({ data }) {
                     setAdmission(data.data);
-                    console.log(data); 
+                    console.log(data);  
                 })
                 .catch(function (error) {
                     if (error.name === 'CanceledError') {
@@ -154,15 +161,21 @@ const ShowAdmission = () => {
                             <div className="row">
                                 <div className="col-4 pt-3 pb-3 border-end">
                                     <h3 className="mb-1 text-primary">{admission ? admission.soins_count : '---'}</h3>
-                                    <span className="fs-6">Soins</span>
+                                    <Link className="fs-6" to={`#`} onClick={() => setOpenSoinModal(true)}>
+                                        Soins
+                                    </Link>
                                 </div>
                                 <div className="col-4 pt-3 pb-3 border-end">
                                     <h3 className="mb-1 text-primary">{admission ? admission.examens_count : '---'}</h3>
-                                    <span className="fs-6">Examens</span>
+                                    <Link className="fs-6" to={`#`} onClick={() => setOpenExamenModal(true)}>
+                                        Examens
+                                    </Link>
                                 </div>
                                 <div className="col-4 pt-3 pb-3">
                                     <h3 className="mb-1 text-primary">{admission ? admission.prescriptions_count : '---'}</h3>
-                                    <span className="fs-6">Ordonnances</span>
+                                    <Link className="fs-6" to={`#`} onClick={() => setOpenPrescriptionModal(true)}>
+                                        Ordonnances
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -185,6 +198,25 @@ const ShowAdmission = () => {
                     </>
                 }
             </Row>
+            {admission &&
+            <>
+                <Soin  
+                    show={openSoinModal}
+                    onHide={() => setOpenSoinModal(false)}
+                    soins={admission.soins}
+                />
+                <Examen  
+                    show={openExamenModal}
+                    onHide={() => setOpenExamenModal(false)}
+                    examens={admission.examens}
+                />
+                <Prescription  
+                    show={openPrescriptionModal}
+                    onHide={() => setOpenPrescriptionModal(false)}
+                    prescriptions={admission.prescriptions}
+                />
+            </>
+            }
         </>
     );
 }

@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { notifyInfo, notifySuccess } from "../../constant/theme";
 import { Dropdown } from 'react-bootstrap';
 import RondeModal from "./modal/RondeModal";
+import parse from 'html-react-parser';
 
 const Ronde = ({ admission }) => {
     const [rondes, setRondes] = useState([]);
@@ -107,7 +108,9 @@ const Ronde = ({ admission }) => {
                                 <li key={ronde.id}>
                                     <div className="timeline-panel">
                                         <div className="media-body">
-                                            <h5 className="mb-0">{ronde.doctor_name} ({ronde.task})</h5>
+                                            <h5 className="mb-0">
+                                                {ronde.doctor_name} {ronde.task ? parse('<br><small>('+ ronde.task +')</small>') : ''}
+                                            </h5>
                                             <small className="text-muted">{ronde.format_datetime}</small>
                                         </div>
                                         <Dropdown className="dropdown ms-2">
