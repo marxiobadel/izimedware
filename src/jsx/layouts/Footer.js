@@ -8,7 +8,7 @@ const Footer = () => {
 			<div className="copyright">
 				<p>Copyright © 
 					{/* Designed &amp;  */}
-					{" "}Developed by{" "}
+					{" "}Developée par{" "}
 					<a href="https://izipresta.com/" target="_blank" rel="noreferrer">
 						{DEVNAME}
 					</a>{" "}

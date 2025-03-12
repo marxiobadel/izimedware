@@ -4,45 +4,62 @@ import * as tf from "@tensorflow/tfjs";
 import { Accordion } from "react-bootstrap";
 import { useRef, useState } from "react";
 import { isImageUrl, notifyError } from "../../constant/theme";
+import axiosInstance from "../../../services/AxiosInstance";
 
 const Result = ({ result, index, destroy }) => {
     const imageRef = useRef(null);
     const [loading, setLoading] = useState(false);
     const [predictions, setPredictions] = useState([]);
 
-    const classifyImage = async () => {
+    const loadModel = async() => {
+        await tf.setBackend("webgl"); 
+        await tf.ready(); 
+    
+        const model = await mobilenet.load();
+        return model;
+    }
+
+    const classifyImage = () => {
         setLoading(true);
 
-        mobilenet
-            .load() 
-            .then((model) => {
-                const img = new Image();
-                img.crossOrigin = "anonymous"; 
-                img.src = result.file_url;
+        axiosInstance
+            .get(`examens/results/${result.id}`, { responseType: "blob" })
+            .then((response) => {
+                const blob = response.data;
+    
+                mobilenet
+                    .load() 
+                    .then((model) => {
+                        const img = new Image();
+                        img.crossOrigin = "use-credentials"; 
+                        img.src = URL.createObjectURL(blob);
 
-                img.onload = () => {
-                    imageRef.current = img;
-                    model
-                        .classify(img)
-                        .then((results) => {
-                            setPredictions(prevState => [...prevState, ...results]);
-                        })
-                        .catch(() => {
-                            notifyError("La classification a échoué.");
-                        })
-                        .finally(() => {
-                            setLoading(false);
-                        });
-                };
+                        img.onload = () => {
+                            imageRef.current = img;
+                            model
+                                .classify(img)
+                                .then((results) => {
+                                    setPredictions([]);
+                                    setPredictions(prevState => [...prevState, ...results]);
+                                })
+                                .catch(() => {
+                                    notifyError("La classification a échoué.");
+                                })
+                                .finally(() => {
+                                    setLoading(false);
+                                });
+                        };
 
-                img.onerror = () => {
-                    notifyError("Votre image n'a pas chargé correctement.")
-                };
-            })
-            .catch(() => {
-                notifyError("Le model d'entrainement a échoué.");
-            })
-            .finally(() => {
+                        img.onerror = () => notifyError("Error loading image blob");
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        notifyError("Le model d'entrainement a échoué.");
+                        setLoading(false);
+                    })
+            }).catch((error) => {
+                console.log(error);
+                notifyError("Votre image n'a pas chargé correctement.");
                 setLoading(false);
             });
     };
@@ -60,23 +77,23 @@ const Result = ({ result, index, destroy }) => {
                         <div className="mt-2">
                             <h4 className="font-semibold">Prédictions des données image grâce à l'IA :</h4>
                             <ul className="mt-2">
-                                {predictions.map((prediction, index) => (
-                                    <li key={index} className="text-gray-700">
+                                {predictions.map((prediction, i) => (
+                                    <li key={i}>
                                         {prediction.className} - <strong>{(prediction.probability * 100).toFixed(2)}%</strong>
                                     </li>
                                 ))}
                             </ul>
                         </div>)}
                     <img ref={imageRef} src={result.file_url} alt="Input"
-                        style={{ display: predictions.length > 0 ? 'block' : 'none' }}
-                        className="w-64 h-auto mb-4 border rounded mt-2"
+                        style={{ display: predictions.length > 0 ? 'block' : 'none', width: '100px' }}
+                        className="mb-4 border rounded mt-2" 
                     />
                     <div className="text-end mt-2">
                         {result.file_url &&
                             <Link to={'#'} onClick={() => window.open(result.file_url, "_blank", "noopener,noreferrer")}>
                                 <i className="fa fa-download text-dark me-3"></i>
                             </Link>}
-                        {isImageUrl(result.file_url) &&
+                        {result.file_url && isImageUrl(result.file_url) &&
                             <Link to={'#'} onClick={classifyImage}>
                                 {loading ?
                                     <i className="fas fa-ellipsis-h text-primary me-3"></i> :

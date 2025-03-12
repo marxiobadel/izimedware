@@ -64,7 +64,8 @@ const BedModal = ({ show, onHide, onSave, bed, rooms}) => {
                     onSave(data.data, type);
 
                     handleOnChange('', 'number');
-                    handleRoomChange(null)
+                    handleRoomChange(null);
+                    setErrors({});
 
                     notifySuccess(`Lit ${message} avec succès`);
                 }

@@ -58,7 +58,7 @@ const ShowDossier = () => {
                         <li className="breadcrumb-item"><Link to={"#"}>{dossier ? dossier.reference : '---'}</Link></li>
                     </ol>
                 </div>
-            </div>
+            </div> 
             <div className="row">
                 <Header dossier={dossier} setDossier={setDossier} />
             </div>

@@ -4,8 +4,8 @@ import { errorStyle, notifySuccess } from '../../../constant/theme';
 import axiosInstance from "../../../../services/AxiosInstance";
 import { createPortal } from "react-dom";
 
-const UnityModal = ({ show, onHide, onSave }) => {
-    const [inputs, setInputs] = useState({ name: '' });
+const AutorisationModal = ({ show, onHide, onSave, admission }) => {
+    const [inputs, setInputs] = useState({ description: '' });
 
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
@@ -21,7 +21,7 @@ const UnityModal = ({ show, onHide, onSave }) => {
 
         axiosInstance.request({
             method: 'POST',
-            url: 'unities',
+            url: `admissions/${admission.id}/autorisations`,
             data: inputs,
             headers: {
                 "Content-Type": 'application/json'
@@ -35,10 +35,10 @@ const UnityModal = ({ show, onHide, onSave }) => {
                 } else {
                     onSave(data.data);
 
-                    handleOnChange('', 'name');
+                    handleOnChange('', 'description');
                     setErrors({});
 
-                    notifySuccess(`${data.data.name} ajoutée avec succès`);
+                    notifySuccess(`Autorisation ajoutée avec succès`);
                 }
             })
             .catch(function(error) {
@@ -53,20 +53,21 @@ const UnityModal = ({ show, onHide, onSave }) => {
         <Modal className="modal fade" backdrop={true} dialogClassName="modal-sm" show={show} onHide={onHide} centered>
             <div className="modal-content">
                 <div className="modal-header">
-                    <h5 className="modal-title">Ajouter une unité</h5>
+                    <h5 className="modal-title">Ajouter une autorisation</h5>
                     <button type="button" className="btn-close" onClick={onHide}></button>
                 </div>
                 <div className="modal-body">
                     <form>
                         <div className="row">
                             <div className="col-sm-12">
-                                <label className="form-label">Nom<span className="text-danger">*</span></label>
-                                <input type="text" 
-                                    value={inputs.name} 
-                                    onChange={event => handleOnChange(event.target.value, 'name')} 
-                                    className="form-control" />
-                                {errors.name && <div className="text-danger">
-                                    <small style={errorStyle}>{errors.name.join('\n\r')}</small>
+                                <label className="form-label">Description<span className="text-danger">*</span></label>
+                                <textarea
+                                    rows={3}
+                                    value={inputs.description} 
+                                    onChange={event => handleOnChange(event.target.value, 'description')} 
+                                    className="form-control"> </textarea>
+                                {errors.description && <div className="text-danger">
+                                    <small style={errorStyle}>{errors.description.join('\n\r')}</small>
                                 </div>}
                             </div>
                         </div>
@@ -83,4 +84,4 @@ const UnityModal = ({ show, onHide, onSave }) => {
     )
 }
 
-export default UnityModal;
+export default AutorisationModal;

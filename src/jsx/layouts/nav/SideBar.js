@@ -184,10 +184,10 @@ const SideBar = ({currentUser}) => {
                 </ul>
 
                 <div className="copyright">
-                    <p><strong>{APPNAME} Hospital Admin Dashboard</strong> © {date.getFullYear()} All Rights Reserved</p>
-                    <p>Made with <span className="heart"
+                    <p><strong>Tableau de bord {APPNAME}</strong> © {date.getFullYear()} Tous Droits Réservés</p>
+                    <p>Fait avec <span className="heart"
                         onClick={(e) => e.target.classList.toggle('heart-blast')}
-                    ></span> by {DEVNAME}
+                    ></span> par {DEVNAME}
                     </p>
                 </div>
             </div>

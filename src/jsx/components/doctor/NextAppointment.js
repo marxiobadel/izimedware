@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { ProgressBar } from "react-bootstrap";
 
 const NextAppointment = ({ nextAppointment }) => {
-    const targetTime = new Date(nextAppointment.time);
+    const targetTime = new Date(nextAppointment.datetime);
 
     const [progress, setProgress] = useState(0);
-    const [remainingTime,  setRemainingTime] = useState('00:00:00');
+    const [remainingTime, setRemainingTime] = useState('00:00:00:00');
 
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -14,7 +14,7 @@ const NextAppointment = ({ nextAppointment }) => {
 
             if (remainingTimeMillis <= 0) {
                 setProgress(100);
-                setRemainingTime('00:00:00');
+                setRemainingTime('00:00:00:00');
                 clearInterval(intervalId);
             } else {
                 const totalDuration = targetTime - new Date().setHours(0, 0, 0, 0);
@@ -24,12 +24,13 @@ const NextAppointment = ({ nextAppointment }) => {
 
                 setProgress(newProgress);
 
-                const hours = Math.floor(remainingTimeMillis / 1000 / 3600);
-                const minutes = Math.floor((remainingTimeMillis % (1000 * 3600)) / 60000);
-                const seconds = Math.floor((remainingTimeMillis % 60000) / 1000);
+                const days = Math.floor(remainingTimeMillis / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((remainingTimeMillis % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((remainingTimeMillis % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remainingTimeMillis % (1000 * 60)) / 1000);
 
                 setRemainingTime(
-                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+                    `${String(days).padStart(2, '0')}:${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
                 );
             }   
         }, 1000);
