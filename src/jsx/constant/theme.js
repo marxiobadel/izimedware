@@ -98,6 +98,18 @@ export const isMember = (roles = []) => {
     return roles.some(role => role.name === 'member');
 };
 
+export const isPharmacist = (roles = []) => {
+    return roles.some(role => role.name === 'pharmacist');
+};
+
+export const isAccountant = (roles = []) => {
+    return roles.some(role => role.name === 'accountant');
+};
+
+export const isLaboratorist = (roles = []) => {
+    return roles.some(role => role.name === 'laboratorist');
+};
+
 export const getLastFiveYears = () => {
     const currentYear = new Date().getFullYear();
     return Array.from({ length: 5 }, (_, i) => currentYear - i);

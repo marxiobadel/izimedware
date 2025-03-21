@@ -1,4 +1,4 @@
-import { isCassier, isMedecin, isSuperAdmin } from "../../constant/theme";
+import { isCassier, isMedecin, isPharmacist, isSuperAdmin } from "../../constant/theme";
 
 export const MenuList = [
     {   
@@ -193,7 +193,7 @@ export const MenuList = [
         ]
     },
     {
-        id: 'Chambres',
+        id: 'rooms',
         title:'Chambres',
         classsChange: 'mm-collapse',
         iconStyle: <i className="flaticon-381-notepad" />,
@@ -209,7 +209,7 @@ export const MenuList = [
         ]
     },
     {
-        id: 'Lits',
+        id: 'beds',
         title:'Lits',
         classsChange: 'mm-collapse',
         iconStyle: <i className="flaticon-381-notepad" />,
@@ -217,6 +217,22 @@ export const MenuList = [
             {
                 title:'Liste',
                 to: 'beds',
+            },
+        ]
+    },
+    {
+        id: 'equipements',
+        title:'Equipements',
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="flaticon-381-notepad" />,
+        content : [
+            {
+                title:'Liste',
+                to: 'equipements',
+            },
+            {
+                title:'Type',
+                to: 'types/equipement',
             },
         ]
     },
@@ -292,6 +308,15 @@ export const getFilteringMenuList = (roles) => {
 
     if (isCassier(roles)) {
         return MenuList.filter(menu => menu.id === 'dashboard' || menu.id === 'invoices' || menu.id === 'config')
+                    .map(menu => ({
+                        ...menu, 
+                        content: menu.content.some(subMenu => subMenu.to === 'edit-profile') ? 
+                                menu.content.filter(subMenu => subMenu.to === 'edit-profile') : menu.content
+                    }));
+    }
+
+    if (isPharmacist(roles)) {
+        return MenuList.filter(menu => menu.id === 'dashboard' || menu.id === 'medicines' || menu.id === 'config')
                     .map(menu => ({
                         ...menu, 
                         content: menu.content.some(subMenu => subMenu.to === 'edit-profile') ? 

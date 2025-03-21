@@ -129,6 +129,7 @@ import ShowConsultation from "./components/consultation/ShowConsultation";
 import Dossier from "./components/Patient/Dossier/Dossier";
 import Notification from "./components/Notification/Notification";
 import ShowAdmission from "./components/Admission/ShowAdmission";
+import Equipement from "./components/Equipement/Equipement";
 
 const Markup = () => {
     const allroutes = [
@@ -170,6 +171,7 @@ const Markup = () => {
         { url: "admissions/:id", component: <ShowAdmission /> },
         { url: "soins", component: <Soin /> },
         { url: "rooms", component: <Room /> },
+        { url: "equipements", component: <Equipement /> },
         { url: "slots", component: <Slot /> },
         { url: "beds", component: <Bed /> },
         { url: "leaves", component: <Leave /> },

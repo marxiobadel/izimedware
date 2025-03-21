@@ -1,93 +1,53 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Badge, Col, Dropdown, Row } from 'react-bootstrap';
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../../hooks/useTitle';
 import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
-import TypeModal from './modal/TypeModal';
-import axios from 'axios';
+import EquipementModal from './modal/EquipementModal';
 
-const Type = () => {
-    let {status} = useParams();
-
-    let title = "Types d'examens médicaux";
-    let parentTitle = "Examens";
-    let parentValue = 'examens_count';
-
-    const allTypes = ["exam", "room", "leave", "soin", 'antecedent', 'equipement'];
-   
-    switch (status) {
-        case 'exam':
-            title = "Types d'examens médicaux";
-            parentTitle = "Examens";
-            parentValue = "examens_count";
-            break;
-        case 'room':
-            title = "Types de chambres";
-            parentTitle = "Chambres";
-            parentValue = "rooms_count";
-            break;
-        case 'leave':
-            title = "Types de congés";
-            parentTitle = "Congés";
-            parentValue = "leaves_count";
-            break;
-        case 'soin':
-            title = "Types de soins";
-            parentTitle = "Soins";
-            parentValue = "soins_count";
-            break;
-        case 'antecedent':
-            title = "Types d'antécédents médicaux";
-            parentTitle = "Antécédents médicaux";
-            parentValue = "antecedents_count";
-            break;
-        case 'equipement':
-            title = "Types d'équipements";
-            parentTitle = "Equipements";
-            parentValue = "equipements_count";
-            break;
-    }
-
+const Equipement = () => {
+    const [equipements, setEquipements] = useState([]);
     const [types, setTypes] = useState([]);
+    const [statuses, setStatuses] = useState([]);
 
     const columns = useMemo(() => [
         {
-            Header: 'ID',
-            Footer: 'ID',
+            Header : 'ID',
+            Footer : 'ID',
             accessor: 'id',
             Filter: ColumnFilter,
         },
         {
-            Header: 'Nom',
-            Footer: 'Nom',
+            Header : 'Nom',
+            Footer : 'Nom',
             accessor: 'name',
             Filter: ColumnFilter,
         },
         {
-            Header: parentTitle,
-            Footer: parentTitle,
-            accessor: parentValue,
+            Header : 'Type',
+            Footer : 'Type',
+            accessor: 'type.name',
             Filter: ColumnFilter,
-            Cell: ({ value }) => (
+        },
+        {
+            Header : 'Etat',
+            Footer : 'Etat',
+            accessor: 'status_label',
+            Filter: ColumnFilter,
+            Cell: ({ value, row }) => (
                 <div className="bootstrap-badge text-center">
-					<Badge bg="" className='badge-rounded badge-outline-primary'>{value}</Badge>
+					<Badge bg="" className={`badge-rounded badge-outline-${row.original.status_color}`}>{value}</Badge>
 				</div>
             ),
         },
         {
-            Header: 'Ajouté le',
-            Footer: 'Ajouté le',
+            Header : 'Ajoutée le',
+            Footer : 'Ajoutée le',
             accessor: 'created_at',
-            Filter: ColumnFilter,
-        },
-        {
-            Header: 'Modifié le',
-            Footer: 'Modifié le',
-            accessor: 'updated_at',
             Filter: ColumnFilter,
         },
         {
@@ -112,9 +72,9 @@ const Type = () => {
                 </Dropdown>
             ),
         }
-    ], [parentTitle, parentValue]);
+    ], []);
 
-    const [editingType, setEditingType] = useState(null);
+    const [editingEquipement, setEditingEquipement] = useState(null);
 
     const [openModal, setOpenModal] = useState(false);
    
@@ -122,16 +82,16 @@ const Type = () => {
 
 	const tableInstance = useTable({
 		columns,
-		data: types,	
+		data: equipements,	
 		initialState: {pageIndex: 0}
 	}, useFilters, useGlobalFilter, useSortBy, usePagination);
 
-    const handleEdit = (type) => {
-        setEditingType(type);
+    const handleEdit = (equipement) => {
+        setEditingEquipement(equipement);
         setOpenModal(true);
     };
 
-    const handleDelete = (type) => {
+    const handleDelete = (equipement) => {
         Swal.fire({
             title:'Etes-vous sûr ?',
             text: "Après suppression, vous ne pourrez pas récupérer la donnée supprimée !",
@@ -143,9 +103,9 @@ const Type = () => {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosInstance.delete(`types/${type.id}`)
+                axiosInstance.delete(`equipements/${equipement.id}`)
                     .then(({data}) => {
-                        setTypes((prevState) => prevState.filter((state) => state.id !== type.id));
+                        setEquipements((prevState) => prevState.filter((state) => state.id !== equipement.id));
 
                         notifySuccess(data.message);
                     })
@@ -161,17 +121,17 @@ const Type = () => {
     };
 
     const handleAdd = () => {
-        setEditingType(null);
+        setEditingEquipement(null);
         setOpenModal(true); 
     }
 
-    const handleAddOrEditType = (type, which) => {
-        if (which === 'edit') {
-            setTypes((prevState) =>
-                prevState.map((state) => (state.id === type.id ? {...state, ...type} : state))
+    const handleAddOrEditEquipement = (equipement, type) => {
+        if (type === 'edit') {
+            setEquipements((prevState) =>
+                prevState.map(state => (state.id === equipement.id ? {...state, ...equipement} : state))
             );
         } else {
-            setTypes((prevState) => [type, ...prevState]);
+            setEquipements((prevState) => [equipement, ...prevState]);
         }
 
         setOpenModal(false);
@@ -195,22 +155,20 @@ const Type = () => {
 
     const {pageIndex} = state;
 
-    useDocumentTitle(title);
+    useDocumentTitle('Equipements');
 
     useEffect(() => {
-        if (!allTypes.some(uri => uri === status)) {
-            status = 'exam';
-        }
-
         const controller = new AbortController();
 
         (() => {
-            axiosInstance.get(`types?status=${status}`, {signal: controller.signal})
+            axiosInstance.get('equipements', {signal: controller.signal})
                 .then(function({data}) {
+                    setEquipements([...data.equipements]);
                     setTypes([...data.types]);
+                    setStatuses([...data.statuses]);
                 })
                 .catch(function(error) {
-                    if (axios.isCancel(error)) {
+                    if (error.name === 'CanceledError') {
                         console.log('requête annulée.');
                     } else {
                         console.log(error);
@@ -223,17 +181,17 @@ const Type = () => {
         return () => {
             controller.abort();
         }
-    }, [status]);
+    }, []);
 
     return (
         <>
             <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
                 <div className="me-auto">
-                    <h2 className="text-black font-w600">Types</h2>
-                    <p className="mb-0">{title}</p>
+                    <h2 className="text-black font-w600">Equipements</h2>
+                    <p className="mb-0">Liste des équipements</p>
                 </div>
                 <div>
-                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouveau type</Link>
+                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouveau équipement</Link>
                 </div>
             </div>
             <ToastContainer />
@@ -332,15 +290,16 @@ const Type = () => {
 					</div>
                 </Col>
             </Row>
-            <TypeModal 
+            <EquipementModal
                 show={openModal}
                 onHide={() => setOpenModal(false)}
-                onSave={handleAddOrEditType}
-                type={editingType}
-                status={status}
+                onSave={handleAddOrEditEquipement}
+                equipement={editingEquipement}
+                types={types}
+                statutes={statuses}
             />
         </>
     );
 };
 
-export default Type;
+export default Equipement;
