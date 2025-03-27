@@ -78,7 +78,7 @@ export const MenuList = [
     },
     {
         id: 'consultations',
-        title:'Consultations',
+        title: 'Consultations',
         classsChange: 'mm-collapse',
         iconStyle: <i className="flaticon-381-notepad" />,
         content : [
@@ -89,8 +89,24 @@ export const MenuList = [
         ]
     },
     {
+        id: 'echantillons',
+        title: 'Echantillons',
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="flaticon-381-notepad" />,
+        content : [
+            {
+                title:'Liste',
+                to: 'echantillons',
+            },
+            {
+                title:'Type',
+                to: 'types/echantillon',
+            },
+        ]
+    },
+    {
         id: 'examens',
-        title:'Examens',
+        title: 'Examens',
         classsChange: 'mm-collapse',
         iconStyle: <i className="flaticon-381-notepad" />,
         content : [

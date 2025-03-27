@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../../services/AxiosInstance';
 import { useDropzone } from 'react-dropzone';
 import { notifyError, notifySuccess } from '../../constant/theme';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 const Invoice = () => {
     const imageStyle = {
@@ -10,11 +12,19 @@ const Invoice = () => {
         objetFit: 'cover'
     };
 
-    const [type, setType] = useState('');
+    const [inputs, setInputs] = useState({
+        name: '',
+        address: '',
+        phone: '',
+        file_note: '',
+        invoice_type: '',
+        email: '',
+        website: ''
+    });
 
-    const handleTypeChange = (event) => {
-        setType(event.target.value);
-    };
+    const handleOnChange = (value, input) => {
+        setInputs(prevState => ({...prevState, [input]: value}));
+    }
 
     const [image, setImage] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
@@ -39,12 +49,10 @@ const Invoice = () => {
         setSaving(true);
 
         axiosInstance.post(`settings/invoice/update`,
-            { invoice_type: type, logo: image },
+            { ...inputs, logo: image },
             { headers: {"Content-Type": "multipart/form-data"}}
         )
             .then(function ({ data }) {
-                setType(data.invoice_type);
-
                 notifySuccess(data.message);
             })
             .catch(function (error) {
@@ -63,7 +71,13 @@ const Invoice = () => {
         (() => {
             axiosInstance.get('settings/invoice/index', {signal: controller.signal})
                 .then(function({data}) {
-                    setType(data.invoice_type);
+                    handleOnChange(data.name ?? '', 'name');
+                    handleOnChange(data.address ?? '', 'address');
+                    handleOnChange(data.phone ?? '', 'phone');
+                    handleOnChange(data.invoice_type, 'invoice_type');
+                    handleOnChange(data.file_note ?? '', 'file_note');
+                    handleOnChange(data.email ?? '', 'email');
+                    handleOnChange(data.website ?? '', 'website');
                     setPreviewImage(data.logo_url);
                 })
                 .catch(function(error) {
@@ -83,41 +97,96 @@ const Invoice = () => {
     return (
         <div className="card pb-0">
             <div className="card-header border-0 pb-0">
-                <h4 className="card-title">Paramètres de facture</h4>
+                <h4 className="card-title">Paramètres de fichiers</h4>
             </div>
             <div className="card-body px-4">
                 <div className="row mt-4">
-                    <div className="col-6 col-sm-4 col-md-3">
+                    <div className="col-6 col-sm-4 col-md-3 mb-3">
                         <div className="form-check">
                             <input
                                 className="form-check-input"
                                 type="radio"
                                 name="type"
                                 value="receipt"
-                                checked={type === 'receipt'}
-                                onChange={handleTypeChange}
+                                checked={inputs.invoice_type === 'receipt'}
+                                onChange={(event) => handleOnChange(event.target.value, 'invoice_type')}
                             />
                             <label className="form-check-label" style={{ paddingTop: '4px' }}>
                                 Reçu
                             </label>
                         </div>
                     </div>
-                    <div className="col-6 col-sm-4 col-md-3">
+                    <div className="col-6 col-sm-8 col-md-9 mb-3">
                         <div className="form-check">
                             <input
                                 className="form-check-input"
                                 type="radio"
                                 name="type"
                                 value="invoice"
-                                checked={type === 'invoice'}
-                                onChange={handleTypeChange}
+                                checked={inputs.invoice_type === 'invoice'}
+                                onChange={(event) => handleOnChange(event.target.value, 'invoice_type')}
                             />
                             <label className="form-check-label" style={{ paddingTop: '4px' }}>
-                                Facture A4
+                                Fichier A4
                             </label>
                         </div>
                     </div>
-                    <div className="col-12 col-sm-12 col-md-12">
+                    <div className="col-sm-6 mb-3">
+                        <label className="form-label">Nom de l'hôpital</label>
+                        <input
+                            type="text"
+                            value={inputs.name} 
+                            onChange={event => handleOnChange(event.target.value, 'name')} 
+                            className="form-control"
+                        />
+                    </div>
+                    <div className="col-sm-6 mb-3">
+                        <label className="form-label">Numéro de contact</label>
+                        <input
+                            type="text"
+                            value={inputs.phone} 
+                            onChange={event => handleOnChange(event.target.value, 'phone')} 
+                            className="form-control"
+                        />
+                    </div>
+                    <div className="col-sm-6 mb-3">
+                        <label className="form-label">E-mail</label>
+                        <input
+                            type="text"
+                            value={inputs.email} 
+                            onChange={event => handleOnChange(event.target.value, 'email')} 
+                            className="form-control"
+                        />
+                    </div>
+                    <div className="col-sm-6 mb-3">
+                        <label className="form-label">Site web</label>
+                        <input
+                            type="text"
+                            value={inputs.website} 
+                            onChange={event => handleOnChange(event.target.value, 'website')} 
+                            className="form-control"
+                        />
+                    </div>
+                    <div className="col-sm-12 mb-3">
+                        <label className="form-label">Adresse</label>
+                        <input
+                            type="text"
+                            value={inputs.address} 
+                            onChange={event => handleOnChange(event.target.value, 'address')} 
+                            className="form-control"
+                        />    
+                    </div>
+                    <div className="col-12 mb-3">
+                        <label className="form-label">Note de pieds de page :</label>
+                        <CKEditor
+                            editor={ ClassicEditor }
+                            data={inputs.file_note}
+                            onChange={( event, editor ) => handleOnChange(editor.getData(), 'file_note')}
+                            config={{language: "fr"}}
+                        />
+                    </div>
+                    <div className="col-12">
+                        <hr/>
                         <div
                             {...getRootProps({
                                 className:

@@ -8,12 +8,10 @@ import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import ConsultationModal from './modal/ConsultationModal';
+import emitter from '../../../context/eventEmitter';
 
 const Consultation = () => {
     const [consultations, setConsultations] = useState([]);
-    const [patients, setPatients] = useState([]);
-    const [doctors, setDoctors] = useState([]);
-    const [medicalProcedures, setMedicalProcedures] = useState([]);
 
     const [action, setAction] = useState(0);
 
@@ -27,7 +25,13 @@ const Consultation = () => {
         {
             Header : 'Date',
             Footer : 'Date',
-            accessor: 'format_date',
+            accessor: 'format_datetime',
+            Filter: ColumnFilter,
+        },
+        {
+            Header : 'Type',
+            Footer : 'Type',
+            accessor: 'type_name',
             Filter: ColumnFilter,
         },
         {
@@ -37,8 +41,8 @@ const Consultation = () => {
             Filter: ColumnFilter,
         },
         {
-            Header : 'Responsable',
-            Footer : 'Responsable',
+            Header : 'Médecin',
+            Footer : 'Médecin',
             accessor: 'doctor_name',
             Filter: ColumnFilter,
         },
@@ -152,15 +156,18 @@ const Consultation = () => {
     useDocumentTitle('Consultations');
 
     useEffect(() => {
+        const handleConsultationChange = (consultation) => {
+            setConsultations((prevState) => [JSON.parse(consultation), ...prevState]);
+        };
+        
+        emitter.on('consultationAdded', handleConsultationChange);
+
         const controller = new AbortController();
 
         (() => { 
             axiosInstance.get('consultations', {signal: controller.signal})
                 .then(function({data}) {
                     setConsultations([...data.consultations]);
-                    setDoctors([...data.doctors]);
-                    setPatients([...data.patients]);
-                    setMedicalProcedures([...data.medicalProcedures]);
                 })
                 .catch(function(error) {
                     if (error.name === 'CanceledError') {
@@ -174,6 +181,7 @@ const Consultation = () => {
         })();
 
         return () => {
+            emitter.off('consultationAdded', handleConsultationChange);
             controller.abort();
         }
     }, []);
@@ -260,7 +268,7 @@ const Consultation = () => {
                                             onChange = {e => { 
                                                 const pageNumber = e.target.value ? Number(e.target.value) - 1 : 0 
                                                 gotoPage(pageNumber)
-                                            } } 
+                                            }} 
                                         />
                                     </span>
                                 </div>
@@ -291,9 +299,6 @@ const Consultation = () => {
                 onHide={() => setOpenModal(false)}
                 onSave={handleAddOrEditConsultation}
                 consultation={editingConsultation}
-                doctors={doctors}
-                patients={patients}
-                medicalProcedures={medicalProcedures}
             />
         </>
     );

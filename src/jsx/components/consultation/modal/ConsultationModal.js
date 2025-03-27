@@ -2,27 +2,35 @@ import { useEffect, useState } from "react";
 import { Modal } from "react-bootstrap";
 import DatePicker, { registerLocale } from "react-datepicker";
 import Select from 'react-select';
-import { errorStyle, notifyError, notifySuccess } from '../../../constant/theme';
+import { errorStyle, isMedecin, notifyError, notifySuccess } from '../../../constant/theme';
 import fr from "date-fns/locale/fr";
 import { format } from 'date-fns';
 import axiosInstance from "../../../../services/AxiosInstance";
 import { connect } from "react-redux";
 import { createPortal } from "react-dom";
+import AutocompleteField from "../../../constant/AutocompleteField";
+import TimePickerPicker from 'react-time-picker';
 
-const ConsultationModal = 
-    ({action, currentUser, show, onHide, onSave, consultation, doctors, patients, medicalProcedures, dossier = null}) => {
+const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultation, dossier = null}) => {
     registerLocale("fr", fr);
+
+    const types = [
+        {label: 'Généraliste', value: 'general'},
+        {label: 'Spécialiste', value: 'special'},
+    ]
 
     const [inputs, setInputs] = useState({
         reason: '',
         patient_id: null,
         doctor_id: null,
         date: new Date(),
+        time: new Date(),
     });
 
+    const [doctors, setDoctors] = useState([]);
+
     const [doctor, setDoctor] = useState(null);
-    const [patient, setPatient] = useState(null);
-    const [medicalProcedure, setMedicalProcedure] = useState(null);
+    const [selectedType, setSelectedType] = useState(null);
 
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
@@ -31,26 +39,32 @@ const ConsultationModal =
         setDoctor(option);
     }
 
-    const handlePatientChange = (option) => {
-        setPatient(option);
-    }
-
-    const handleMedicalProcedureChange = (option) => {
-        setMedicalProcedure(option);
+    const handleTypeChange = (option) => {
+        setSelectedType(option);
     }
 
     const handleOnChange = (value, input) => {
         setInputs(prevState => ({...prevState, [input]: value}));
     }
 
+    const handleAutocompleteSelect = (id) => {
+        handleOnChange(id, 'patient_id');
+    };
+
     const resetForm = () => {
-        const doctor = dossier ? (doctors.find(d => d.id === dossier.doctor_id) ?? null) : (currentUser ?? null);
+        let doctor = null;
+
+        if (dossier) {
+            doctor = doctors.find(d => d.id === dossier.doctor_id) ?? null;
+        } else if (isMedecin(currentUser.roles)) {
+            doctor = currentUser ?? null;
+        }
         
         handleOnChange('', 'reason');
         handleDoctorChange(doctor);
-        handlePatientChange(dossier ? patients.find(p => p.id === dossier.patient_id) : null);
-        handleMedicalProcedureChange(null);
+        handleTypeChange(null);
         handleOnChange(new Date(), 'date');
+        handleOnChange(new Date(), 'time');
     }
 
     useEffect(() => {
@@ -63,13 +77,36 @@ const ConsultationModal =
         if (consultation) {
             handleOnChange(consultation.reason, 'reason');
             handleDoctorChange(doctors.find(d => d.id === consultation.doctor_id) ?? null);
-            handlePatientChange(patients.find(p => p.id === consultation.patient_id) ?? null);
-            handleMedicalProcedureChange(medicalProcedures.find(mp => mp.id === consultation.medical_procedure_id) ?? null);
+            handleOnChange(consultation.patient_id, 'patient_id');
+            handleTypeChange(types.find(t => t.value === consultation.type) ?? null);
             handleOnChange(new Date(consultation.date), 'date');
+            handleOnChange(new Date(consultation.time), 'time');
         } 
 
         setErrors({});
     }, [consultation]);
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        (() => {
+            axiosInstance.get('doctors', {signal: controller.signal})
+                .then(function({data}) {
+                    setDoctors([...data.doctors]);
+                })
+                .catch(function(error) {
+                    if (error.name === 'CanceledError') {
+                        console.log('requête annulée.');
+                    } else {
+                        console.log(error);
+                    }
+                });     
+        })();
+
+        return () => {
+            controller.abort();
+        }
+    }, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -77,15 +114,15 @@ const ConsultationModal =
         setSaving(true);
 
         const date = format(inputs.date, 'yyyy-MM-dd');
-        const patient_id = patient ? patient.id : null;
+        const time = typeof inputs.time === 'object' ? format(inputs.time, 'HH:mm') : inputs.time;
         const doctor_id = doctor ? doctor.id : null;
-        const medical_procedure_id = medicalProcedure ? medicalProcedure.id : null;
+        const type = selectedType ? selectedType.value : null;
         const dossier_id = dossier ? dossier.id : null;
 
         axiosInstance.request({
             method: consultation ? 'PUT' : 'POST',
             url: consultation ? 'consultations/'+ consultation.id : 'consultations',
-            data: {...inputs, date, patient_id, doctor_id, medical_procedure_id, dossier_id},
+            data: {...inputs, date, doctor_id, time, type, dossier_id},
             headers: {
                 "Content-Type": 'application/json'
             }
@@ -116,17 +153,19 @@ const ConsultationModal =
     };
 
     return createPortal(
-        <Modal className="modal fade" backdrop={true} dialogClassName="modal-lg" show={show} onHide={onHide} centered>
+        <Modal className="modal fade" backdrop={true} show={show} onHide={onHide} centered>
             <div className="modal-content">
                 <div className="modal-header">
-                    <h5 className="modal-title">{(consultation ? 'Modifier' : 'Ajouter') + ' une consultation'}</h5>
+                    <h5 className="modal-title">
+                        <strong>{(consultation ? 'Modifier' : 'Ajouter') + ' une consultation'}</strong>
+                    </h5>
                     <button type="button" className="btn-close" onClick={onHide}></button>
                 </div>
                 <div className="modal-body">
                     <form>
-                        <div className="row">
-                        <div className="col-sm-6 mb-3">
-                            <label className="form-label">Date<span className="text-danger">*</span></label>
+                        <div className="row picker-data">
+                            <div className="col-sm-6 mb-3">
+                                <label className="form-label">Date<span className="text-danger">*</span></label>
                                 <DatePicker 
                                     locale="fr"
                                     dateFormat="dd/MM/yyyy"
@@ -138,27 +177,30 @@ const ConsultationModal =
                                     <small style={errorStyle}>{errors.date.join('\n\r')}</small>
                                 </div>}
                             </div>
-                            <div className="col-sm-6 mb-3">                                        
-                                <label className="form-label">Patient<span className="text-danger">*</span></label>
-                                <Select options={patients} className="custom-react-select" 
-                                    placeholder='Choisir un patient'
-                                    isSearchable
-                                    value={patient}
-                                    isDisabled={dossier ? true : false}
-                                    onChange={handlePatientChange} 
-                                    getOptionValue={p => p.id}
-                                    getOptionLabel={p => p.fullname}
+                            <div className="col-sm-6 color-time-picker mb-3">
+                                <label className="form-label">Heure<span className="text-danger">*</span></label>
+                                <TimePickerPicker 
+                                    onChange={time => handleOnChange(time, 'time')} 
+                                    value={inputs.time} 
                                 />
+                                {errors.time && <div className="text-danger">
+                                    <small style={errorStyle}>{errors.time.join('\n\r')}</small>
+                                </div>}
+                            </div>
+                            <div className="col-sm-6 mb-3">
+                                <label className="form-label">Patient<span className="text-danger">*</span></label>
+                                <AutocompleteField initialName={consultation ? consultation.patient_name : ''} onSelect={handleAutocompleteSelect} />
                                 {errors.patient_id && <div className="text-danger">
                                     <small style={errorStyle}>{errors.patient_id.join('\n\r')}</small>
                                 </div>}
                             </div>
                             <div className="col-sm-6 mb-3">                                        
-                                <label className="form-label">Personnel médical<span className="text-danger">*</span></label>
+                                <label className="form-label">Médecin<span className="text-danger">*</span></label>
                                 <Select options={doctors} className="custom-react-select" 
-                                    placeholder='Choisir un membre'
+                                    placeholder='Choisir un médecin'
                                     isSearchable
                                     value={doctor}
+                                    isDisabled={isMedecin(currentUser.roles)}
                                     onChange={handleDoctorChange} 
                                     getOptionValue={d => d.id}
                                     getOptionLabel={d => d.fullname}
@@ -167,24 +209,21 @@ const ConsultationModal =
                                     <small style={errorStyle}>{errors.doctor_id.join('\n\r')}</small>
                                 </div>}
                             </div>
-                            <div className="col-sm-6 mb-3">                                        
-                                <label className="form-label">Acte médical<span className="text-danger">*</span></label>
-                                <Select options={medicalProcedures} className="custom-react-select" 
-                                    placeholder='Associer un acte'
-                                    isSearchable
-                                    value={medicalProcedure}
-                                    onChange={handleMedicalProcedureChange} 
-                                    getOptionValue={mp => mp.id}
-                                    getOptionLabel={mp => mp.name}
+                            <div className="col-sm-12 mb-3">                                        
+                                <label className="form-label">Type<span className="text-danger">*</span></label>
+                                <Select options={types} className="custom-react-select" 
+                                    placeholder='Sélectionner un type'
+                                    value={selectedType}
+                                    onChange={handleTypeChange} 
                                 />
-                                {errors.medical_procedure_id && <div className="text-danger">
-                                    <small style={errorStyle}>{errors.medical_procedure_id.join('\n\r')}</small>
+                                {errors.type && <div className="text-danger">
+                                    <small style={errorStyle}>{errors.type.join('\n\r')}</small>
                                 </div>}
                             </div>
                             <div className="col-sm-12 mb-3">
-                                <label className="form-label">Motif<span className="text-danger">*</span></label>
+                                <label className="form-label">Note<span className="text-danger">*</span></label>
                                 <textarea 
-                                    rows={2}
+                                    rows={3}
                                     value={inputs.reason} 
                                     onChange={event => handleOnChange(event.target.value, 'reason')} 
                                     className="form-control"

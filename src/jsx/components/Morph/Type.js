@@ -17,7 +17,7 @@ const Type = () => {
     let parentTitle = "Examens";
     let parentValue = 'examens_count';
 
-    const allTypes = ["exam", "room", "leave", "soin", 'antecedent', 'equipement'];
+    const allTypes = ["exam", "room", "leave", "soin", 'antecedent', 'equipement', 'echantillon'];
    
     switch (status) {
         case 'exam':
@@ -49,6 +49,11 @@ const Type = () => {
             title = "Types d'équipements";
             parentTitle = "Equipements";
             parentValue = "equipements_count";
+            break;
+        case 'echantillon':
+            title = "Types d'échantillons";
+            parentTitle = "Echantillons";
+            parentValue = "echantillons_count";
             break;
     }
 

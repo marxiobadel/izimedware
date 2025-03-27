@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Modal } from "react-bootstrap";
-import { errorStyle, notifySuccess } from '../../../constant/theme';
+import { errorStyle, notifyError, notifySuccess } from '../../../constant/theme';
 import axiosInstance from "../../../../services/AxiosInstance";
 import Select from 'react-select';
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -136,7 +136,11 @@ const AdmissionModal = ({ action, show, onHide, onSave, admission, onRoomChange,
                 }
             })
             .catch(function(error) {
-                console.log(error);
+                if (error.response && error.response.data) {
+                    notifyError(error.response.data.message);
+                } else {
+                    console.log(error);
+                }
             })
             .finally(function() {
                 setSaving(false);

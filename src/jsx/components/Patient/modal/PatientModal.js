@@ -114,7 +114,7 @@ const PatientModal = ({ show, onHide, onSave, patient}) => {
         <Modal className="modal fade" backdrop={true} dialogClassName="modal-lg" show={show} onHide={onHide} centered>
             <div className="modal-content">
                 <div className="modal-header">
-                    <h5 className="modal-title">{(patient ? 'Modifier' : 'Ajouter') + ' un patient'}</h5>
+                    <h5 className="modal-title"><strong>{(patient ? 'Modifier' : 'Ajouter') + ' un patient'}</strong></h5>
                     <button type="button" className="btn-close" onClick={onHide}></button>
                 </div>
                 <div className="modal-body">

@@ -4,67 +4,46 @@ import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../../hooks/useTitle';
 import axiosInstance from '../../../services/AxiosInstance';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
-import PatientModal from './modal/PatientModal';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
-import emitter from '../../../context/eventEmitter';
+import EchantillonModal from './modal/EchantillonModal';
 
-const Patient = () => {
+const Echantillon = () => {
+    const [echantillons, setEchantillons] = useState([]);
     const [patients, setPatients] = useState([]);
+    const [doctors, setDoctors] = useState([]);
+    const [types, setTypes] = useState([]);
 
     const columns = useMemo(() => [
         {
-            Header : 'ID',
-            Footer : 'ID',
-            accessor: 'reference',
+            Header : 'Code barre',
+            Footer : 'Code barre',
+            accessor: 'code',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Profil',
-            Footer : 'Profil',
-            disableSortBy: true,
-            disableFilters: true,
-            Cell: ({ row }) => ( 
-                <div className="image-container">
-                    <img src={row.original.avatar_url} alt={row.original.firstname} className="img-thumbnail preview-image" />
-                    <div className="zoomed-image">
-                        <img src={row.original.avatar_url} alt={row.original.firstname} />
-                    </div>
-                </div>
-            ),
-        },
-        {
-            Header : 'Nom',
-            Footer : 'Nom',
-            accessor: 'shortname',
+            Header : 'Date',
+            Footer : 'Date',
+            accessor: 'format_date',
             Filter: ColumnFilter,
         },
         {
-            Header : 'E-mail',
-            Footer : 'E-mail',
-            accessor: 'email',
+            Header : 'Type',
+            Footer : 'Type',
+            accessor: 'type.name',
+            Filter: ColumnFilter,
+        },
+       {
+            Header : 'Patient',
+            Footer : 'Patient',
+            accessor: 'patient_name',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Téléphone',
-            Footer : 'Téléphone',
-            accessor: 'phone_label',
-            Filter: ColumnFilter,
-            Cell: ({ value }) => (
-                <span className={value === 'aucun' ? 'text-warning' : ''}>{value}</span>
-            )
-        },
-        {
-            Header : 'Naissance',
-            Footer : 'Naissance',
-            accessor: 'date_of_birth',
-            Filter: ColumnFilter,
-        },
-        {
-            Header : 'Sexe',
-            Footer : 'Sexe',
-            accessor: 'gender_label',
+            Header : 'Responsable',
+            Footer : 'Responsable',
+            accessor: 'doctor_name',
             Filter: ColumnFilter,
         },
         {
@@ -83,7 +62,6 @@ const Patient = () => {
                         </svg>
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-end" align="end">
-                        <Dropdown.Item as={Link} to={`/patient-details/${row.original.id}`}>Détails</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleEdit(row.original)}>Modifier</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
                     </Dropdown.Menu>
@@ -92,24 +70,24 @@ const Patient = () => {
         }
     ], []);
 
-    const [editingPatient, setEditingPatient] = useState(null);
+    const [editingEchantillon, setEditingEchantillon] = useState(null);
 
     const [openModal, setOpenModal] = useState(false);
    
     const [loading, setLoading] = useState(true);
 
-	const tableInstance = useTable({
-		columns,
-		data: patients,	
-		initialState: {pageIndex: 0}
-	}, useFilters, useGlobalFilter, useSortBy, usePagination);
+    const tableInstance = useTable({
+        columns,
+        data: echantillons,	
+        initialState: {pageIndex: 0}
+    }, useFilters, useGlobalFilter, useSortBy, usePagination);
 
-    const handleEdit = (patient) => {
-        setEditingPatient(patient);
+    const handleEdit = (echantillon) => {
+        setEditingEchantillon(echantillon);
         setOpenModal(true);
     };
 
-    const handleDelete = (patient) => {
+    const handleDelete = (echantillon) => {
         Swal.fire({
             title:'Etes-vous sûr ?',
             text: "Après suppression, vous ne pourrez pas récupérer la donnée supprimée !",
@@ -121,9 +99,9 @@ const Patient = () => {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosInstance.delete(`patients/${patient.id}`)
+                axiosInstance.delete(`echantillons/${echantillon.id}`)
                     .then(({data}) => {
-                        setPatients((prevState) => prevState.filter((state) => state.id !== patient.id));
+                        setEchantillons((prevState) => prevState.filter((state) => state.id !== echantillon.id));
 
                         notifySuccess(data.message);
                     })
@@ -139,55 +117,52 @@ const Patient = () => {
     };
 
     const handleAdd = () => {
-        setEditingPatient(null);
+        setEditingEchantillon(null);
         setOpenModal(true); 
     }
 
-    const handleAddOrEditPatient = (patient, type) => {
+    const handleAddOrEditEchantillon = (echantillon, type) => {
         if (type === 'edit') {
-            setPatients((prevState) =>
-                prevState.map(state => (state.id === patient.id ? {...state, ...patient} : state))
+            setEchantillons((prevState) =>
+                prevState.map((state) => (state.id === echantillon.id ? {...state, ...echantillon} : state))
             );
         } else {
-            setPatients((prevState) => [patient, ...prevState]);
+            setEchantillons((prevState) => [echantillon, ...prevState]);
         }
 
         setOpenModal(false);
     };
  
     const { 
-		getTableProps, 
-		getTableBodyProps, 
-		headerGroups, 
-		prepareRow,
-		state,
-		page,
-		gotoPage,
-		pageCount,
-		pageOptions,
-		nextPage,
-		previousPage,
-		canNextPage,
-		canPreviousPage
-	} = tableInstance;
+        getTableProps, 
+        getTableBodyProps, 
+        headerGroups, 
+        prepareRow,
+        state,
+        page,
+        gotoPage,
+        pageCount,
+        pageOptions,
+        nextPage,
+        previousPage,
+        canNextPage,
+        canPreviousPage
+    } = tableInstance;
 
     const {pageIndex} = state;
 
-    useDocumentTitle('Patients');
+    useDocumentTitle('Echantillons');
 
     useEffect(() => {
-        const handlePatientChange = (patient) => {
-			setPatients((prevState) => [JSON.parse(patient), ...prevState]);
-		};
-
-        emitter.on('patientAdded', handlePatientChange);
-
         const controller = new AbortController();
 
         (() => {
-            axiosInstance.get('patients', {signal: controller.signal})
+            axiosInstance.get('echantillons', {signal: controller.signal})
                 .then(function({data}) {
+                    setEchantillons([...data.echantillons]);
                     setPatients([...data.patients]);
+                    setDoctors([...data.doctors]);
+                    setTypes([...data.types]);
                 })
                 .catch(function(error) {
                     if (error.name === 'CanceledError') {
@@ -201,7 +176,6 @@ const Patient = () => {
         })();
 
         return () => {
-            emitter.off('patientAdded', handlePatientChange);
             controller.abort();
         }
     }, []);
@@ -210,47 +184,47 @@ const Patient = () => {
         <>
             <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
                 <div className="me-auto">
-                    <h2 className="text-black font-w600">Patients</h2>
-                    <p className="mb-0">Liste des patients</p>
+                    <h2 className="text-black font-w600">Echantillons</h2>
+                    <p className="mb-0">Liste des echantillons</p>
                 </div>
                 <div>
-                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouveau patient</Link>
+                    <Link to={"#"} className="btn btn-primary me-3" onClick={handleAdd}>+ Nouveau echantillon</Link>
                 </div>
             </div>
             <ToastContainer />
             <Row>
-				<Col lg="12">
+                <Col lg="12">
                     <div className="card">
                         <div className="card-body">	
                             <div className="table-responsive">
                                 <table {...getTableProps()} className="table dataTable display">
                                     <thead>
-                                    {headerGroups.map(headerGroup => (
-                                        <tr {...headerGroup.getHeaderGroupProps()}>
-                                            {headerGroup.headers.map(column => (
-                                                <th {...column.getHeaderProps()} className="align-top">
-                                                    <span onClick={() => handleSort(column)} 
-                                                        style={{ cursor: column.canSort ? 'pointer' : 'default' }}>
-                                                        {column.render('Header')}
-                                                        {column.canSort && (
-                                                            <span className="ml-1">
-                                                                {column.isSorted ? (
-                                                                    column.isSortedDesc ?  
-                                                                        <i className="fa fa-arrow-down ms-2 fs-14"  style={{opacity: '0.7'}} />
-                                                                            :  
-                                                                        <i className="fa fa-arrow-up ms-2 fs-14" style={{opacity: '0.7'}} /> 
-                                                                    ) 
-                                                                        : 
-                                                                    (<i className="fa fa-sort ms-2 fs-14"  style={{opacity: '0.3'}} />) 
-                                                                }
-                                                            </span>
-                                                        )}
-                                                    </span>
-                                                    {column.canFilter ? column.render('Filter') : null}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    ))}
+                                        {headerGroups.map(headerGroup => (
+                                            <tr {...headerGroup.getHeaderGroupProps()}>
+                                                {headerGroup.headers.map(column => (
+                                                    <th {...column.getHeaderProps()} className="align-top">
+                                                        <span onClick={() => handleSort(column)} 
+                                                            style={{ cursor: column.canSort ? 'pointer' : 'default' }}>
+                                                            {column.render('Header')}
+                                                            {column.canSort && (
+                                                                <span className="ml-1">
+                                                                    {column.isSorted ? (
+                                                                        column.isSortedDesc ?  
+                                                                            <i className="fa fa-arrow-down ms-2 fs-14"  style={{opacity: '0.7'}} />
+                                                                                :  
+                                                                            <i className="fa fa-arrow-up ms-2 fs-14" style={{opacity: '0.7'}} /> 
+                                                                        ) 
+                                                                            : 
+                                                                        (<i className="fa fa-sort ms-2 fs-14"  style={{opacity: '0.3'}} />) 
+                                                                    }
+                                                                </span>
+                                                            )}
+                                                        </span>
+                                                        {column.canFilter ? column.render('Filter') : null}
+                                                    </th>
+                                                ))}
+                                            </tr>
+                                        ))}
                                     </thead> 
                                     <tbody {...getTableBodyProps()} className="">
                                         {loading ?
@@ -310,17 +284,20 @@ const Patient = () => {
                                 </div>
                             </div>
                         </div>
-					</div>
+                    </div>
                 </Col>
             </Row>
-            <PatientModal 
+            <EchantillonModal
                 show={openModal}
                 onHide={() => setOpenModal(false)}
-                onSave={handleAddOrEditPatient}
-                patient={editingPatient}
+                onSave={handleAddOrEditEchantillon}
+                echantillon={editingEchantillon}
+                patients={patients}
+                doctors={doctors}
+                types={types}
             />
         </>
     );
 };
 
-export default Patient;
+export default Echantillon;
