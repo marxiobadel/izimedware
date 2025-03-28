@@ -67,7 +67,7 @@ const ShowConsultation = () => {
             <PageTitle pageContent={''} motherMenu={'Consultation'} activeMenu={"Détail de consultation"} />
             <ToastContainer />
             <div className="row">
-                <div className="col-md-4">
+                <div className="col-md-5">
                     <div className="row">
                         <div className="col-md-12">
                             <div className="card">
@@ -77,13 +77,42 @@ const ShowConsultation = () => {
                                             <strong>ID</strong><span className="mb-0">{consultation ? consultation.reference : '---'}</span>
                                         </li>
                                         <li className="list-group-item d-flex px-0 justify-content-between">
-                                            <strong>Date</strong><span className="mb-0">{consultation ? consultation.format_date : '---'}</span>
+                                            <strong>Date</strong><span className="mb-0">{consultation ? consultation.format_datetime : '---'}</span>
                                         </li>
-                                        <li className="list-group-item d-flex px-0 justify-content-between">
-                                            <strong>Patient</strong><span className="mb-0">{consultation ? consultation.patient?.reference : '---'}</span>
+                                        <li className="list-group-item d-flex flex-column px-0">
+                                            <strong className="mb-1">Patient</strong>
+                                            <span className="mb-0">
+                                                <span className="me-2">
+                                                    {consultation ? (consultation.patient?.gender === 'male' ?
+                                                        <i className="fa-solid fa-mars"></i> :
+                                                        consultation.patient?.gender === 'female' ?
+                                                            <i className="fa-solid fa-venus"></i> :
+                                                            <i className="fa-solid fa-venus-mars"></i>) : '---'
+                                                    }
+                                                </span>
+                                                {consultation &&
+                                                <Link to={`/patient-details/${consultation.patient.id}`}>
+                                                    #{consultation.patient?.reference}
+                                                </Link>}
+                                            </span>
+                                            <span>{consultation ? consultation.patient?.fullname : '---'}</span>
+                                            {consultation && consultation.patient && consultation.patient.phone &&
+                                            <span className="text-end">({consultation.patient.phone})</span>}
                                         </li>
-                                        <li className="list-group-item d-flex px-0 justify-content-between">
-                                            <strong>Responsable</strong><span className="mb-0">{consultation ? consultation.doctor?.reference : '---'}</span>
+                                        <li className="list-group-item d-flex px-0 flex-column">
+                                            <strong className="mb-1">Médecin</strong>
+                                            {consultation &&
+                                            <Link to={`/doctor-details/${consultation.doctor.id}`}>
+                                                #{consultation.doctor?.reference}
+                                            </Link>}
+                                            <span>
+                                                <i className="las la-stethoscope me-2 scale4"></i>
+                                                {consultation ? consultation.doctor?.fullname : '---'}
+                                            </span>
+                                            {consultation && consultation.doctor.skills && consultation.doctor.skills.length > 0 &&
+                                            <Link to={"#"} className="text-end">
+                                                {consultation.doctor.skills[0].name}
+                                            </Link>}
                                         </li>
                                     </ul>
                                 </div>
@@ -91,7 +120,7 @@ const ShowConsultation = () => {
                         </div>
                     </div>
                 </div>
-                <div className="col-md-8">
+                <div className="col-md-7">
                     <div className="card">
                         <div className="card-header">
                             <span>Observations</span>

@@ -9,7 +9,7 @@ import axiosInstance from "../../../../services/AxiosInstance";
 import { connect } from "react-redux";
 import { createPortal } from "react-dom";
 import AutocompleteField from "../../../constant/AutocompleteField";
-import TimePickerPicker from 'react-time-picker';
+import { Link } from "react-router-dom";
 
 const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultation, dossier = null}) => {
     registerLocale("fr", fr);
@@ -23,8 +23,7 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
         reason: '',
         patient_id: null,
         doctor_id: null,
-        date: new Date(),
-        time: new Date(),
+        datetime: new Date(),
     });
 
     const [doctors, setDoctors] = useState([]);
@@ -62,9 +61,8 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
         
         handleOnChange('', 'reason');
         handleDoctorChange(doctor);
-        handleTypeChange(null);
-        handleOnChange(new Date(), 'date');
-        handleOnChange(new Date(), 'time');
+        handleTypeChange(types[0]);
+        handleOnChange(new Date(), 'datetime');
     }
 
     useEffect(() => {
@@ -79,8 +77,7 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
             handleDoctorChange(doctors.find(d => d.id === consultation.doctor_id) ?? null);
             handleOnChange(consultation.patient_id, 'patient_id');
             handleTypeChange(types.find(t => t.value === consultation.type) ?? null);
-            handleOnChange(new Date(consultation.date), 'date');
-            handleOnChange(new Date(consultation.time), 'time');
+            handleOnChange(new Date(consultation.datetime), 'datetime');
         } 
 
         setErrors({});
@@ -113,8 +110,7 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
 
         setSaving(true);
 
-        const date = format(inputs.date, 'yyyy-MM-dd');
-        const time = typeof inputs.time === 'object' ? format(inputs.time, 'HH:mm') : inputs.time;
+        const datetime = format(inputs.datetime, 'yyyy-MM-dd HH:mm');
         const doctor_id = doctor ? doctor.id : null;
         const type = selectedType ? selectedType.value : null;
         const dossier_id = dossier ? dossier.id : null;
@@ -122,7 +118,7 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
         axiosInstance.request({
             method: consultation ? 'PUT' : 'POST',
             url: consultation ? 'consultations/'+ consultation.id : 'consultations',
-            data: {...inputs, date, doctor_id, time, type, dossier_id},
+            data: {...inputs, datetime, doctor_id, type, dossier_id},
             headers: {
                 "Content-Type": 'application/json'
             }
@@ -168,23 +164,27 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
                                 <label className="form-label">Date<span className="text-danger">*</span></label>
                                 <DatePicker 
                                     locale="fr"
-                                    dateFormat="dd/MM/yyyy"
+                                    dateFormat="dd/MM/yyyy HH:mm"
+                                    showTimeSelect
+                                    timeIntervals={1}
+                                    timeCaption="Heure"
                                     className="form-control"
-                                    selected={inputs.date} 
-                                    onChange={date => handleOnChange(date, 'date')} 
+                                    selected={inputs.datetime} 
+                                    onChange={datetime => handleOnChange(datetime, 'datetime')} 
                                 />
-                                {errors.date && <div className="text-danger">
-                                    <small style={errorStyle}>{errors.date.join('\n\r')}</small>
+                                {errors.datetime && <div className="text-danger">
+                                    <small style={errorStyle}>{errors.datetime.join('\n\r')}</small>
                                 </div>}
                             </div>
-                            <div className="col-sm-6 color-time-picker mb-3">
-                                <label className="form-label">Heure<span className="text-danger">*</span></label>
-                                <TimePickerPicker 
-                                    onChange={time => handleOnChange(time, 'time')} 
-                                    value={inputs.time} 
+                            <div className="col-sm-6 mb-3">                                        
+                                <label className="form-label">Type<span className="text-danger">*</span></label>
+                                <Select options={types} className="custom-react-select" 
+                                    placeholder='Sélectionner un type'
+                                    value={selectedType}
+                                    onChange={handleTypeChange} 
                                 />
-                                {errors.time && <div className="text-danger">
-                                    <small style={errorStyle}>{errors.time.join('\n\r')}</small>
+                                {errors.type && <div className="text-danger">
+                                    <small style={errorStyle}>{errors.type.join('\n\r')}</small>
                                 </div>}
                             </div>
                             <div className="col-sm-6 mb-3">
@@ -209,17 +209,6 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
                                     <small style={errorStyle}>{errors.doctor_id.join('\n\r')}</small>
                                 </div>}
                             </div>
-                            <div className="col-sm-12 mb-3">                                        
-                                <label className="form-label">Type<span className="text-danger">*</span></label>
-                                <Select options={types} className="custom-react-select" 
-                                    placeholder='Sélectionner un type'
-                                    value={selectedType}
-                                    onChange={handleTypeChange} 
-                                />
-                                {errors.type && <div className="text-danger">
-                                    <small style={errorStyle}>{errors.type.join('\n\r')}</small>
-                                </div>}
-                            </div>
                             <div className="col-sm-12 mb-3">
                                 <label className="form-label">Note<span className="text-danger">*</span></label>
                                 <textarea 
@@ -237,6 +226,11 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
                 </div>
                 <div className="modal-footer">
                     <button type="button" className="btn btn-danger btn-sm light" onClick={onHide}>Fermer</button>
+                    {consultation &&
+                    <Link to={`/prescriptions/create?consultation_id=${consultation.id}`} className="btn btn-info btn-sm light">
+                        Ajouter une prescription
+                    </Link>
+                    }
                     <button type="button" className="btn btn-primary btn-sm" onClick={handleSubmit} disabled={saving}>
                         {consultation ? 'Mettre à jour' : 'Sauvegarder'}
                     </button>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axiosInstance from '../../../services/AxiosInstance';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
-import { Col, Dropdown, Row } from 'react-bootstrap';
+import { Badge, Col, Dropdown, Row } from 'react-bootstrap';
 import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table';
 import { useDocumentTitle } from '../../hooks/useTitle';
 import Swal from 'sweetalert2';
@@ -45,6 +45,17 @@ const Consultation = () => {
             Footer : 'Médecin',
             accessor: 'doctor_name',
             Filter: ColumnFilter,
+        },
+        {
+            Header : 'Observations',
+            Footer : 'Observations',
+            accessor: 'observations_count',
+            Filter: ColumnFilter,
+            Cell: ({ value }) => (
+                <div className="bootstrap-badge text-center">
+                    <Badge bg="" className='badge-rounded badge-outline-primary'>{value}</Badge>
+                </div>
+            ),
         },
         {
             Header: 'Actions',

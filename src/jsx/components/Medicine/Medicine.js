@@ -212,7 +212,7 @@ const Medicine = () => {
         <>
             <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
                 <div className="me-auto">
-                    <h2 className="text-black font-w600">Médicaments</h2>
+                    <h2 className="text-black font-w600">Pharmacie</h2>
                     <p className="mb-0">Liste des Médicaments</p>
                 </div>
                 <div>

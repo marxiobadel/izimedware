@@ -761,3 +761,6 @@ button.react-calendar__tile.react-calendar__tile--active.react-calendar__tile--r
   position: relative;
   z-index: 1;
 }
+.prescription .custom-react-select > div:nth-child(3) {
+  border-color: #007A64 !important;
+}

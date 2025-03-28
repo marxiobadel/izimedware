@@ -8,6 +8,13 @@ export const MenuList = [
         to: 'dashboard',
         content: []
     },
+    {   
+        id: 'agenda',
+        title:'Agenda',
+        iconStyle: <i className="flaticon-381-networking" />,
+        to: 'agenda',
+        content: []
+    },
     {
         id: 'patients',
         title: 'Patients',	
@@ -15,134 +22,28 @@ export const MenuList = [
         iconStyle: <i className="flaticon-381-networking" />,
         content: [
             {
-                title: 'Liste',
+                title: 'Patients',
                 to: 'patients',                 
             },
             {
-                title: "Dossiers",
+                title: "Dossiers médicaux",
                 to: 'dossiers',
-            },
-            {
-                title: "Contrat d'assurance",
-                to: 'contracts',
-            },
-            {
-                title:'Assurances',
-                to: 'insurances',
-            },
+            }
         ],
-    },  
-    {
-        id: 'antecedents',
-        title: 'Antécédents médicaux',	
-        classsChange: 'mm-collapse',		
-        iconStyle: <i className="flaticon-381-networking" />,
-        content: [
-            {
-                title: 'Liste',
-                to: 'antecedents',                 
-            },
-            {
-                title:'Type',
-                to: 'types/antecedent',
-            },
-        ],
-    },    
-    {
-        id: 'doctors',
-        title:'Personnel médical',
-        classsChange: 'mm-collapse',
-        iconStyle: <i className="flaticon-381-notepad" />,
-        content : [
-            {
-                title:'Liste',
-                to: 'doctors',
-            },
-            {
-                title:'Compétences',
-                to: 'skills',
-            },
-            {
-                title:'Créneaux horaires',
-                to: 'slots',
-            },
-            {
-                title:'Rendez-vous',
-                to: 'appointments',
-            },
-            {
-                title:'Planning',
-                to: 'plannings',
-            },
-        ]
-    },
-    {
+    },   
+    {   
         id: 'consultations',
-        title: 'Consultations',
-        classsChange: 'mm-collapse',
+        title:'Consultations',
         iconStyle: <i className="flaticon-381-notepad" />,
-        content : [
-            {
-                title:'Liste',
-                to: 'consultations',
-            },
-        ]
+        to: 'consultations',
+        content: []
     },
-    {
-        id: 'echantillons',
-        title: 'Echantillons',
-        classsChange: 'mm-collapse',
-        iconStyle: <i className="flaticon-381-notepad" />,
-        content : [
-            {
-                title:'Liste',
-                to: 'echantillons',
-            },
-            {
-                title:'Type',
-                to: 'types/echantillon',
-            },
-        ]
-    },
-    {
-        id: 'examens',
-        title: 'Examens',
-        classsChange: 'mm-collapse',
-        iconStyle: <i className="flaticon-381-notepad" />,
-        content : [
-            {
-                title:'Liste',
-                to: 'examinations',
-            },
-            {
-                title:'Type',
-                to: 'types/exam',
-            },
-        ]
-    },
-    {
-        id: 'admissions',
-        title:'Hospitalisations',
-        classsChange: 'mm-collapse',
-        iconStyle: <i className="flaticon-381-notepad" />,
-        content : [
-            {
-                title:'Liste',
-                to: 'admissions',
-            },
-        ]
-    },
-    {
+    {   
         id: 'prescriptions',
         title:'Prescriptions',
-        classsChange: 'mm-collapse',
         iconStyle: <i className="flaticon-381-notepad" />,
-        content : [
-            {
-                title:'Liste',
-                to: 'prescriptions',
-            },
-        ]
+        to: 'prescriptions',
+        content: []
     },
     {
         id: "medical_procedures",
@@ -154,142 +55,54 @@ export const MenuList = [
                 title:'Liste',
                 to: 'medical_procedures',
             },
-        ]
-    },
-    {
-        id: "soins",
-        title:'Soins médicaux',
-        classsChange: 'mm-collapse',
-        iconStyle: <i className="flaticon-381-notepad" />,
-        content : [
             {
-                title:'Liste',
-                to: 'soins',
-            },
-            {
-                title:'Type',
-                to: 'types/soin',
-            },
-        ]
-    },
-    {
-        id: 'medicines',
-        title:'Médicaments',
-        classsChange: 'mm-collapse',
-        iconStyle: <i className="flaticon-381-notepad" />,
-        content : [
-            {
-                title:'Liste',
+                title:'Pharmacie',
                 to: 'medicines',
             },
-            {
-                title:'Stocks',
-                to: 'stocks',
-            },
-            {
-                title:'Catégories',
-                to: 'categories',
-            },
-            {
-                title:'Formes',
-                to: 'formes',
-            }
         ]
     },
     {
-        id: 'invoices',
-        title:'Facturation',
+        id: 'admissions',
+        title:'Hospitalisations',
         classsChange: 'mm-collapse',
         iconStyle: <i className="flaticon-381-notepad" />,
         content : [
             {
-                title:'Liste',
-                to: 'invoices',
-            }
-        ]
-    },
-    {
-        id: 'rooms',
-        title:'Chambres',
-        classsChange: 'mm-collapse',
-        iconStyle: <i className="flaticon-381-notepad" />,
-        content : [
+                title:'Hospitalisations',
+                to: 'admissions',
+            },
             {
-                title:'Liste',
+                title:'Chambres',
                 to: 'rooms',
             },
             {
-                title:'Type',
-                to: 'types/room',
-            },
-        ]
-    },
-    {
-        id: 'beds',
-        title:'Lits',
-        classsChange: 'mm-collapse',
-        iconStyle: <i className="flaticon-381-notepad" />,
-        content : [
-            {
-                title:'Liste',
+                title:'Lits',
                 to: 'beds',
             },
         ]
     },
     {
-        id: 'equipements',
-        title:'Equipements',
+        id: 'administration',
+        title:'Administration',
         classsChange: 'mm-collapse',
         iconStyle: <i className="flaticon-381-notepad" />,
         content : [
             {
-                title:'Liste',
-                to: 'equipements',
+                title:'Personnel médical',
+                to: 'doctors',
             },
             {
-                title:'Type',
-                to: 'types/equipement',
-            },
-        ]
-    },
-    {
-        id: 'departments',
-        title:'Départements',
-        classsChange: 'mm-collapse',
-        iconStyle: <i className="flaticon-381-notepad" />,
-        content : [
-            {
-                title:'Liste',
+                title:'Départements',
                 to: 'departments',
-            }
-        ]
-    },
-    {
-        id: 'leaves',
-        title:'Congés',
-        classsChange: 'mm-collapse',
-        iconStyle: <i className="flaticon-381-notepad" />,
-        content : [
+            },
             {
-                title:'Liste',
+                title:'Congés',
                 to: 'leaves',
             },
             {
-                title:'Type',
-                to: 'types/leave',
+                title:'Equipements',
+                to: 'equipements',
             },
-        ]
-    },
-    {
-        id: 'report',
-        title:'Rapport',
-        classsChange: 'mm-collapse',
-        iconStyle: <i className="flaticon-381-notepad" />,
-        content : [
-            {
-                title:'Voir',
-                to: 'reports',
-            }
         ]
     },
     {
@@ -297,17 +110,17 @@ export const MenuList = [
         title:'Paramètres',
         classsChange: 'mm-collapse',
         iconStyle:<i className="flaticon-381-network" />,
-        content : [
-            {
-                title:'Profile',
-                to: 'edit-profile',
-            },
-            {
-                title:'Général',
-                to: 'general',
-            },
-        ]
-    } 
+        to: 'general',
+        content : []
+    }, 
+    {
+        id: 'report',
+        title:'Rapports',
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="flaticon-381-notepad" />,
+        to: 'reports',
+        content : []
+    }
 ];
 
 export const getFilteringMenuList = (roles) => {

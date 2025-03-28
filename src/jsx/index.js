@@ -131,6 +131,7 @@ import Notification from "./components/Notification/Notification";
 import ShowAdmission from "./components/Admission/ShowAdmission";
 import Equipement from "./components/Equipement/Equipement";
 import Echantillon from "./components/Echantillon/Echantillon";
+import Agenda from "./components/Agenda/Agenda";
 
 const Markup = () => {
     const allroutes = [
@@ -148,6 +149,7 @@ const Markup = () => {
         { url: "medical_procedures", component: <MedicalProcedure /> },
         { url: "medicines", component: <Medicine /> },
         { url: "invoices", component: <Invoice /> },
+        { url: "agenda", component: <Agenda /> },
         { url: "invoices/:id/edit", component: <EditInvoice /> },
         { url: "invoices/:id", component: <ShowInvoice /> },
         { url: "invoices/create", component: <CreateInvoice /> },
