@@ -12,8 +12,6 @@ import axios from 'axios';
 
 const Soin = () => {
     const [soins, setSoins] = useState([]);
-    const [medicalProcedures, setMedicalProcedures] = useState([]);
-    const [doctors, setDoctors] = useState([]);
     const [types, setTypes] = useState([]);
 
     const columns = useMemo(() => [
@@ -24,9 +22,9 @@ const Soin = () => {
             Filter: ColumnFilter,
         },
         {
-            Header : 'Date',
-            Footer : 'Date',
-            accessor: 'format_date_time',
+            Header : 'Libellé',
+            Footer : 'Libellé',
+            accessor: 'name',
             Filter: ColumnFilter,
         },
         {
@@ -35,16 +33,16 @@ const Soin = () => {
             accessor: 'type.name',
             Filter: ColumnFilter,
         },
-       {
-            Header : 'Patient',
-            Footer : 'Patient',
-            accessor: 'patient_name',
+        {
+            Header : 'Coût',
+            Footer : 'Coût',
+            accessor: 'amount_with_currency',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Responsable',
-            Footer : 'Responsable',
-            accessor: 'doctor_name',
+            Header : 'Description',
+            Footer : 'Description',
+            accessor: 'description',
             Filter: ColumnFilter,
         },
         {
@@ -161,8 +159,6 @@ const Soin = () => {
             axiosInstance.get('soins', {signal: controller.signal})
                 .then(function({data}) {
                     setSoins([...data.soins]);
-                    setMedicalProcedures([...data.medicalProcedures]);
-                    setDoctors([...data.doctors]);
                     setTypes([...data.types]);
                 })
                 .catch(function(error) {
@@ -293,8 +289,6 @@ const Soin = () => {
                 onHide={() => setOpenModal(false)}
                 onSave={handleAddOrEditSoin}
                 soin={editingSoin}
-                medicalProcedures={medicalProcedures}
-                doctors={doctors}
                 types={types}
             />
         </>

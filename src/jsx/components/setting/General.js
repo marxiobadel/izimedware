@@ -5,6 +5,7 @@ import Unity from './Unity';
 import Invoice from './Invoice';
 import Patient from './Patient';
 import Doctor from './Doctor';
+import Type from './Type';
 
 const General = () => {
     const title = 'Paramètres généraux';
@@ -23,6 +24,7 @@ const General = () => {
             <div className="row">
                 <div className="col-xl-4 col-lg-6">
                     <div className="row">
+                        <div className="col-sm-12"><Type /></div>
                         <div className="col-sm-12"><Unity /></div>
                     </div>
                 </div>

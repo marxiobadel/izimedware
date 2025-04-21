@@ -25,8 +25,8 @@ const Prescription = () => {
             Filter: ColumnFilter,
         },
         {
-            Header : 'Responsable',
-            Footer : 'Responsable',
+            Header : 'Médecin',
+            Footer : 'Médecin',
             accessor: 'doctor_name',
             Filter: ColumnFilter,
         },

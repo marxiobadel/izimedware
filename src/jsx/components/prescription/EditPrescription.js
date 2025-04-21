@@ -4,16 +4,15 @@ import axiosInstance from '../../../services/AxiosInstance';
 import { ToastContainer } from 'react-toastify';
 import PageTitle from '../../layouts/PageTitle';
 import Select from 'react-select';
-import { Table } from 'react-bootstrap';
+import { Button, Table } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import { notifyError, notifyInfo, notifySuccess } from '../../constant/theme';
-import { connect } from 'react-redux';
 import { format } from 'date-fns';
 import DatePicker, { registerLocale } from "react-datepicker";
 import fr from "date-fns/locale/fr";
 import AutocompleteField from '../../constant/AutocompleteField';
 
-const EditPrescription = ({currentUser}) => {
+const EditPrescription = () => {
     const {id} = useParams();
 
     registerLocale("fr", fr);
@@ -23,10 +22,14 @@ const EditPrescription = ({currentUser}) => {
     const [services, setServices] = useState([]);
     const [consultations, setConsultations] = useState([]);
     const [admissions, setAdmissions] = useState([]);
+    const [examens, setExamens] = useState([]);
+    const [soins, setSoins] = useState([]);
 
     const [patientName, setPatientName] = useState('');
 
-    const [inputs, setInputs] = useState([]);
+    const [inputsMedicine, setInputsMedicine] = useState([]);
+    const [inputsExamen, setInputsExamen] = useState([]);
+    const [inputsSoin, setInputsSoin] = useState([]);
 
     const [saving, setSaving] = useState(false);
 
@@ -37,6 +40,8 @@ const EditPrescription = ({currentUser}) => {
     const [selectedService, setSelectedService] = useState(null);
     const [selectedConsultation, setSelectedConsultation] = useState(null);
     const [selectedAdmission, setSelectedAdmission] = useState(null);
+    const [selectedExamen, setSelectedExamen] = useState(null);
+    const [selectedSoin, setSelectedSoin] = useState(null);
     const [reason, setReason] = useState('');
 
     const handleAutocompleteSelect = (id) => {
@@ -55,32 +60,62 @@ const EditPrescription = ({currentUser}) => {
             });
     };
 
-    const handleInputChange = (e, i) => {
-        const field = e.target.name; 
-        const newInputs = [...inputs]; 
-        newInputs[i][field] = e.target.value; 
-        setInputs(newInputs); 
+    const handleInputChange = (e, i, inputs, setInputs) => {
+        const field = e.target.name;
+        const newInputs = [...inputs];
+        newInputs[i][field] = e.target.value;
+        setInputs(newInputs);
     };
 
-    const handleAddInput = () => {
+    const handleAddInputMedicine = () => {
         if (selectedMedicine) {
             const { id, name, unity } = selectedMedicine;
-           
-            const input = inputs.find(i => i.id === id);
+
+            const input = inputsMedicine.find(i => i.id === id);
             if (!input) {
-                setInputs([...inputs, { id, name, quantity: 1, unity: unity.name, duration: '', posologie: '' }]); 
+                setInputsMedicine([...inputsMedicine, { id, name, quantity: 1, unity: unity.name, duration: '', posologie: '' }]);
             }
-  
+
             setSelectedMedicine(null);
         } else {
             notifyInfo('Merci de sélectionner au préalable un médicament.');
         }
     };
 
-    const handleDeleteInput = (i) => {
-        const newInputs = [...inputs]; 
-        newInputs.splice(i, 1); 
-        setInputs(newInputs); 
+     const handleAddInputSoin = () => {
+        if (selectedSoin) {
+            const { id, name } = selectedSoin;
+
+            const input = inputsSoin.find(i => i.id === id);
+            if (!input) {
+                setInputsSoin([...inputsSoin, { id, name, duration: '', frequency: '', comment: '' }]);
+            }
+
+            setSelectedSoin(null);
+        } else {
+            notifyInfo('Merci de sélectionner au préalable un soin.');
+        }
+    };
+
+    const handleAddInputExamen = () => {
+        if (selectedExamen) {
+            const { id, name } = selectedExamen;
+
+            const input = inputsExamen.find(i => i.id === id);
+            if (!input) {
+                setInputsExamen([...inputsExamen, { id, name }]);
+            }
+
+            setSelectedExamen(null);
+        } else {
+            notifyInfo('Merci de sélectionner au préalable un examen.');
+        }
+    };
+
+    const handleDeleteInput = (i, inputs, setInputs) => {
+        const newInputs = [...inputs];
+        newInputs.splice(i, 1);
+        setInputs(newInputs);
     };
 
     const handlePrescriptionMedecines = (medicines) => {
@@ -89,12 +124,35 @@ const EditPrescription = ({currentUser}) => {
 
             const newItem = {id, name, quantity: pivotQuantity, unity: unity.name, duration: pivotDuration, posologie: pivotPosologie};
             
-            setInputs(prevState => {
-                const exists = prevState.some((item) => item.id === id);
-                return exists ? prevState : [...prevState, newItem];
+            setInputsMedicine(prevState => {
+                return prevState.some((item) => item.id === id) ? prevState : [...prevState, newItem];
             }); 
         });
     };
+
+    const handlePrescriptionSoins = (soins) => {
+        soins.forEach(soin => {
+            const {id, name, pivotDuration, pivotFrequency, pivotComment } = soin;
+
+            const newItem = {id, name, duration: pivotDuration, frequency: pivotFrequency, comment: pivotComment};
+            
+            setInputsSoin(prevState => {
+                return prevState.some((item) => item.id === id) ? prevState : [...prevState, newItem];
+            }); 
+        });
+    };
+
+    const handlePrescriptionExamens = (examens) => {
+        examens.forEach(examen => {
+            const {id, name} = examen;
+
+            const newItem = {id, name};
+            
+            setInputsExamen(prevState => {
+                return prevState.some((item) => item.id === id) ? prevState : [...prevState, newItem];
+            }); 
+        });
+    }
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -103,7 +161,9 @@ const EditPrescription = ({currentUser}) => {
 
         axiosInstance.put(`prescriptions/${id}`, 
             {
-                medicines: inputs, 
+                medicines: inputsMedicine, 
+                examens: inputsExamen,
+                soins: inputsSoin,
                 doctor_id: (selectedDoctor ? selectedDoctor.id : null), 
                 service_id: (selectedService ? selectedService.id : null),  
                 consultation_id: (selectedConsultation ? selectedConsultation.id : null), 
@@ -142,11 +202,12 @@ const EditPrescription = ({currentUser}) => {
         (() => {
             axiosInstance.get(`prescriptions/${id}/edit`, {signal: controller.signal})
                 .then(function ({ data }) {
-                    console.log(data.data);
                     setMedicines([...data.medicines]);
                     setDoctors([...data.doctors]);
                     setServices([...data.services]);
                     setConsultations([...data.consultations]);
+                    setExamens([...data.examens]);
+                    setSoins([...data.soins]);
                     setAdmissions([...data.admissions]);
 
                     setDatetime(new Date(data.data.datetime));
@@ -159,6 +220,8 @@ const EditPrescription = ({currentUser}) => {
                     setReason(data.data.reason ?? '');
 
                     handlePrescriptionMedecines(data.data.medicines);
+                    handlePrescriptionExamens(data.data.examens);
+                    handlePrescriptionSoins(data.data.soins);
                 })
                 .catch(function (error) {
                     if (error.name === 'CanceledError') {
@@ -237,7 +300,14 @@ const EditPrescription = ({currentUser}) => {
                                         getOptionLabel={d => `${d.reference} (${d.format_entry_date})`}
                                     />
                                 </div>
-                                <div className="col-sm-3 mb-3 prescription">
+                            </div>
+                            <div className="row">
+                                <div class="col-12 my-2">
+                                    <div class="hr-text">Médicaments</div>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="offset-md-6 col-sm-3 col-12 mb-3 prescription">
                                     <label className="form-label">Médicament</label>
                                     <Select options={medicines} className="custom-react-select"
                                         isDisabled={loading}
@@ -249,8 +319,8 @@ const EditPrescription = ({currentUser}) => {
                                         getOptionLabel={m => m.name}
                                     />
                                 </div>
-                                <div className="col-sm-3 mb-3">
-                                    <button onClick={handleAddInput} className="btn btn-primary btn-lg btn-block">Ajouter à la liste</button>
+                                <div className="col-sm-3 col-12 mb-3 d-flex align-items-end">
+                                    <button onClick={handleAddInputMedicine} className="btn btn-primary btn-lg btn-block">Ajouter à la liste</button>
                                 </div>
                             </div>
                             <div className="row">
@@ -266,31 +336,31 @@ const EditPrescription = ({currentUser}) => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {inputs.length === 0 ?
+                                        {inputsMedicine.length === 0 ?
                                             <tr className="text-center"><td colSpan={6}>Liste des médicaments</td></tr>
                                         :
-                                            inputs.map((input, index) => ( 
+                                            inputsMedicine.map((input, index) => ( 
                                                 <tr key={index}>
                                                     <td>{input.name}</td>
                                                     <td>
                                                         <input type="number" value={input.quantity} name="quantity" required style={{width: '100px'}}
-                                                            onChange={e => handleInputChange(e, index)}  
+                                                            onChange={e => handleInputChange(e, index, inputsMedicine, setInputsMedicine)}  
                                                             className="form-control" />                           
                                                     </td>
                                                         <td>{input.unity}</td> 
                                                     <td>
                                                         <input type="number" value={input.duration} name="duration" required style={{width: '100px'}}
-                                                            onChange={e => handleInputChange(e, index)}  
+                                                            onChange={e => handleInputChange(e, index, inputsMedicine, setInputsMedicine)}  
                                                             className="form-control" />  
                                                     </td>
                                                     <td>
                                                         <input type="text" value={input.posologie} name="posologie"
-                                                            onChange={e => handleInputChange(e, index)}  
+                                                            onChange={e => handleInputChange(e, index, inputsMedicine, setInputsMedicine)}  
                                                             className="form-control" />  
                                                     </td>
                                                     <td>
                                                         <div className="d-flex">
-                                                            <Link to={"#"} onClick={() => handleDeleteInput(index)} className="btn btn-danger shadow btn-xs sharp">
+                                                            <Link to={"#"} onClick={() => handleDeleteInput(index, inputsMedicine, setInputsMedicine)} className="btn btn-danger shadow btn-xs sharp">
                                                                 <i className="fa fa-trash"></i>
                                                             </Link>
                                                         </div>
@@ -299,6 +369,116 @@ const EditPrescription = ({currentUser}) => {
                                             ))}
                                     </tbody>
                                 </Table>
+                            </div>
+                             <div className="row">
+                                <div class="col-12 my-2">
+                                    <div class="hr-text">Soins</div>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="offset-md-6 col-sm-3 col-12 mb-3 prescription">
+                                    <label className="form-label">Soin</label>
+                                    <Select options={soins} className="custom-react-select"
+                                        isDisabled={loading}
+                                        placeholder={loading ? 'Chargement...' : 'Choisir un traitement'}
+                                        isSearchable
+                                        value={selectedSoin}
+                                        onChange={setSelectedSoin}
+                                        getOptionValue={s => s.id}
+                                        getOptionLabel={s => s.name}
+                                    />
+                                </div>
+                                <div className="col-sm-3 col-12 mb-3 d-flex align-items-end">
+                                    <button onClick={handleAddInputSoin} className="btn btn-primary btn-lg btn-block">Ajouter à la liste</button>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <Table responsive>
+                                    <thead>
+                                        <tr>
+                                            <th><strong>Nom</strong></th>
+                                            <th><strong>Durée (jour)</strong></th>
+                                            <th><strong>Fréquence</strong></th>
+                                            <th><strong>Commentaire</strong></th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {inputsSoin.length === 0 ?
+                                            <tr className="text-center"><td colSpan={6}>Liste des soins</td></tr>
+                                            :
+                                            inputsSoin.map((input, index) => (
+                                                <tr key={index}>
+                                                    <td>{input.name}</td>
+                                                    <td>
+                                                        <input type="number" value={input.duration} name="duration" required style={{ width: '100px' }}
+                                                            onChange={e => handleInputChange(e, index, inputsSoin, setInputsSoin)}
+                                                            className="form-control" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" value={input.frequency} name="frequency" required
+                                                            onChange={e => handleInputChange(e, index, inputsSoin, setInputsSoin)}
+                                                            className="form-control" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" value={input.comment} name="comment"
+                                                            onChange={e => handleInputChange(e, index, inputsSoin, setInputsSoin)}
+                                                            className="form-control" />
+                                                    </td>
+                                                    <td>
+                                                        <div className="d-flex">
+                                                            <Link to={"#"} onClick={() => handleDeleteInput(index, inputsSoin, setInputsSoin)} className="btn btn-danger shadow btn-xs sharp">
+                                                                <i className="fa fa-trash"></i>
+                                                            </Link>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                    </tbody>
+                                </Table>
+                            </div>
+                            <div className="row">
+                                <div class="col-12 my-2">
+                                    <div class="hr-text">Examens</div>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="offset-md-6 col-sm-3 col-12 mb-3">
+                                    <label className="form-label">Examen</label>
+                                    <Select options={examens} className="custom-react-select"
+                                        isDisabled={loading}
+                                        placeholder={loading ? 'Chargement...' : 'Choisir un examen'}
+                                        isSearchable
+                                        value={selectedExamen}
+                                        onChange={setSelectedExamen}
+                                        getOptionValue={e => e.id}
+                                        getOptionLabel={e => e.name}
+                                    />
+                                </div>
+                                <div className="col-sm-3 col-12 mb-3 d-flex align-items-end">
+                                    <button onClick={handleAddInputExamen} className="btn btn-primary btn-lg btn-block">Ajouter à la liste</button>
+                                </div>
+                            </div>
+                            <div className="row">
+                            {inputsExamen.length === 0 ?
+                                <div className="col-12 text-center small">Aucun examen attribué</div>
+                                :
+                                <div className="col-12">
+                                    {inputsExamen.map((input, index) => (
+                                        <Button key={index} className="me-2 mb-2" variant="dark">
+                                            {input.name}
+                                            <Link className="btn-icon-end text-warning" onClick={() => handleDeleteInput(index, inputsExamen, setInputsExamen)}>
+                                                <i className="fas fa-times" />
+                                            </Link>
+                                        </Button>
+                                    ))}
+                                </div>
+                            }
+                            </div>
+                            <div className="row">
+                                <div class="col-12 my-2">
+                                    <div class="hr-text"></div>
+                                </div>
                             </div>
                             <div className="row mt-2">
                                 <div className="col-12 col-sm-4 mb-3">
@@ -322,7 +502,10 @@ const EditPrescription = ({currentUser}) => {
                                         onChange={(event) => setReason(event.target.value)}></textarea>
                                 </div>
                                 <div className="col-12 d-flex justify-content-end">
-                                    <button onClick={handleSubmit} disabled={inputs.length === 0 || saving} className="btn btn-primary">
+                                    <button 
+                                        onClick={handleSubmit} 
+                                        disabled={(inputsSoin.length === 0 && inputsMedicine.length === 0 && inputsExamen.length) || saving} 
+                                        className="btn btn-primary">
                                         Mettre à jour
                                     </button>
                                 </div>
@@ -335,10 +518,5 @@ const EditPrescription = ({currentUser}) => {
     );
 }
 
-const mapStateToProps = (state) => {
-    return {
-        currentUser: state.auth.auth.currentUser
-    };
-};
  
-export default connect(mapStateToProps)(EditPrescription);
+export default EditPrescription;

@@ -5,7 +5,7 @@ import { useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
-import ValidateModal from '../Appointment/modal/ValidateModal';
+import ValidateModal from '../Agenda/modal/ValidateModal';
 
 const Appointment = ({appointments, setAppointments}) => {
     const columns = useMemo(() => [

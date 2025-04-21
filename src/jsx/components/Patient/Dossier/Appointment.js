@@ -7,9 +7,9 @@ import Appointment from "../../Dashboard/Element/Appointment";
 import { registerLocale } from "react-datepicker";
 import fr from "date-fns/locale/fr";
 import { DataContext } from "../ShowDossier";
-import ValidateModal from "../../Appointment/modal/ValidateModal";
 import Swal from "sweetalert2";
 import { notifyError, notifySuccess } from "../../../constant/theme";
+import ValidateModal from "../../Agenda/modal/ValidateModal";
 
 const DossierAppointment = ({ currentUser }) => {
     registerLocale("fr", fr);

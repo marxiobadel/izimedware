@@ -12,8 +12,20 @@ export const MenuList = [
         id: 'agenda',
         title:'Agenda',
         iconStyle: <i className="flaticon-381-networking" />,
-        to: 'agenda',
-        content: []
+        content: [
+            {
+                title: 'Calendrier',
+                to: 'agenda',                 
+            },
+            {
+                title: "Créneaux horaires",
+                to: 'slots',
+            },
+            {
+                title: "Prise de rendez-vous",
+                to: 'prisederendezvous',
+            }
+        ],
     },
     {
         id: 'patients',
@@ -52,12 +64,36 @@ export const MenuList = [
         iconStyle: <i className="flaticon-381-notepad" />,
         content : [
             {
-                title:'Liste',
-                to: 'medical_procedures',
+                title:'Examens',
+                to: 'examinations',
             },
             {
-                title:'Pharmacie',
+                title:'Soins',
+                to: 'soins',
+            }
+        ]
+    },
+    {
+        id: "pharmacie",
+        title:'Pharmacie',
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="flaticon-381-notepad" />,
+        content : [
+            {
+                title:'Médicaments',
                 to: 'medicines',
+            },
+            {
+                title:'Stocks',
+                to: 'stocks',
+            },
+            {
+                title:'Catégorie',
+                to: 'categories',
+            },
+            {
+                title:'Formes',
+                to: 'formes',
             },
         ]
     },

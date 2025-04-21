@@ -764,3 +764,42 @@ button.react-calendar__tile.react-calendar__tile--active.react-calendar__tile--r
 .prescription .custom-react-select > div:nth-child(3) {
   border-color: #007A64 !important;
 }
+.hr-text {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+}
+.hr-text::before,
+.hr-text::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #6c757d;
+  margin: 5px;
+}
+.times {
+  display: flex;
+  flex-direction: column;
+  height: 300px;
+  overflow: auto;
+  align-items: center;
+}
+.times input {
+  display: none;
+}
+.times input:checked + span {
+  color: #fff;
+  background: #BDA25C;
+  border-radius: 5px;
+}
+.times span {
+  display: inline-block;
+  font-weight: bold;
+  border-radius: 2px;
+  transition: 0.3s ease;
+  padding: 5px 15px;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin: 5px 0px;
+  text-align: center;
+}

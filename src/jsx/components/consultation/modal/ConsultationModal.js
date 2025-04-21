@@ -10,9 +10,23 @@ import { connect } from "react-redux";
 import { createPortal } from "react-dom";
 import AutocompleteField from "../../../constant/AutocompleteField";
 import { Link } from "react-router-dom";
+import PatientModal from "../../Patient/modal/PatientModal";
 
 const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultation, dossier = null}) => {
     registerLocale("fr", fr);
+
+    const [openPatientModal, setOpenPatientModal] = useState(false);
+    const [patientName, setPatientName] = useState("");
+
+    const handleAddPatient = (patient, type) => {
+		if (type === 'add') {
+            handleOnChange(patient.id, 'patient_id');
+
+            setPatientName(patient.fullname);
+
+        	setOpenPatientModal(false);
+		}
+    };
 
     const types = [
         {label: 'Généraliste', value: 'general'},
@@ -50,6 +64,10 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
         handleOnChange(id, 'patient_id');
     };
 
+    const handleAddNewPatient = (name) => {
+        setOpenPatientModal(true);
+    };
+
     const resetForm = () => {
         let doctor = null;
 
@@ -78,6 +96,7 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
             handleOnChange(consultation.patient_id, 'patient_id');
             handleTypeChange(types.find(t => t.value === consultation.type) ?? null);
             handleOnChange(new Date(consultation.datetime), 'datetime');
+            setPatientName(consultation.patient_name)
         } 
 
         setErrors({});
@@ -90,6 +109,7 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
             axiosInstance.get('doctors', {signal: controller.signal})
                 .then(function({data}) {
                     setDoctors([...data.doctors]);
+                    console.log(data.doctors); 
                 })
                 .catch(function(error) {
                     if (error.name === 'CanceledError') {
@@ -148,8 +168,8 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
             });  
     };
 
-    return createPortal(
-        <Modal className="modal fade" backdrop={true} show={show} onHide={onHide} centered>
+    return  <> {show && createPortal(
+        <Modal className="modal fade" backdrop={true} dialogClassName="modal-lg" show={show} onHide={onHide} centered>
             <div className="modal-content">
                 <div className="modal-header">
                     <h5 className="modal-title">
@@ -189,7 +209,11 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
                             </div>
                             <div className="col-sm-6 mb-3">
                                 <label className="form-label">Patient<span className="text-danger">*</span></label>
-                                <AutocompleteField initialName={consultation ? consultation.patient_name : ''} onSelect={handleAutocompleteSelect} />
+                                <AutocompleteField 
+                                    initialName={patientName} 
+                                    onSelect={handleAutocompleteSelect} 
+                                    onAddNew={handleAddNewPatient}
+                                />
                                 {errors.patient_id && <div className="text-danger">
                                     <small style={errorStyle}>{errors.patient_id.join('\n\r')}</small>
                                 </div>}
@@ -203,7 +227,7 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
                                     isDisabled={isMedecin(currentUser.roles)}
                                     onChange={handleDoctorChange} 
                                     getOptionValue={d => d.id}
-                                    getOptionLabel={d => d.fullname}
+                                    getOptionLabel={d => `${d.fullname} (${d.skills && d.skills.length > 0 ? d.skills[0].name : 'inconnue'})`}
                                 />
                                 {errors.doctor_id && <div className="text-danger">
                                     <small style={errorStyle}>{errors.doctor_id.join('\n\r')}</small>
@@ -237,7 +261,14 @@ const ConsultationModal = ({action, currentUser, show, onHide, onSave, consultat
                 </div>
             </div>
         </Modal>, document.body
-    )
+    )}
+        <PatientModal 
+            show={openPatientModal}
+            onHide={() => setOpenPatientModal(false)}
+            onSave={handleAddPatient}
+            patient={null}
+        />
+    </>
 };
 
 const mapStateToProps = (state) => {

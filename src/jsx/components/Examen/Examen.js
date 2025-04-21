@@ -11,8 +11,6 @@ import ExamenModal from './modal/ExamenModal';
 
 const Examen = () => {
     const [examens, setExamens] = useState([]);
-    const [medicalProcedures, setMedicalProcedures] = useState([]);
-    const [doctors, setDoctors] = useState([]);
     const [types, setTypes] = useState([]);
 
     const columns = useMemo(() => [
@@ -23,9 +21,9 @@ const Examen = () => {
             Filter: ColumnFilter,
         },
         {
-            Header : 'Date',
-            Footer : 'Date',
-            accessor: 'format_date',
+            Header : 'Libellé',
+            Footer : 'Libellé',
+            accessor: 'name',
             Filter: ColumnFilter,
         },
         {
@@ -34,16 +32,16 @@ const Examen = () => {
             accessor: 'type.name',
             Filter: ColumnFilter,
         },
-       {
-            Header : 'Patient',
-            Footer : 'Patient',
-            accessor: 'patient_name',
+        {
+            Header : 'Coût',
+            Footer : 'Coût',
+            accessor: 'amount_with_currency',
             Filter: ColumnFilter,
         },
         {
-            Header : 'Responsable',
-            Footer : 'Responsable',
-            accessor: 'doctor_name',
+            Header : 'Description',
+            Footer : 'Description',
+            accessor: 'description',
             Filter: ColumnFilter,
         },
         {
@@ -62,7 +60,6 @@ const Examen = () => {
                         </svg>
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-end" align="end">
-                        <Dropdown.Item as={Link} to={`/examinations/${row.original.id}`}>Détail</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleEdit(row.original)}>Modifier</Dropdown.Item>
                         <Dropdown.Item onClick={() => handleDelete(row.original)}>Supprimer</Dropdown.Item>
                     </Dropdown.Menu>
@@ -161,8 +158,6 @@ const Examen = () => {
             axiosInstance.get('examens', {signal: controller.signal})
                 .then(function({data}) {
                     setExamens([...data.examens]);
-                    setMedicalProcedures([...data.medicalProcedures]);
-                    setDoctors([...data.doctors]);
                     setTypes([...data.types]);
                 })
                 .catch(function(error) {
@@ -293,8 +288,6 @@ const Examen = () => {
                 onHide={() => setOpenModal(false)}
                 onSave={handleAddOrEditExamen}
                 examen={editingExamen}
-                medicalProcedures={medicalProcedures}
-                doctors={doctors}
                 types={types}
             />
         </>

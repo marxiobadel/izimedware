@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import debounce from "lodash.debounce";
 import axiosInstance from "../../services/AxiosInstance";
 
-const AutocompleteField = ({ initialName = "", onSelect }) => {
+const AutocompleteField = ({ initialName = "", onSelect, onAddNew }) => {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -79,7 +79,24 @@ const AutocompleteField = ({ initialName = "", onSelect }) => {
                             </li>
                      ))
                     ) : (
+                        <>
                         <li className="list-group-item small py-2 px-3 text-muted">Aucun résultat trouvé</li>
+                        {query.trim() !== "" && onAddNew && (
+                            <li
+                                className="list-group-item list-group-item-action small py-2 px-3 text-primary"
+                                onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    onAddNew(query.trim());
+                                    setShowDropdown(false);
+                                    setUserTyping(false);
+                                    setResults([]);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                ➕ Ajouter un nouveau patient : <strong>{query.trim()}</strong>
+                            </li>
+                        )}
+                        </>
                     )
                 )}
                 </ul>

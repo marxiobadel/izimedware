@@ -12,14 +12,20 @@ const localizer = dateFnsLocalizer({
     locales: { fr },
 });
 
+const CustomEvent = ({ event }) => {
+    return (
+      <div dangerouslySetInnerHTML={{ __html: event.title }} />
+    );
+};
+
 const Calendrier = ({ appointments }) => {
     const [events, setEvents] = useState([]);
 
     const calendar = useCallback(() => {
         const modifiedAppointments = appointments.map(appointment => ({
-            title: <div dangerouslySetInnerHTML={{ __html: `<span class="text-${appointment.status_color}">
+            title: `<span class="text-${appointment.status_color}">
                         ${String(appointment.status_label).replace(/\b\w/g, char => char.toUpperCase())}</span><br>
-                        <b>${appointment.patient_name}</b> : ${appointment.reason1}` }} />,
+                        <b>${appointment.patient_name}</b> : ${appointment.reason1}`,
             start: new Date(appointment.datetime),
             end: new Date(appointment.end_datetime)
         }));
@@ -35,6 +41,7 @@ const Calendrier = ({ appointments }) => {
     return (
         <div style={{ height: "500px" }}>
             <Calendar
+                components={{event: CustomEvent}}
                 views={['agenda', 'month']}
                 localizer={localizer}
                 events={events}

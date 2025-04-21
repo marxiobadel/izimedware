@@ -84,9 +84,9 @@ const Home = ({ currentUser, title }) => {
 				</div>
 				<div className="col-xl-6">
 					<div className="row">
-						<div className="col-xl-12">
+						{/*<div className="col-xl-12">
 							<Appointment doctors={doctors} patients={patients} locale={fr} currentUser={currentUser} />
-						</div>
+						</div>*/}
 						<div className="col-xl-12">
 							<RevenueSummary />
 						</div>

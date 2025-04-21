@@ -7,8 +7,9 @@ import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { ColumnFilter, handleSort, notifyError, notifySuccess } from '../../constant/theme';
 import ValidateModal from './modal/ValidateModal';
+import emitter from '../../../context/eventEmitter';
 
-const Appointment = () => {
+const ShowAppointment = () => {
     const [appointments, setAppointments] = useState([]);
 
     const columns = useMemo(() => [
@@ -43,8 +44,8 @@ const Appointment = () => {
             Filter: ColumnFilter,
             Cell: ({ value, row }) => (
                 <div className="bootstrap-badge text-center">
-					<Badge bg="" className={`badge-rounded badge-outline-${row.original.status_color}`}>{value}</Badge>
-				</div>
+                    <Badge bg="" className={`badge-rounded badge-outline-${row.original.status_color}`}>{value}</Badge>
+                </div>
             ),
         },
         {
@@ -85,11 +86,11 @@ const Appointment = () => {
    
     const [loading, setLoading] = useState(true);
 
-	const tableInstance = useTable({
-		columns,
-		data: appointments,	
-		initialState: {pageIndex: 0}
-	}, useFilters, useGlobalFilter, useSortBy, usePagination);
+    const tableInstance = useTable({
+        columns,
+        data: appointments,	
+        initialState: {pageIndex: 0}
+    }, useFilters, useGlobalFilter, useSortBy, usePagination);
 
     const handleDelete = (appointment) => {
         Swal.fire({
@@ -135,26 +136,32 @@ const Appointment = () => {
     }
 
     const { 
-		getTableProps, 
-		getTableBodyProps, 
-		headerGroups, 
-		prepareRow,
-		state,
-		page,
-		gotoPage,
-		pageCount,
-		pageOptions,
-		nextPage,
-		previousPage,
-		canNextPage,
-		canPreviousPage
-	} = tableInstance;
+        getTableProps, 
+        getTableBodyProps, 
+        headerGroups, 
+        prepareRow,
+        state,
+        page,
+        gotoPage,
+        pageCount,
+        pageOptions,
+        nextPage,
+        previousPage,
+        canNextPage,
+        canPreviousPage
+    } = tableInstance;
 
     const {pageIndex} = state;
 
     useDocumentTitle('Rendez-vous');
 
     useEffect(() => {
+        const handleAppointmentChange = (appointment) => {
+            setAppointments((prevState) => [JSON.parse(appointment), ...prevState]);
+        };
+        
+        emitter.on('appointmentAdded', handleAppointmentChange);
+
         const controller = new AbortController();
 
         (() => {
@@ -175,21 +182,23 @@ const Appointment = () => {
 
         return () => {
             controller.abort();
+            emitter.off('appointmentAdded', handleAppointmentChange);
         }
     }, []);
 
     return (
         <>
-            <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
-                <div className="me-auto">
-                    <h2 className="text-black font-w600">Rendez-vous</h2>
-                    <p className="mb-0">Liste des rendez-vous</p>
-                </div>
-            </div>
-            <ToastContainer />
             <Row>
-				<Col lg="12">
+                <Col lg="12">
                     <div className="card">
+                        <div className="card-header">
+                            <div className="form-head align-items-center d-flex mb-sm-4 mb-3">
+                                <div className="me-auto">
+                                    <h2 className="text-black font-w600">Rendez-vous</h2>
+                                    <p className="mb-0">Liste des rendez-vous</p>
+                                </div>
+                            </div>
+                        </div>
                         <div className="card-body">	
                             <div className="table-responsive">
                                 <table {...getTableProps()} className="table dataTable display">
@@ -279,7 +288,7 @@ const Appointment = () => {
                                 </div>
                             </div>
                         </div>
-					</div>
+                    </div>
                 </Col>
             </Row>
             <ValidateModal
@@ -292,4 +301,4 @@ const Appointment = () => {
     );
 };
 
-export default Appointment;
+export default ShowAppointment;

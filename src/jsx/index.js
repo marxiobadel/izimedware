@@ -117,7 +117,6 @@ import Admission from "./components/Admission/Admission";
 import Soin from "./components/Soin/Soin";
 import Leave from "./components/Leave/Leave";
 import Slot from "./components/Slot/Slot";
-import Appointment from "./components/Appointment/Appointment";
 import Report from "./components/Report/Report";
 import Planning from "./components/Planning/Planning";
 import ShowPrescription from "./components/prescription/ShowPrescription";
@@ -132,6 +131,7 @@ import ShowAdmission from "./components/Admission/ShowAdmission";
 import Equipement from "./components/Equipement/Equipement";
 import Echantillon from "./components/Echantillon/Echantillon";
 import Agenda from "./components/Agenda/Agenda";
+import Appointment from "./components/Agenda/Appointment";
 
 const Markup = () => {
     const allroutes = [
@@ -178,7 +178,7 @@ const Markup = () => {
         { url: "slots", component: <Slot /> },
         { url: "beds", component: <Bed /> },
         { url: "leaves", component: <Leave /> },
-        { url: "appointments", component: <Appointment /> },
+        { url: "prisederendezvous", component: <Appointment /> },
         { url: "echantillons", component: <Echantillon /> },
         { url: "plannings", component: <Planning /> },
         { url: "reports", component: <Report /> },
